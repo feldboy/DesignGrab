@@ -1,0 +1,104 @@
+/* DesignGrab — Overlay & Tooltip Styles (injected into Shadow DOM) */
+
+/* Box model overlays */
+.dg-margin-box {
+  background-color: rgba(255, 165, 0, 0.15);
+  border: 1px dashed rgba(255, 165, 0, 0.6);
+  display: none;
+}
+
+.dg-border-box {
+  background-color: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.7);
+  display: none;
+}
+
+.dg-padding-box {
+  background-color: rgba(76, 175, 80, 0.15);
+  border: 1px dashed rgba(76, 175, 80, 0.5);
+  display: none;
+}
+
+.dg-content-box {
+  background-color: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.6);
+  display: none;
+}
+
+/* Alignment guides */
+.dg-guide-h,
+.dg-guide-v {
+  display: none;
+}
+
+/* Tooltip */
+.dg-tooltip {
+  display: none;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  background: rgba(15, 15, 25, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #e4e4e7;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+              0 0 0 1px rgba(255, 255, 255, 0.05);
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dg-tooltip-tag {
+  color: #a78bfa;
+  font-weight: 600;
+  margin-bottom: 2px;
+  font-size: 12px;
+}
+
+.dg-tooltip-dims {
+  color: #60a5fa;
+  font-weight: 500;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dg-tooltip-props {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dg-tooltip-props span {
+  color: #a1a1aa;
+  font-size: 10px;
+}
+
+/* Pinned element indicator */
+.dg-pinned-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  background: rgba(15, 15, 25, 0.94);
+  backdrop-filter: blur(12px);
+  color: #a78bfa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 20px;
+  border-radius: 100px;
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: none;
+  pointer-events: none;
+}
+
+/* Inspect mode cursor style (applied to body) */
+.dg-inspecting * {
+  cursor: crosshair !important;
+}

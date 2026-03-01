@@ -1,0 +1,114 @@
+---
+/**
+ * FeatureShowcase — Rich feature section with animated demo visual.
+ * Used on the landing page to replace simple emoji feature cards
+ * with interactive, attention-grabbing demo visuals.
+ */
+interface Props {
+  heading: string;
+  desc: string;
+  bullets: string[];
+  badge?: string;
+  reverse?: boolean;
+}
+
+const { heading, desc, bullets, badge, reverse = false } = Astro.props;
+---
+
+<section class:list={["showcase", { "showcase-reverse": reverse }]}>
+  <div class="showcase-inner">
+    <div class="showcase-text">
+      {badge && <span class="showcase-badge">{badge}</span>}
+      <h3 class="showcase-title">{heading}</h3>
+      <p class="showcase-desc">{desc}</p>
+      <ul class="showcase-bullets">
+        {bullets.map((b) => <li>{b}</li>)}
+      </ul>
+    </div>
+    <div class="showcase-visual">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .showcase {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .showcase:last-of-type {
+    border-bottom: none;
+  }
+  .showcase-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .showcase-reverse .showcase-inner {
+    direction: rtl;
+  }
+  .showcase-reverse .showcase-inner > * {
+    direction: ltr;
+  }
+  .showcase-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 100px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+  .showcase-title {
+    font-size: clamp(24px, 2.5vw, 32px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .showcase-desc {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .showcase-bullets {
+    list-style: none;
+    padding: 0;
+  }
+  .showcase-bullets li {
+    padding: 6px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .showcase-bullets li::before {
+    content: "✓";
+    color: #4ade80;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .showcase-visual {
+    position: relative;
+  }
+
+  @media (max-width: 768px) {
+    .showcase-inner {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .showcase-reverse .showcase-inner {
+      direction: ltr;
+    }
+  }
+</style>

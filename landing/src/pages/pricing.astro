@@ -1,0 +1,371 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Pricing — DesignGrab" description="Simple, fair pricing for DesignGrab. Start free, upgrade when you need more.">
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
+          <rect width="20" height="20" rx="5" fill="url(#g)" />
+          <path d="M6 7L10 10L6 13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <line x1="11" y1="13" x2="15" y2="13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" />
+          <defs><linearGradient id="g" x1="0" y1="0" x2="20" y2="20"><stop stop-color="#6366f1" /><stop offset="1" stop-color="#8b5cf6" /></linearGradient></defs>
+        </svg>
+        <span>DesignGrab</span>
+      </a>
+      <div class="nav-links">
+        <a href="/#features">Features</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/#waitlist" class="nav-cta">Get Early Access</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="pricing-hero">
+    <div class="container">
+      <h1 class="pricing-title">Choose your plan</h1>
+      <p class="pricing-sub">Start free. Upgrade when you need more power.</p>
+    </div>
+  </section>
+
+  <!-- Pricing Cards -->
+  <section class="section">
+    <div class="container">
+      <div class="pricing-grid">
+        <!-- Free -->
+        <div class="price-card">
+          <div class="price-name">Free</div>
+          <div class="price-amount">$0</div>
+          <div class="price-period">forever</div>
+          <ul class="price-features">
+            <li>Element Inspector</li>
+            <li>Color & font analysis</li>
+            <li>Layout DNA</li>
+            <li>15 asset downloads / mo</li>
+            <li>5 code exports / mo</li>
+            <li>3 design system exports / mo</li>
+            <li>Local design library</li>
+          </ul>
+          <a href="/#waitlist" class="btn btn-ghost btn-full">Get Started Free</a>
+        </div>
+
+        <!-- Pro -->
+        <div class="price-card popular">
+          <div class="price-badge">Most Popular</div>
+          <div class="price-name">Pro</div>
+          <div class="price-amount">$12<span>/mo</span></div>
+          <div class="price-period">billed monthly</div>
+          <ul class="price-features">
+            <li>Everything in Free</li>
+            <li>2,000 asset downloads / mo</li>
+            <li>Unlimited code exports</li>
+            <li>Unlimited design system exports</li>
+            <li>50 AI exports / mo (React, Vue)</li>
+            <li>Figma SVG export</li>
+            <li>Animation capture</li>
+            <li>Priority support</li>
+          </ul>
+          <a href="/#waitlist" class="btn btn-primary btn-full">Join Waitlist</a>
+        </div>
+
+        <!-- Lifetime -->
+        <div class="price-card">
+          <div class="price-name">Lifetime</div>
+          <div class="price-amount">$99</div>
+          <div class="price-period">one-time payment</div>
+          <ul class="price-features">
+            <li>Everything in Pro</li>
+            <li>Pay once, use forever</li>
+            <li>All future updates included</li>
+            <li>Early access to new features</li>
+            <li>Founder badge</li>
+          </ul>
+          <a href="/#waitlist" class="btn btn-ghost btn-full">Join Waitlist</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Comparison Table -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Full feature comparison</h2>
+        <p class="section-sub">See exactly what's included in each plan.</p>
+      </div>
+      <div class="compare-wrapper">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th class="feature-col">Feature</th>
+              <th>Free</th>
+              <th class="highlight-col">Pro</th>
+              <th>Lifetime</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Inspection -->
+            <tr class="section-row"><td colspan="4">Inspection</td></tr>
+            <tr><td>Element Inspector</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Box model overlay (margin/padding/border)</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>CSS property display</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Copy individual CSS values</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+
+            <!-- Analysis -->
+            <tr class="section-row"><td colspan="4">Analysis</td></tr>
+            <tr><td>Color palette extraction</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>WCAG contrast audit</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Font detection & typography scale</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Layout DNA (Flexbox/Grid)</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+
+            <!-- Assets -->
+            <tr class="section-row"><td colspan="4">Assets</td></tr>
+            <tr><td>Asset downloads / month</td><td>15</td><td class="hl">2,000</td><td>2,000</td></tr>
+            <tr><td>Image extraction (img, bg, picture)</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>SVG extraction (inline & external)</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Lottie animation download</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>CSS keyframes & transitions</td><td class="dash">&mdash;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Video detection</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+
+            <!-- Code Export -->
+            <tr class="section-row"><td colspan="4">Code Export</td></tr>
+            <tr><td>Code exports / month</td><td>5</td><td class="hl">Unlimited</td><td>Unlimited</td></tr>
+            <tr><td>HTML + CSS export</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Tailwind CSS export</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Tailwind config generation</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Design system exports / month</td><td>3</td><td class="hl">Unlimited</td><td>Unlimited</td></tr>
+
+            <!-- AI Features -->
+            <tr class="section-row"><td colspan="4">AI-Powered</td></tr>
+            <tr><td>AI exports / month</td><td class="dash">&mdash;</td><td class="hl">50</td><td>50</td></tr>
+            <tr><td>AI React TSX component</td><td class="dash">&mdash;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>AI Vue SFC component</td><td class="dash">&mdash;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Figma SVG export</td><td class="dash">&mdash;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+
+            <!-- Library & Support -->
+            <tr class="section-row"><td colspan="4">Library & Support</td></tr>
+            <tr><td>Local design library</td><td class="check">&#10003;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Cloud sync</td><td class="dash">&mdash;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Priority support</td><td class="dash">&mdash;</td><td class="check hl">&#10003;</td><td class="check">&#10003;</td></tr>
+            <tr><td>Early access to features</td><td class="dash">&mdash;</td><td class="dash hl">&mdash;</td><td class="check">&#10003;</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Pricing -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Pricing FAQ</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Do I need a credit card for the free plan?</summary>
+          <p>No. The free plan is completely free with no credit card required. Just install the extension and start using it.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What counts as an "AI export"?</summary>
+          <p>An AI export is when you use the Claude-powered feature to generate a React TSX, Vue SFC, or Figma SVG component from a selected element. Each generation counts as one AI export. You provide your own Anthropic API key.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What's the difference between Pro monthly and Lifetime?</summary>
+          <p>They include the exact same features. Lifetime is a one-time payment of $99 that gives you Pro access forever, including all future updates. If you plan to use DesignGrab for more than 8 months, Lifetime is the better deal.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I switch plans?</summary>
+          <p>Yes. You can upgrade from Free to Pro at any time. If you're on Pro monthly and want to switch to Lifetime, we'll prorate the remaining balance.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do usage limits reset each month?</summary>
+          <p>Yes. All monthly limits (downloads, code exports, AI exports) reset on the 1st of each month.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is my API key safe?</summary>
+          <p>Your Anthropic API key is stored locally in Chrome storage and is only sent directly to Anthropic's API. It never passes through our servers.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section section-alt">
+    <div class="container" style="text-align:center;">
+      <h2 class="section-title" style="margin-bottom:16px;">Ready to grab some designs?</h2>
+      <p class="section-sub" style="margin-bottom:32px;">Join the waitlist and be the first to know when we launch.</p>
+      <a href="/#waitlist" class="btn btn-primary btn-lg">Join the Waitlist</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">DesignGrab</span>
+        <span class="footer-copy">&copy; 2026 DesignGrab. All rights reserved.</span>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="mailto:support@designgrab.app">Contact</a>
+      </div>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  /* Nav (reuse from index) */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(6, 6, 14, 0.8); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 14px; color: var(--text-secondary); }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    padding: 7px 16px; border-radius: 8px; background: var(--accent);
+    color: white !important; font-weight: 600; font-size: 13px; transition: background 0.15s;
+  }
+  .nav-cta:hover { background: #4f46e5; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 22px; border-radius: 10px; font-weight: 600; font-size: 14px;
+    border: none; cursor: pointer; transition: all 0.2s ease; font-family: var(--font);
+  }
+  .btn-primary {
+    background: var(--gradient); color: white;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4); }
+  .btn-ghost {
+    background: transparent; color: var(--text-secondary);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+  .btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 12px; }
+  .btn-full { width: 100%; }
+
+  .gradient-text {
+    background: var(--gradient); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* Pricing Hero */
+  .pricing-hero { padding: 140px 0 40px; text-align: center; }
+  .pricing-title {
+    font-size: clamp(32px, 4vw, 48px); font-weight: 800;
+    line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  .pricing-sub { font-size: 18px; color: var(--text-secondary); }
+
+  /* Sections */
+  .section { padding: 60px 0; }
+  .section-alt { background: var(--bg-card); }
+  .section-header { text-align: center; margin-bottom: 48px; }
+  .section-title {
+    font-size: clamp(26px, 3vw, 36px); font-weight: 800;
+    line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  .section-sub { font-size: 16px; color: var(--text-secondary); max-width: 480px; margin: 0 auto; }
+
+  /* Pricing Grid */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; align-items: start;
+  }
+  .price-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px 24px; text-align: center;
+    position: relative; transition: border-color 0.2s;
+  }
+  .price-card:hover { border-color: var(--border-strong); }
+  .price-card.popular {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.06), var(--bg-card));
+    transform: scale(1.03);
+  }
+  .price-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    padding: 4px 14px; background: var(--gradient); color: white;
+    border-radius: 100px; font-size: 11px; font-weight: 700; white-space: nowrap;
+  }
+  .price-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .price-amount { font-size: 42px; font-weight: 800; letter-spacing: -0.02em; }
+  .price-amount span { font-size: 16px; font-weight: 500; color: var(--text-secondary); }
+  .price-period { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+  .price-features { list-style: none; text-align: left; margin-bottom: 24px; }
+  .price-features li {
+    padding: 6px 0; font-size: 14px; color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .price-features li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+
+  /* Comparison Table */
+  .compare-wrapper { overflow-x: auto; }
+  .compare-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px;
+  }
+  .compare-table th,
+  .compare-table td {
+    padding: 10px 16px; text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table th {
+    font-weight: 700; font-size: 15px; padding: 14px 16px;
+    background: var(--bg-elevated); position: sticky; top: 0;
+  }
+  .compare-table .feature-col { text-align: left; min-width: 260px; }
+  .compare-table td:first-child { text-align: left; color: var(--text-secondary); }
+  .compare-table .section-row td {
+    font-weight: 700; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent);
+    background: rgba(99, 102, 241, 0.05); padding: 10px 16px;
+  }
+  .compare-table .check { color: #4ade80; font-weight: 700; }
+  .compare-table .dash { color: var(--text-muted); }
+  .compare-table .hl { background: rgba(99, 102, 241, 0.04); }
+  .compare-table .highlight-col { color: var(--accent); }
+  .compare-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  /* FAQ */
+  .faq-list { max-width: 680px; margin: 0 auto; }
+  .faq-item { border-bottom: 1px solid var(--border); padding: 20px 0; }
+  .faq-item summary {
+    font-size: 16px; font-weight: 600; cursor: pointer; list-style: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-item summary::after { content: "+"; font-size: 20px; color: var(--text-muted); }
+  .faq-item[open] summary::after { content: "−"; }
+  .faq-item p { margin-top: 12px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+
+  /* Footer */
+  .footer { padding: 32px 0; border-top: 1px solid var(--border); }
+  .footer-inner { display: flex; justify-content: space-between; align-items: center; }
+  .footer-left { display: flex; align-items: center; gap: 16px; }
+  .footer-brand { font-weight: 700; font-size: 14px; }
+  .footer-copy { font-size: 12px; color: var(--text-muted); }
+  .footer-links { display: flex; gap: 20px; font-size: 13px; color: var(--text-secondary); }
+  .footer-links a:hover { color: var(--text); }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+    .pricing-grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+    .price-card.popular { transform: none; }
+    .compare-wrapper { margin: 0 -24px; padding: 0 24px; }
+    .footer-inner { flex-direction: column; gap: 16px; }
+  }
+</style>

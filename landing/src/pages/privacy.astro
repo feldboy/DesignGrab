@@ -1,0 +1,119 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Privacy Policy — DesignGrab">
+  <div class="policy">
+    <a href="/" class="back">&larr; Back to DesignGrab</a>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: February 28, 2026</p>
+
+    <h2>Overview</h2>
+    <p>DesignGrab is a Chrome extension that helps developers and designers extract design information from websites. We are committed to protecting your privacy.</p>
+
+    <h2>Data Collection</h2>
+    <h3>What we DO NOT collect</h3>
+    <ul>
+      <li>We do not collect, store, or transmit any data from the websites you visit</li>
+      <li>We do not track your browsing history or behavior</li>
+      <li>We do not sell or share any personal information</li>
+      <li>We do not use analytics or tracking scripts in the extension</li>
+    </ul>
+
+    <h3>What stays on your device</h3>
+    <ul>
+      <li><strong>Design data</strong> — All extracted colors, fonts, CSS, and assets are processed locally in your browser and never leave your device</li>
+      <li><strong>API keys</strong> — Your Anthropic API key is stored in Chrome's local storage and is only sent directly to Anthropic's API when you use AI export</li>
+      <li><strong>Saved library</strong> — Your saved colors, fonts, and assets are stored locally in Chrome storage</li>
+      <li><strong>Usage counts</strong> — Monthly usage tracking for freemium limits is stored locally</li>
+    </ul>
+
+    <h3>Optional account data</h3>
+    <p>If you create an account (optional, for syncing and Pro features):</p>
+    <ul>
+      <li>We store your email address and hashed password via Supabase Auth</li>
+      <li>We store your subscription plan and Stripe customer ID</li>
+      <li>We store usage logs to enforce plan limits</li>
+    </ul>
+
+    <h2>Third-Party Services</h2>
+    <ul>
+      <li><strong>Anthropic (Claude API)</strong> — When you use AI export with your own API key, your element's HTML and CSS are sent to Anthropic's API. See <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic's Privacy Policy</a>.</li>
+      <li><strong>Supabase</strong> — Used for optional authentication and plan management. See <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase's Privacy Policy</a>.</li>
+      <li><strong>Stripe</strong> — Used for payment processing. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's Privacy Policy</a>.</li>
+    </ul>
+
+    <h2>Permissions</h2>
+    <p>DesignGrab requires the following Chrome permissions:</p>
+    <ul>
+      <li><strong>activeTab</strong> — To inspect the current tab's content when you activate the extension</li>
+      <li><strong>scripting</strong> — To inject the inspector script into pages</li>
+      <li><strong>storage</strong> — To save your settings, library, and usage data locally</li>
+      <li><strong>downloads</strong> — To download extracted assets (images, SVGs)</li>
+      <li><strong>sidePanel</strong> — To display the DesignGrab panel alongside web pages</li>
+      <li><strong>host_permissions (&lt;all_urls&gt;)</strong> — Required to inspect any website you choose to analyze</li>
+    </ul>
+
+    <h2>Data Security</h2>
+    <p>All data is stored locally using Chrome's built-in storage APIs, which are sandboxed and encrypted by Chrome. Optional cloud data is protected by Supabase's Row Level Security (RLS) policies, ensuring users can only access their own data.</p>
+
+    <h2>Changes</h2>
+    <p>We may update this privacy policy from time to time. Changes will be posted on this page with an updated date.</p>
+
+    <h2>Contact</h2>
+    <p>Questions? Email us at <a href="mailto:support@designgrab.app">support@designgrab.app</a>.</p>
+  </div>
+</Base>
+
+<style>
+  .policy {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+  .back {
+    display: inline-block;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+    transition: color 0.15s;
+  }
+  .back:hover { color: var(--text); }
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .updated {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 32px 0 12px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 20px 0 8px;
+    color: var(--text-secondary);
+  }
+  p, li {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  ul {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+  li { margin-bottom: 6px; }
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  a:hover { color: #818cf8; }
+</style>
