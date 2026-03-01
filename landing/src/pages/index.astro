@@ -29,14 +29,11 @@ import FeatureShowcase from '../components/FeatureShowcase.astro';
   <section class="hero">
     <div class="hero-glow"></div>
     <div class="container">
-      <div class="hero-badge">Chrome Extension · Figma Export</div>
       <h1 class="hero-title">
-        Export any website<br />
-        <span class="gradient-text">directly into Figma</span>
+        Extract any website's design<br />in seconds.
       </h1>
       <p class="hero-sub">
-        Click any element. Grab colors, fonts, and CSS. AI generates Figma-ready
-        components you can paste straight into your design files — in seconds.
+        Colors, fonts, CSS, SVGs, and production-ready code.
       </p>
       <div class="hero-actions">
         <a href="#waitlist" class="btn btn-primary btn-lg">
@@ -52,28 +49,26 @@ import FeatureShowcase from '../components/FeatureShowcase.astro';
             <span class="demo-dot" style="background:#f87171"></span>
             <span class="demo-dot" style="background:#fbbf24"></span>
             <span class="demo-dot" style="background:#4ade80"></span>
-            <span class="demo-bar-title">DesignGrab — Side Panel</span>
           </div>
-          <div class="demo-body">
-            <div class="demo-tabs">
-              <span class="demo-tab active">Figma Export</span>
-              <span class="demo-tab">Inspector</span>
-              <span class="demo-tab">Colors</span>
-              <span class="demo-tab">Fonts</span>
-              <span class="demo-tab">Code</span>
-            </div>
-            <div class="demo-content">
-              <div class="demo-element-header">
-                <code>&lt;div&gt;.hero-card#main</code>
-                <span class="demo-dims figma-badge">→ Figma</span>
+          <div class="demo-body demo-body-split">
+            <div class="demo-browser-area"></div>
+            <div class="demo-panels">
+              <div class="demo-panel">
+                <div class="demo-panel-title">Computed Styles</div>
+                <div class="demo-props">
+                  <div class="demo-prop"><span>width</span><span>420px</span></div>
+                  <div class="demo-prop"><span>padding</span><span>24px 32px</span></div>
+                  <div class="demo-prop"><span>border-radius</span><span>12px</span></div>
+                  <div class="demo-prop"><span>box-shadow</span><span>0 8px 32px...</span></div>
+                </div>
               </div>
-              <div class="demo-props">
-                <div class="demo-prop"><span>background</span><span><span class="demo-swatch" style="background:#1a1a2e"></span>#1a1a2e</span></div>
-                <div class="demo-prop"><span>border-radius</span><span>12px</span></div>
-                <div class="demo-prop"><span>padding</span><span>24px</span></div>
-                <div class="demo-prop"><span>font-family</span><span>Inter</span></div>
-                <div class="demo-prop"><span>color</span><span><span class="demo-swatch" style="background:#e4e4e7"></span>#e4e4e7</span></div>
-                <div class="demo-prop"><span>box-shadow</span><span>0 4px 24px rgba(0,0,0,.3)</span></div>
+              <div class="demo-panel">
+                <div class="demo-panel-title">Colors</div>
+                <div class="demo-colors">
+                  <span class="demo-color-swatch" style="background:#6366f1"></span>
+                  <span class="demo-color-swatch" style="background:#22c55e"></span>
+                  <span class="demo-color-swatch" style="background:#f1f5f9"></span>
+                </div>
               </div>
             </div>
           </div>
@@ -566,11 +561,11 @@ import FeatureShowcase from '../components/FeatureShowcase.astro';
     border: 1px solid rgba(99, 102, 241, 0.2);
   }
   .hero-title {
-    font-size: clamp(36px, 5vw, 60px);
+    font-size: clamp(40px, 6.5vw, 80px);
     font-weight: 800;
     line-height: 1.1;
     margin-bottom: 20px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
   }
   .hero-sub {
     font-size: 18px;
@@ -587,7 +582,7 @@ import FeatureShowcase from '../components/FeatureShowcase.astro';
   }
 
   /* Demo Window */
-  .hero-demo { max-width: 520px; margin: 0 auto; }
+  .hero-demo { max-width: 860px; margin: 0 auto; }
   .demo-window {
     background: var(--bg-card);
     border-radius: 12px;
@@ -606,48 +601,58 @@ import FeatureShowcase from '../components/FeatureShowcase.astro';
   .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
   .demo-bar-title { margin-left: 8px; font-size: 11px; color: var(--text-muted); }
   .demo-body { padding: 0; }
-  .demo-tabs {
+  .demo-body-split {
     display: flex;
-    gap: 2px;
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
+    min-height: 340px;
   }
-  .demo-tab {
-    padding: 4px 10px;
-    font-size: 11px;
-    color: var(--text-muted);
-    border-radius: 4px;
-    white-space: nowrap;
+  .demo-browser-area {
+    flex: 1;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    min-height: 340px;
   }
-  .demo-tab.active {
-    background: var(--accent-light);
-    color: var(--accent);
-  }
-  .demo-content { padding: 12px; }
-  .demo-element-header {
+  .demo-panels {
+    width: 220px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+  }
+  .demo-panel {
     background: var(--bg-elevated);
-    border-radius: 6px;
-    margin-bottom: 8px;
+    padding: 14px 14px 12px;
   }
-  .demo-element-header code { font-size: 11px; color: var(--purple); }
-  .demo-dims { font-size: 11px; color: #60a5fa; font-family: monospace; }
+  .demo-panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .demo-colors {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 4px 0;
+  }
+  .demo-color-swatch {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
   .demo-props { display: flex; flex-direction: column; }
   .demo-prop {
     display: flex;
     justify-content: space-between;
-    padding: 5px 10px;
+    padding: 5px 0;
     font-family: 'SF Mono', monospace;
     font-size: 11px;
-    border-bottom: 1px solid rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
   }
   .demo-prop span:first-child { color: var(--text-secondary); }
-  .demo-prop span:last-child { color: var(--text); display: flex; align-items: center; gap: 6px; }
-  .demo-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.1); }
+  .demo-prop span:last-child { color: var(--text); }
 
   /* Sections */
   .section { padding: 100px 0; }

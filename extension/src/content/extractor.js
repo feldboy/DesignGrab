@@ -1,9 +1,6 @@
 import { walkAllElements, makeAbsolute, describeElement } from '../lib/domUtils.js';
 import { extractUrlsFromCSS } from '../lib/cssUtils.js';
 
-import { walkAllElements, makeAbsolute, describeElement } from '../lib/domUtils.js';
-import { extractUrlsFromCSS } from '../lib/cssUtils.js';
-
 /**
  * Asset extractor — scans page for images, SVGs, videos
  */
@@ -479,13 +476,6 @@ function extractCSSAnimations() {
     return animations;
 }
 
-function describeElement(el) {
-    const tag = el.tagName?.toLowerCase() || 'unknown';
-    const id = el.id ? `#${el.id}` : '';
-    const cls = el.classList?.length > 0 ? `.${Array.from(el.classList).slice(0, 2).join('.')}` : '';
-    return `${tag}${id}${cls}`;
-}
-
 function getNameFromUrl(url) {
     try {
         const pathname = new URL(url).pathname;
@@ -497,24 +487,6 @@ function getNameFromUrl(url) {
 }
 
 // --- Helpers ---
-
-function walkAllElements(root, callback) {
-    const elements = root.querySelectorAll('*');
-    elements.forEach(el => {
-        callback(el);
-        if (el.shadowRoot) walkAllElements(el.shadowRoot, callback);
-    });
-}
-
-function makeAbsolute(url) {
-    if (!url) return url;
-    if (url.startsWith('data:') || url.startsWith('blob:')) return url;
-    try {
-        return new URL(url, window.location.href).href;
-    } catch {
-        return url;
-    }
-}
 
 function getImageFormat(url) {
     if (!url) return 'unknown';
@@ -536,18 +508,6 @@ function estimateImageSize(w, h) {
     if (bytes > 1024 * 1024) return Math.round(bytes / (1024 * 1024)) + ' MB';
     if (bytes > 1024) return Math.round(bytes / 1024) + ' KB';
     return bytes + ' B';
-}
-
-function extractUrlsFromCSS(value) {
-    const urls = [];
-    const regex = /url\(["']?(.*?)["']?\)/g;
-    let match;
-    while ((match = regex.exec(value)) !== null) {
-        if (match[1] && !match[1].startsWith('data:')) {
-            urls.push(match[1]);
-        }
-    }
-    return urls;
 }
 
 function parseSrcset(srcset) {
