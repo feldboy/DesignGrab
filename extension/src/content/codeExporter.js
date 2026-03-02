@@ -331,8 +331,13 @@ function cssToTailwind(styles) {
  * Walks the live DOM, reads bounding rects + computed styles,
  * and builds an SVG with <rect>, <text>, <image> elements
  * that Figma converts to native layers.
+ * Images are embedded as base64 data URIs so Figma renders them correctly.
  */
-export function exportForFigma(element) {
+export async function exportForFigma(element) {
+    // Pre-resolve all images to base64 data URIs before building SVG
+    const imageCache = new Map();
+    await collectImages(element, imageCache);
+
     const rootRect = element.getBoundingClientRect();
     const W = Math.round(rootRect.width);
     const H = Math.round(rootRect.height);
@@ -414,7 +419,8 @@ export function exportForFigma(element) {
         if (tag === 'img') {
             const src = el.currentSrc || el.src;
             if (src) {
-                body.push(`  <image href="${esc(src)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>`);
+                const resolved = imageCache.get(src) || src;
+                body.push(`  <image href="${esc(resolved)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>`);
             }
         }
 
@@ -512,7 +518,8 @@ export function exportForFigma(element) {
         if (bgImage && bgImage !== 'none') {
             const urlMatch = bgImage.match(/url\(["']?(.*?)["']?\)/);
             if (urlMatch && urlMatch[1] && !urlMatch[1].startsWith('data:image/svg')) {
-                body.push(`  <image href="${esc(urlMatch[1])}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>`);
+                const resolved = imageCache.get(urlMatch[1]) || urlMatch[1];
+                body.push(`  <image href="${esc(resolved)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/>`);
             }
         }
 
@@ -531,7 +538,146 @@ export function exportForFigma(element) {
     const defsBlock = defs.length > 0 ? `<defs>\n${defs.join('\n')}\n</defs>\n` : '';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">\n${defsBlock}${body.join('\n')}\n</svg>`;
 
-    return { svg, width: W, height: H, mode: 'figma-svg' };
+    const interactions = extractInteractions(element);
+    return { svg, width: W, height: H, mode: 'figma-svg', interactions };
+}
+
+/**
+ * Recursively collect all image URLs in an element tree and resolve
+ * them to base64 data URIs, storing results in imageCache.
+ */
+async function collectImages(el, imageCache) {
+    const tag = el.tagName.toLowerCase();
+
+    if (tag === 'img') {
+        const src = el.currentSrc || el.src;
+        if (src && !imageCache.has(src)) {
+            imageCache.set(src, await imgToDataUrl(el, src));
+        }
+    }
+
+    const bgImage = window.getComputedStyle(el).backgroundImage;
+    if (bgImage && bgImage !== 'none') {
+        const urlMatch = bgImage.match(/url\(["']?(.*?)["']?\)/);
+        if (urlMatch && urlMatch[1] && !urlMatch[1].startsWith('data:')) {
+            const url = urlMatch[1];
+            if (!imageCache.has(url)) {
+                imageCache.set(url, await imgToDataUrl(null, url));
+            }
+        }
+    }
+
+    // Recurse (skip leaf tags that have no meaningful children)
+    if (tag !== 'img' && tag !== 'video' && tag !== 'svg') {
+        for (const child of el.children) {
+            await collectImages(child, imageCache);
+        }
+    }
+}
+
+/**
+ * Convert an image to a base64 data URI.
+ * Tries canvas first (fast for already-loaded <img>), then fetch+FileReader.
+ * Falls back to the original src on any error (CORS, network, etc.).
+ */
+async function imgToDataUrl(imgEl, src) {
+    if (!src || src.startsWith('data:')) return src;
+
+    // Fast path: img element already loaded — draw to canvas
+    if (imgEl && imgEl.complete && imgEl.naturalWidth > 0) {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = imgEl.naturalWidth;
+            canvas.height = imgEl.naturalHeight;
+            canvas.getContext('2d').drawImage(imgEl, 0, 0);
+            return canvas.toDataURL('image/png');
+        } catch (e) { /* tainted canvas (CORS) — fall through to fetch */ }
+    }
+
+    // Fetch path: works for same-origin and CORS-enabled resources
+    try {
+        const resp = await fetch(src, { mode: 'cors', credentials: 'omit' });
+        if (!resp.ok) return src;
+        const blob = await resp.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => resolve(src);
+            reader.readAsDataURL(blob);
+        });
+    } catch (e) {
+        return src; // network/CORS failure — use original URL as best-effort
+    }
+}
+
+/**
+ * Extract hover/focus/active interaction states and CSS transitions
+ * for all elements within the given root element.
+ */
+function extractInteractions(rootElement) {
+    const interactionMap = new Map(); // selector → { state, properties }
+    const STATE_PATTERNS = [
+        { pattern: ':hover', state: 'Hover' },
+        { pattern: ':focus', state: 'Focus' },
+        { pattern: ':focus-visible', state: 'Focus visible' },
+        { pattern: ':active', state: 'Active' },
+    ];
+
+    for (const sheet of document.styleSheets) {
+        let rules;
+        try { rules = sheet.cssRules || sheet.rules; } catch (e) { continue; }
+        if (!rules) continue;
+
+        for (const rule of rules) {
+            if (!rule.selectorText || !rule.style) continue;
+            const sel = rule.selectorText;
+
+            const matchedState = STATE_PATTERNS.find(s => sel.includes(s.pattern));
+            if (!matchedState) continue;
+
+            // Derive the base selector by stripping pseudo-class
+            const baseSelector = sel
+                .replace(/:hover|:focus-visible|:focus|:active/g, '')
+                .trim();
+
+            let matches = false;
+            try {
+                matches = !baseSelector
+                    || rootElement.matches(baseSelector)
+                    || !!rootElement.querySelector(baseSelector);
+            } catch (e) { /* invalid selector */ }
+
+            if (!matches) continue;
+
+            const props = {};
+            const INTERESTING = ['color', 'background-color', 'border-color', 'opacity',
+                'box-shadow', 'transform', 'text-decoration', 'outline'];
+            for (const prop of INTERESTING) {
+                const val = rule.style.getPropertyValue(prop);
+                if (val) props[prop] = val;
+            }
+            if (Object.keys(props).length === 0) continue;
+
+            const key = `${matchedState.state}|${sel}`;
+            interactionMap.set(key, { state: matchedState.state, selector: sel, properties: props });
+        }
+    }
+
+    // Collect transition info from computed styles
+    const transitions = new Set();
+    const allEls = [rootElement, ...rootElement.querySelectorAll('*')];
+    for (const el of allEls) {
+        const cs = window.getComputedStyle(el);
+        const t = cs.transition;
+        if (t && t !== 'none' && t !== 'all 0s ease 0s') {
+            transitions.add(t);
+        }
+    }
+
+    return {
+        states: [...interactionMap.values()],
+        transitions: [...transitions],
+    };
 }
 
 /** Get only direct text content of an element (not from children) */

@@ -342,6 +342,59 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                     </div>
                 )}
 
+                {/* Interactions panel — hover/focus/active states & transitions */}
+                {data?.mode === 'figma-svg' && data.interactions && (
+                    data.interactions.states.length > 0 || data.interactions.transitions.length > 0
+                ) && (
+                    <div className="code-block-wrapper" style={{ marginTop: '10px' }}>
+                        <div className="code-header">
+                            <span>
+                                Interactions
+                                <span className="code-badge">
+                                    {data.interactions.states.length} state{data.interactions.states.length !== 1 ? 's' : ''}
+                                </span>
+                            </span>
+                        </div>
+                        <div style={{ padding: '8px 12px', fontSize: '11px', lineHeight: 1.6 }}>
+                            {data.interactions.transitions.length > 0 && (
+                                <div style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid var(--border)' }}>
+                                    <div style={{ fontWeight: 600, opacity: 0.6, marginBottom: '3px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em' }}>Transitions</div>
+                                    {data.interactions.transitions.map((t, i) => (
+                                        <div key={i} style={{ fontFamily: 'monospace', opacity: 0.85, marginBottom: '2px' }}>{t}</div>
+                                    ))}
+                                </div>
+                            )}
+                            {data.interactions.states.map((item, i) => (
+                                <div key={i} style={{ marginBottom: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                        <span style={{
+                                            background: item.state === 'Hover' ? '#3b82f6' : item.state === 'Active' ? '#ef4444' : '#8b5cf6',
+                                            color: '#fff', borderRadius: '3px', padding: '1px 6px', fontSize: '10px', fontWeight: 600
+                                        }}>{item.state}</span>
+                                        <span style={{ opacity: 0.5, fontFamily: 'monospace', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.selector}</span>
+                                    </div>
+                                    {Object.entries(item.properties).map(([prop, val]) => (
+                                        <div key={prop} style={{ display: 'flex', gap: '8px', paddingLeft: '8px', marginBottom: '2px' }}>
+                                            <span style={{ opacity: 0.55, minWidth: '120px', fontFamily: 'monospace' }}>{prop}</span>
+                                            <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>
+                                                {/* Show a color swatch for color values */}
+                                                {(prop.includes('color') || prop === 'box-shadow') && (
+                                                    <span style={{
+                                                        display: 'inline-block', width: '10px', height: '10px',
+                                                        background: val, borderRadius: '2px', border: '1px solid rgba(128,128,128,0.3)',
+                                                        marginRight: '4px', verticalAlign: 'middle'
+                                                    }} />
+                                                )}
+                                                {val}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Tailwind config */}
                 {data?.mode === 'tailwind-config' && (
                     <div className="code-block-wrapper">

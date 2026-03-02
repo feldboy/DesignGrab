@@ -220,17 +220,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         case 'EXPORT_FIGMA_SVG':
             initDesignGrab();
-            try {
-                let figmaEl = getPinnedElement() || lastPinnedElement || document.querySelector('main') || document.body.children[0];
-                if (payload?.childIndex != null && figmaEl.children[payload.childIndex]) {
-                    figmaEl = figmaEl.children[payload.childIndex];
+            (async () => {
+                try {
+                    let figmaEl = getPinnedElement() || lastPinnedElement || document.querySelector('main') || document.body.children[0];
+                    if (payload?.childIndex != null && figmaEl.children[payload.childIndex]) {
+                        figmaEl = figmaEl.children[payload.childIndex];
+                    }
+                    const figmaData = await exportForFigma(figmaEl);
+                    sendResponse({ success: true, data: figmaData });
+                } catch (err) {
+                    sendResponse({ success: false, error: err.message });
                 }
-                const figmaData = exportForFigma(figmaEl);
-                sendResponse({ success: true, data: figmaData });
-            } catch (err) {
-                sendResponse({ success: false, error: err.message });
-            }
-            break;
+            })();
+            return true; // keep message channel open for async response
 
         case 'GET_CHILD_ELEMENTS':
             initDesignGrab();

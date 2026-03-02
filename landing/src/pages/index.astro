@@ -4,1180 +4,389 @@ import FeatureShowcase from '../components/FeatureShowcase.astro';
 ---
 
 <Base title="DesignGrab — Extract any website's design in seconds" description="Inspect, extract, and export colors, fonts, CSS, SVGs, and production-ready React/Vue code from any website. Powered by AI.">
-  <!-- Nav -->
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="/" class="nav-logo">
-        <svg width="28" height="28" viewBox="0 0 20 20" fill="none">
-          <rect width="20" height="20" rx="5" fill="url(#g)" />
-          <path d="M6 7L10 10L6 13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          <line x1="11" y1="13" x2="15" y2="13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" />
-          <defs><linearGradient id="g" x1="0" y1="0" x2="20" y2="20"><stop stop-color="#6366f1" /><stop offset="1" stop-color="#8b5cf6" /></linearGradient></defs>
-        </svg>
-        <span>DesignGrab</span>
-      </a>
-      <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#faq">FAQ</a>
-        <a href="#waitlist" class="nav-cta">Get Early Access</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-glow"></div>
-    <div class="container">
-      <h1 class="hero-title">
-        Extract any website's design<br />in seconds.
-      </h1>
-      <p class="hero-sub">
-        Colors, fonts, CSS, SVGs, and production-ready code.
-      </p>
-      <div class="hero-actions">
-        <a href="#waitlist" class="btn btn-primary btn-lg">
-          Join the Waitlist
-        </a>
-        <a href="#features" class="btn btn-ghost btn-lg">
-          See Features
-        </a>
-      </div>
-      <div class="hero-demo">
-        <div class="demo-window">
-          <div class="demo-bar">
-            <span class="demo-dot" style="background:#f87171"></span>
-            <span class="demo-dot" style="background:#fbbf24"></span>
-            <span class="demo-dot" style="background:#4ade80"></span>
+  <div class="relative min-h-screen overflow-x-hidden" style="background-color: #0f0f1a;">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] pointer-events-none" style="background: radial-gradient(circle at center, rgba(46, 11, 218, 0.15) 0%, transparent 70%);"></div>
+    
+    <nav class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#0f0f1a]/80 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: #2e0bda;">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <rect width="20" height="20" rx="5" fill="none" />
+              <path d="M6 7L10 10L6 13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <line x1="11" y1="13" x2="15" y2="13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
           </div>
-          <div class="demo-body demo-body-split">
-            <div class="demo-browser-area"></div>
-            <div class="demo-panels">
-              <div class="demo-panel">
-                <div class="demo-panel-title">Computed Styles</div>
-                <div class="demo-props">
-                  <div class="demo-prop"><span>width</span><span>420px</span></div>
-                  <div class="demo-prop"><span>padding</span><span>24px 32px</span></div>
-                  <div class="demo-prop"><span>border-radius</span><span>12px</span></div>
-                  <div class="demo-prop"><span>box-shadow</span><span>0 8px 32px...</span></div>
+          <span class="text-xl font-bold tracking-tight text-slate-100">DesignGrab</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#features">Features</a>
+          <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#pricing">Pricing</a>
+          <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#faq">FAQ</a>
+          <a href="#waitlist" class="hover:opacity-90 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-indigo-500/20" style="background-color: #2e0bda;">
+            Get Early Access
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="relative pt-24 pb-16 px-6 overflow-hidden">
+      <div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 text-xs font-bold uppercase tracking-wider" style="color: #6366f1; background-color: rgba(99, 102, 241, 0.1);">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background-color: #6366f1;"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2" style="background-color: #6366f1;"></span>
+          </span>
+          Now with AI-Powered Code Export
+        </div>
+        
+        <h1 class="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-white leading-[1.1]">
+          Steal Any <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-indigo-300">Design.</span>
+        </h1>
+        
+        <p class="text-lg md:text-xl text-slate-400 max-w-2xl leading-relaxed">
+          The ultimate design inspection tool for modern creators. <br class="hidden md:block"/> Extract colors, fonts, and production-ready code in seconds.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 mt-4">
+          <a href="#waitlist" class="bg-gradient-to-r from-indigo-600 to-indigo-400 hover:opacity-90 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-xl flex items-center justify-center gap-2 border-0">
+            Join the Waitlist
+          </a>
+          <a href="#features" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all flex items-center justify-center">
+            View Features
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-20 max-w-5xl mx-auto relative group">
+        <div class="absolute -inset-1 bg-gradient-to-r from-indigo-600/30 to-purple-500/30 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl" style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08);">
+          <div class="h-8 bg-white/5 flex items-center px-4 gap-1.5 border-b border-white/10">
+            <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+          </div>
+          <div class="aspect-[16/10] bg-slate-900/50 flex flex-col md:flex-row items-stretch justify-center relative overflow-hidden">
+            
+            <div class="flex-1 bg-slate-800/20 p-8 flex flex-col justify-center items-center">
+              <div class="w-3/4 max-w-md bg-white/5 rounded-2xl p-6 border border-white/5 shadow-xl">
+                 <div class="w-1/2 h-6 bg-white/10 rounded-md mb-6"></div>
+                 <div class="w-full h-32 bg-indigo-500/20 rounded-xl mb-4 border border-indigo-500/30"></div>
+                 <div class="flex gap-3">
+                   <div class="w-20 h-8 bg-white/10 rounded-md"></div>
+                   <div class="w-20 h-8 bg-indigo-500/80 rounded-md"></div>
+                 </div>
+              </div>
+            </div>
+
+            <div class="w-72 border-l border-white/10 p-6 flex flex-col gap-6" style="background-color: rgba(15, 15, 26, 0.9);">
+              <div class="flex items-center justify-between">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Inspector</div>
+                <div class="text-indigo-400 text-xs font-medium">Active</div>
+              </div>
+              <div class="space-y-4">
+                <div class="p-3 bg-white/5 rounded-lg border border-white/10">
+                  <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">PRIMARY COLOR</div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded" style="background-color: #6366f1;"></div>
+                    <span class="text-xs font-mono text-slate-300">#6366f1</span>
+                  </div>
+                </div>
+                <div class="p-3 bg-white/5 rounded-lg border border-white/10">
+                  <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">TYPOGRAPHY</div>
+                  <div class="text-xs font-medium text-slate-300">Inter SemiBold, 48px</div>
+                </div>
+                <div class="p-4 bg-slate-950 rounded-lg border border-white/10">
+                  <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">COMPUTED CSS</div>
+                  <div class="text-[11px] font-mono text-indigo-300 leading-relaxed">
+                      display: flex;<br/>
+                      border-radius: 1rem;<br/>
+                      padding: 1.5rem;<br/>
+                      background: var(--bg);
+                  </div>
                 </div>
               </div>
-              <div class="demo-panel">
-                <div class="demo-panel-title">Colors</div>
-                <div class="demo-colors">
-                  <span class="demo-color-swatch" style="background:#6366f1"></span>
-                  <span class="demo-color-swatch" style="background:#22c55e"></span>
-                  <span class="demo-color-swatch" style="background:#f1f5f9"></span>
-                </div>
+              <button class="mt-auto w-full py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-bold rounded-lg border border-indigo-500/30 transition-colors">Copy Component Code</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clean Features Grid -->
+    <section id="features" class="py-24 px-6 max-w-7xl mx-auto">
+      <div class="flex flex-col items-center gap-4 mb-16 text-center">
+        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight">Powerful Features</h2>
+        <p class="text-slate-400 max-w-xl text-lg">Everything you need to analyze and replicate beautiful web designs without breaking a sweat.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-8 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+          <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Inspect &amp; Extract</h3>
+          <p class="text-slate-400 leading-relaxed text-sm">Deep dive into any element on the page instantly. Get dimensions, padding, margins and hierarchy details. Copy values instantly.</p>
+        </div>
+
+        <div class="p-8 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+          <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 mb-6 group-hover:scale-110 transition-transform">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Colors &amp; Fonts</h3>
+          <p class="text-slate-400 leading-relaxed text-sm">Automatically identify brand palettes and typography scales. View accessibility contrast ratios and export straight to Tailwind config.</p>
+        </div>
+
+        <div class="p-8 rounded-2xl border border-white/5 hover:border-green-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+          <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 mb-6 group-hover:scale-110 transition-transform">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">AI Code Export</h3>
+          <p class="text-slate-400 leading-relaxed text-sm">Copy production-ready CSS, Tailwind classes, and clean HTML structures. Use Claude AI to generate ready-to-use React and Vue components.</p>
+        </div>
+        
+        <div class="p-8 rounded-2xl border border-white/5 hover:border-pink-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+          <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 mb-6 group-hover:scale-110 transition-transform">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Asset Extraction</h3>
+          <p class="text-slate-400 leading-relaxed text-sm">Find every image, SVG, video, and Lottie animation on a page. Download them all as a ZIP file or copy the raw SVG code instantly.</p>
+        </div>
+
+        <div class="p-8 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all group md:col-span-2" style="background: rgba(255, 255, 255, 0.02);">
+          <div class="flex h-full flex-col md:flex-row gap-8 items-center">
+            <div class="flex-1">
+              <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
               </div>
+              <h3 class="text-xl font-bold text-white mb-3">Figma Integration</h3>
+              <p class="text-slate-400 leading-relaxed text-sm">Copy any element and paste it directly into Figma as a fully editable vector graphic. Bridging the gap between the live web and your design files seamlessly.</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Features -->
-  <section id="features" class="section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Everything you need to<br /><span class="gradient-text">reverse-engineer any design</span></h2>
-        <p class="section-sub">Figma export at its core — plus eight more powerful tools in one lightweight Chrome extension.</p>
+    <!-- Pre-existing Pricing Section (preserved functionality & tiers, restyled slightly to match minimal dark theme) -->
+    <section id="pricing" class="py-24 px-6 max-w-5xl mx-auto border-t border-white/5">
+      <div class="flex flex-col items-center gap-4 mb-16 text-center">
+        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight">Simple Pricing</h2>
+        <p class="text-slate-400 text-lg">Start free. Upgrade when you need more power.</p>
       </div>
-      <div class="features-grid">
-        <div class="feature-card featured figma-featured">
-          <div class="feature-icon">🎯</div>
-          <h3>Figma Export <span class="feature-badge">Core Feature</span></h3>
-          <p>AI-powered SVG generation that you can paste directly into Figma. Preserves colors, typography, and layout — bridging the web and your design files instantly.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔍</div>
-          <h3>Element Inspector</h3>
-          <p>Click any element to see its full computed styles — colors, fonts, spacing, borders, shadows. Copy any value instantly.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎨</div>
-          <h3>Color Extraction</h3>
-          <p>Auto-detect every color on a page. Grouped by role — backgrounds, text, accents. Accessibility contrast checks included.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔤</div>
-          <h3>Font Analysis</h3>
-          <p>Detect all font families, weights, and sources. See the complete typography scale with usage breakdown.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⟨/⟩</div>
-          <h3>AI Code Export</h3>
-          <p>Export any element as clean HTML+CSS, Tailwind, or AI-generated React TSX and Vue SFC components. Production-ready.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🖼</div>
-          <h3>Asset Extraction</h3>
-          <p>Find every image, SVG, video, and Lottie animation on a page. Download or copy SVG code in one click.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⊞</div>
-          <h3>Layout Analysis</h3>
-          <p>Understand any page's structure. See the DOM tree, flexbox/grid properties, and structural HTML at a glance.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">✦</div>
-          <h3>Animation Capture</h3>
-          <p>Extract CSS keyframe animations, transitions, and Lottie files with full timing and easing details.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">♡</div>
-          <h3>Design Library</h3>
-          <p>Save colors, fonts, SVGs, and images from any site into your personal library. Build your design system as you browse.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Feature Showcases -->
-  <section class="showcases-section">
-    <FeatureShowcase
-      heading="Inspect any element instantly"
-      desc="Hover over any element on any website. See its full computed styles — dimensions, colors, typography, spacing, shadows — all in a beautiful overlay."
-      bullets={[
-        "Box model visualization (margin, padding, border)",
-        "Click-to-copy any CSS value",
-        "Pin elements for deeper analysis",
-        "Works on any website, any framework",
-      ]}
-      badge="Core Feature"
-    >
-      <div class="demo-mock demo-inspector">
-        <div class="di-page">
-          <div class="di-element di-el-1"></div>
-          <div class="di-element di-el-2">
-            <div class="di-cursor"></div>
-            <div class="di-overlay">
-              <div class="di-margin-box"></div>
-              <div class="di-padding-box"></div>
-              <div class="di-content-box"></div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Free -->
+        <div class="p-8 rounded-2xl border border-white/10 flex flex-col items-start relative overflow-hidden group" style="background: rgba(255, 255, 255, 0.02);">
+          <div class="mb-8">
+            <h3 class="text-xl font-bold text-white mb-2">Free</h3>
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-black text-white">$0</span>
             </div>
-            <div class="di-tooltip">
-              <div class="di-tooltip-row"><span>width</span><span>420px</span></div>
-              <div class="di-tooltip-row"><span>padding</span><span>24px</span></div>
-              <div class="di-tooltip-row"><span>border-radius</span><span>12px</span></div>
-              <div class="di-tooltip-row"><span>font-family</span><span>Inter</span></div>
-            </div>
+            <div class="text-sm text-slate-500 mt-1">forever</div>
           </div>
-          <div class="di-element di-el-3"></div>
-        </div>
-      </div>
-    </FeatureShowcase>
-
-    <FeatureShowcase
-      heading="Extract colors & fonts automatically"
-      desc="Scan an entire page in one click. Get the complete color palette grouped by role, and every font family with usage breakdown and typography scale."
-      bullets={[
-        "Colors grouped: primary, text, background, accent",
-        "WCAG contrast accessibility audit",
-        "Font weights, sources, and load URLs",
-        "One-click copy as HEX, RGB, or HSL",
-      ]}
-      reverse={true}
-    >
-      <div class="demo-mock demo-colors">
-        <div class="dc-header">
-          <span class="dc-tab dc-tab-active">Colors</span>
-          <span class="dc-tab">Fonts</span>
-        </div>
-        <div class="dc-palette">
-          <div class="dc-swatch-row">
-            <div class="dc-swatch" style="background:#6366f1"></div>
-            <div class="dc-info"><span class="dc-hex">#6366f1</span><span class="dc-role">Primary</span></div>
-            <div class="dc-count">142×</div>
-          </div>
-          <div class="dc-swatch-row">
-            <div class="dc-swatch" style="background:#1a1a2e"></div>
-            <div class="dc-info"><span class="dc-hex">#1a1a2e</span><span class="dc-role">Text</span></div>
-            <div class="dc-count">89×</div>
-          </div>
-          <div class="dc-swatch-row">
-            <div class="dc-swatch" style="background:#f8f9fa"></div>
-            <div class="dc-info"><span class="dc-hex">#f8f9fa</span><span class="dc-role">Background</span></div>
-            <div class="dc-count">67×</div>
-          </div>
-          <div class="dc-swatch-row">
-            <div class="dc-swatch" style="background:#4ade80"></div>
-            <div class="dc-info"><span class="dc-hex">#4ade80</span><span class="dc-role">Accent</span></div>
-            <div class="dc-count">23×</div>
-          </div>
-          <div class="dc-swatch-row dc-swatch-pulse">
-            <div class="dc-swatch" style="background:#e94560"></div>
-            <div class="dc-info"><span class="dc-hex">#e94560</span><span class="dc-role">CTA</span></div>
-            <div class="dc-count">11×</div>
-          </div>
-        </div>
-        <div class="dc-contrast">
-          <span class="dc-contrast-label">WCAG AA</span>
-          <span class="dc-contrast-pass">✓ Pass 7.4:1</span>
-        </div>
-      </div>
-    </FeatureShowcase>
-
-    <FeatureShowcase
-      heading="AI-powered code export"
-      desc="Select any section and export it as a production-ready React TSX or Vue SFC component. Claude AI generates clean, typed, responsive code with Tailwind CSS."
-      bullets={[
-        "React TSX with TypeScript props",
-        "Vue 3 SFC with Composition API",
-        "Tailwind CSS — no inline styles",
-        "Accessible, responsive, production-ready",
-      ]}
-      badge="Pro Feature"
-    >
-      <div class="demo-mock demo-ai">
-        <div class="da-header">
-          <span class="da-tab da-tab-active">React TSX</span>
-          <span class="da-tab">Vue SFC</span>
-          <span class="da-tab">HTML+CSS</span>
-        </div>
-        <div class="da-code">
-          <div class="da-line"><span class="da-kw">export default</span> <span class="da-fn">function</span> <span class="da-name">HeroCard</span><span class="da-p">(</span><span class="da-prop">{'{ title, subtitle }'}</span><span class="da-p">)</span> <span class="da-p">{'{'}</span></div>
-          <div class="da-line da-indent"><span class="da-kw">return</span> <span class="da-p">(</span></div>
-          <div class="da-line da-indent-2"><span class="da-tag">&lt;section</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"flex flex-col items-center gap-8 py-20"</span><span class="da-tag">&gt;</span></div>
-          <div class="da-line da-indent-3"><span class="da-tag">&lt;h1</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"text-5xl font-bold"</span><span class="da-tag">&gt;</span></div>
-          <div class="da-line da-indent-4 da-typing"><span class="da-p">{'{title}'}</span></div>
-          <div class="da-line da-indent-3"><span class="da-tag">&lt;/h1&gt;</span></div>
-          <div class="da-line da-indent-3"><span class="da-tag">&lt;p</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"text-lg text-gray-400"</span><span class="da-tag">&gt;</span></div>
-          <div class="da-line da-indent-4"><span class="da-p">{'{subtitle}'}</span></div>
-          <div class="da-line da-indent-3"><span class="da-tag">&lt;/p&gt;</span></div>
-          <div class="da-line da-indent-2"><span class="da-tag">&lt;/section&gt;</span></div>
-          <div class="da-line da-indent"><span class="da-p">{')'}</span></div>
-          <div class="da-line"><span class="da-p">{'}'}</span></div>
-        </div>
-        <div class="da-status">
-          <span class="da-ai-badge">⚡ Claude AI</span>
-          <span class="da-copy">Copy Component</span>
-        </div>
-      </div>
-    </FeatureShowcase>
-
-    <FeatureShowcase
-      heading="Layout DNA — understand structure, not just styles"
-      desc="Other tools show you CSS values. DesignGrab shows you how the layout actually works — Flexbox directions, Grid templates, alignment, and gaps. Reverse-engineer any layout."
-      bullets={[
-        "Flexbox: direction, align, justify, gap",
-        "Grid: template columns, rows, areas",
-        "Structural HTML with layout classes",
-        "Export as Tailwind layout utilities",
-      ]}
-      badge="Differentiator"
-      reverse={true}
-    >
-      <div class="demo-mock demo-layout">
-        <div class="dl-tree">
-          <div class="dl-node dl-root">
-            <span class="dl-tag">flex</span>
-            <span class="dl-dir">column</span>
-            <span class="dl-gap">gap: 32px</span>
-          </div>
-          <div class="dl-children">
-            <div class="dl-branch"></div>
-            <div class="dl-node dl-child">
-              <span class="dl-tag">flex</span>
-              <span class="dl-dir">row</span>
-              <span class="dl-gap">gap: 16px</span>
-            </div>
-            <div class="dl-grandchildren">
-              <div class="dl-branch"></div>
-              <div class="dl-node dl-leaf"><span class="dl-tag">img</span><span class="dl-size">w: 50%</span></div>
-              <div class="dl-branch"></div>
-              <div class="dl-node dl-leaf"><span class="dl-tag">flex</span><span class="dl-dir">col</span></div>
-            </div>
-            <div class="dl-branch"></div>
-            <div class="dl-node dl-child">
-              <span class="dl-tag">grid</span>
-              <span class="dl-cols">1fr 1fr 1fr</span>
-              <span class="dl-gap">gap: 24px</span>
-            </div>
-          </div>
-        </div>
-        <div class="dl-output">
-          <code>flex flex-col items-center gap-8</code>
-        </div>
-      </div>
-    </FeatureShowcase>
-  </section>
-  <section class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Three steps. Zero friction.</h2>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <h3>Inspect</h3>
-          <p>Open the side panel and click any element on the page. Or press <kbd>Cmd+Shift+G</kbd>.</p>
-        </div>
-        <div class="step-arrow">→</div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <h3>Extract</h3>
-          <p>See every design detail — colors, fonts, spacing, CSS. Grab assets, SVGs, and animations.</p>
-        </div>
-        <div class="step-arrow">→</div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <h3>Export to Figma</h3>
-          <p>Paste AI-generated components directly into Figma. Or export React, Vue, or Tailwind — production-ready code in one click.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Pricing -->
-  <section id="pricing" class="section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Simple, fair pricing</h2>
-        <p class="section-sub">Start free. Upgrade when you need more.</p>
-      </div>
-      <div class="pricing-grid">
-        <div class="price-card">
-          <div class="price-name">Free</div>
-          <div class="price-amount">$0</div>
-          <div class="price-period">forever</div>
-          <ul class="price-features">
-            <li>Inspector, colors, fonts, layout</li>
-            <li>15 asset downloads / month</li>
-            <li>5 code exports / month</li>
-            <li>Local design library</li>
+          <ul class="space-y-4 mb-10 w-full flex-1">
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+              Inspector, colors, fonts, layout
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+              15 asset downloads / month
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+              5 code exports / month
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+              Local design library
+            </li>
           </ul>
-          <a href="#waitlist" class="btn btn-ghost">Get Started</a>
+          <a href="#waitlist" class="mt-auto w-full py-3 text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition-all text-sm">
+            Get Started
+          </a>
         </div>
-        <div class="price-card popular">
-          <div class="price-badge">Most Popular</div>
-          <div class="price-name">Pro</div>
-          <div class="price-amount">$12<span>/mo</span></div>
-          <div class="price-period">billed monthly</div>
-          <ul class="price-features">
-            <li>Everything in Free</li>
-            <li>2,000 downloads / month</li>
-            <li>Unlimited code exports</li>
-            <li>50 AI exports / month</li>
-            <li>Figma export</li>
-            <li>Priority support</li>
+
+        <!-- Pro -->
+        <div class="p-8 rounded-2xl border-2 border-indigo-500/50 flex flex-col items-start relative overflow-hidden transform md:-translate-y-4 shadow-2xl shadow-indigo-500/10" style="background: rgba(99, 102, 241, 0.05);">
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-b-lg">
+            Most Popular
+          </div>
+          <div class="mb-8 mt-4">
+            <h3 class="text-xl font-bold text-white mb-2">Pro</h3>
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-black text-white">$12</span>
+              <span class="text-slate-500 font-medium">/mo</span>
+            </div>
+            <div class="text-sm text-slate-500 mt-1">billed monthly</div>
+          </div>
+          <ul class="space-y-4 mb-10 w-full flex-1">
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-indigo-400 mt-0.5">✓</span>
+              <strong class="font-semibold text-white">Everything in Free</strong>
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-indigo-400 mt-0.5">✓</span>
+              2,000 downloads / month
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-indigo-400 mt-0.5">✓</span>
+              Unlimited code exports
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-indigo-400 mt-0.5">✓</span>
+              50 AI React/Vue exports / month
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-indigo-400 mt-0.5">✓</span>
+              Figma export
+            </li>
           </ul>
-          <a href="#waitlist" class="btn btn-primary">Join Waitlist</a>
+          <a href="#waitlist" class="mt-auto w-full py-3 text-center bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/25 border-0 text-sm">
+            Join Waitlist
+          </a>
         </div>
-        <div class="price-card">
-          <div class="price-name">Lifetime</div>
-          <div class="price-amount">$99</div>
-          <div class="price-period">one-time payment</div>
-          <ul class="price-features">
-            <li>Everything in Pro</li>
-            <li>Pay once, use forever</li>
-            <li>All future updates</li>
-            <li>Early access to new features</li>
+
+        <!-- Lifetime -->
+        <div class="p-8 rounded-2xl border border-white/10 flex flex-col items-start relative overflow-hidden group" style="background: rgba(255, 255, 255, 0.02);">
+          <div class="mb-8">
+            <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-black text-white">$99</span>
+            </div>
+             <div class="text-sm text-slate-500 mt-1">one-time payment</div>
+          </div>
+          <ul class="space-y-4 mb-10 w-full flex-1">
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+               <strong class="font-semibold text-white">Everything in Pro</strong>
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+              Pay once, use forever
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+              All future updates
+            </li>
+            <li class="flex items-start gap-3 text-slate-300 text-sm">
+              <span class="text-slate-500 mt-0.5">✓</span>
+              Early access to features
+            </li>
           </ul>
-          <a href="#waitlist" class="btn btn-ghost">Join Waitlist</a>
+          <a href="#waitlist" class="mt-auto w-full py-3 text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition-all text-sm">
+            Join Waitlist
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-24 px-6 max-w-3xl mx-auto border-t border-white/5">
+      <div class="flex flex-col items-center gap-4 mb-16 text-center">
+        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight">Frequently Asked Questions</h2>
+      </div>
+      
+      <div class="space-y-4">
+        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
+            <span>Is it really free?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
+            Yes. The free plan gives you full access to the inspector, color/font/layout analysis, and a generous monthly quota of downloads and code exports. No credit card required.
+          </div>
+        </details>
+        
+        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
+            <span>How does the AI export work?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
+            DesignGrab captures the full design context of a pinned element — HTML, CSS, colors, fonts, layout structure — and sends it to Claude (Anthropic's AI) to generate a production-ready React TSX, Vue SFC, or Figma-compatible SVG component.
+          </div>
+        </details>
+
+        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
+            <span>Do I need my own API key?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
+            For AI exports, yes — you provide your own Anthropic API key in Settings. This means your usage is billed directly by Anthropic at their rates, and your data never touches our servers.
+          </div>
+        </details>
+
+        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
+            <span>Does it work on any website?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
+            DesignGrab works on any publicly accessible website. It reads the live DOM and computed styles, so it works regardless of what framework or CSS methodology the site uses.
+          </div>
+        </details>
+
+        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
+            <span>Is my data private?</span>
+            <span class="transition group-open:rotate-180">
+              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+            </span>
+          </summary>
+          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
+            Absolutely. DesignGrab runs entirely in your browser. Your design data, saved library, and API keys are stored locally in Chrome storage. Nothing is sent to our servers.
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Pre-existing Waitlist (maintained) -->
+    <section id="waitlist" class="py-32 px-6 max-w-3xl mx-auto text-center">
+      <div class="p-12 rounded-3xl border border-white/10 relative overflow-hidden" style="background: rgba(255,255,255,0.03);">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none"></div>
+        <div class="relative z-10">
+          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">Get early access</h2>
+          <p class="text-slate-400 mb-8 max-w-md mx-auto">Be the first to know when DesignGrab launches on the Chrome Web Store.</p>
+          <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" id="waitlist-form">
+            <input type="email" name="email" placeholder="you@email.com" required class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" />
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-6 py-3 font-bold transition-all shadow-lg shadow-indigo-500/25 border-0 whitespace-nowrap">Join Waitlist</button>
+          </form>
+          <p class="text-xs text-slate-500 mt-4" id="waitlist-msg">No spam. Unsubscribe anytime.</p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FAQ -->
-  <section id="faq" class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Frequently asked questions</h2>
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-white/5 bg-black/20">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-2 opacity-80">
+          <div class="w-6 h-6 rounded flex items-center justify-center" style="background-color: #2e0bda;">
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+              <rect width="20" height="20" rx="5" fill="none" />
+              <path d="M6 7L10 10L6 13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <span class="text-sm font-bold tracking-tight text-white">DesignGrab</span>
+        </div>
+        <div class="flex gap-8">
+          <a class="text-xs font-medium text-slate-500 hover:text-white transition-colors" href="/privacy">Privacy Policy</a>
+          <a class="text-xs font-medium text-slate-500 hover:text-white transition-colors" href="mailto:support@designgrab.app">Contact</a>
+        </div>
+        <p class="text-xs text-slate-600 font-medium tracking-wide">
+          © 2026 DesignGrab. All rights reserved.
+        </p>
       </div>
-      <div class="faq-list">
-        <details class="faq-item">
-          <summary>Is it really free?</summary>
-          <p>Yes. The free plan gives you full access to the inspector, color/font/layout analysis, and a generous monthly quota of downloads and code exports. No credit card required.</p>
-        </details>
-        <details class="faq-item">
-          <summary>How does the AI export work?</summary>
-          <p>DesignGrab captures the full design context of a pinned element — HTML, CSS, colors, fonts, layout structure — and sends it to Claude (Anthropic's AI) to generate a production-ready React TSX, Vue SFC, or Figma-compatible SVG component.</p>
-        </details>
-        <details class="faq-item">
-          <summary>Do I need my own API key?</summary>
-          <p>For AI exports, yes — you provide your own Anthropic API key in Settings. This means your usage is billed directly by Anthropic at their rates, and your data never touches our servers.</p>
-        </details>
-        <details class="faq-item">
-          <summary>Does it work on any website?</summary>
-          <p>DesignGrab works on any publicly accessible website. It reads the live DOM and computed styles, so it works regardless of what framework or CSS methodology the site uses.</p>
-        </details>
-        <details class="faq-item">
-          <summary>Is my data private?</summary>
-          <p>Absolutely. DesignGrab runs entirely in your browser. Your design data, saved library, and API keys are stored locally in Chrome storage. Nothing is sent to our servers.</p>
-        </details>
-        <details class="faq-item">
-          <summary>Can I cancel anytime?</summary>
-          <p>Yes. Pro subscriptions can be cancelled anytime from your account. You keep access until the end of your billing period. Lifetime is a one-time purchase with no recurring charges.</p>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <!-- Waitlist -->
-  <section id="waitlist" class="section">
-    <div class="container">
-      <div class="waitlist-box">
-        <h2 class="section-title">Get early access</h2>
-        <p class="section-sub" style="margin-bottom:24px;">Be the first to know when DesignGrab launches on the Chrome Web Store.</p>
-        <form class="waitlist-form" id="waitlist-form">
-          <input type="email" name="email" placeholder="you@email.com" required class="waitlist-input" />
-          <button type="submit" class="btn btn-primary">Join Waitlist</button>
-        </form>
-        <p class="waitlist-note" id="waitlist-msg">No spam. Unsubscribe anytime.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container footer-inner">
-      <div class="footer-left">
-        <span class="footer-brand">DesignGrab</span>
-        <span class="footer-copy">&copy; 2026 DesignGrab. All rights reserved.</span>
-      </div>
-      <div class="footer-links">
-        <a href="/privacy">Privacy Policy</a>
-        <a href="mailto:support@designgrab.app">Contact</a>
-      </div>
-    </div>
-  </footer>
+    </footer>
+  </div>
 </Base>
-
-<style>
-  /* Nav */
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: rgba(6, 6, 14, 0.8);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 12px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    font-size: 16px;
-  }
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-  .nav-links a:hover { color: var(--text); }
-  .nav-cta {
-    padding: 7px 16px;
-    border-radius: 8px;
-    background: var(--accent);
-    color: white !important;
-    font-weight: 600;
-    font-size: 13px;
-    transition: background 0.15s;
-  }
-  .nav-cta:hover { background: #4f46e5; }
-
-  /* Container */
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-
-  /* Buttons */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 22px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: var(--font);
-  }
-  .btn-primary {
-    background: var(--gradient);
-    color: white;
-    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4); }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-strong);
-  }
-  .btn-ghost:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-  .btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 12px; }
-
-  /* Gradient text */
-  .gradient-text {
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Hero */
-  .hero {
-    position: relative;
-    padding: 140px 0 60px;
-    text-align: center;
-    overflow: hidden;
-  }
-  .hero-glow {
-    position: absolute;
-    top: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 600px;
-    background: radial-gradient(ellipse, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-badge {
-    display: inline-block;
-    padding: 6px 16px;
-    border-radius: 100px;
-    background: var(--accent-light);
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    margin-bottom: 24px;
-    border: 1px solid rgba(99, 102, 241, 0.2);
-  }
-  .hero-title {
-    font-size: clamp(40px, 6.5vw, 80px);
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 20px;
-    letter-spacing: -0.03em;
-  }
-  .hero-sub {
-    font-size: 18px;
-    color: var(--text-secondary);
-    max-width: 560px;
-    margin: 0 auto 32px;
-    line-height: 1.6;
-  }
-  .hero-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-bottom: 60px;
-  }
-
-  /* Demo Window */
-  .hero-demo { max-width: 860px; margin: 0 auto; }
-  .demo-window {
-    background: var(--bg-card);
-    border-radius: 12px;
-    border: 1px solid var(--border-strong);
-    overflow: hidden;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-  }
-  .demo-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    background: var(--bg-elevated);
-    border-bottom: 1px solid var(--border);
-  }
-  .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .demo-bar-title { margin-left: 8px; font-size: 11px; color: var(--text-muted); }
-  .demo-body { padding: 0; }
-  .demo-body-split {
-    display: flex;
-    min-height: 340px;
-  }
-  .demo-browser-area {
-    flex: 1;
-    background: var(--bg-card);
-    border-right: 1px solid var(--border);
-    min-height: 340px;
-  }
-  .demo-panels {
-    width: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    background: var(--border);
-  }
-  .demo-panel {
-    background: var(--bg-elevated);
-    padding: 14px 14px 12px;
-  }
-  .demo-panel-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  .demo-colors {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    padding: 4px 0;
-  }
-  .demo-color-swatch {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .demo-props { display: flex; flex-direction: column; }
-  .demo-prop {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    font-family: 'SF Mono', monospace;
-    font-size: 11px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-  }
-  .demo-prop span:first-child { color: var(--text-secondary); }
-  .demo-prop span:last-child { color: var(--text); }
-
-  /* Sections */
-  .section { padding: 100px 0; }
-  .section-alt { background: var(--bg-card); }
-  .section-header { text-align: center; margin-bottom: 56px; }
-  .section-title {
-    font-size: clamp(28px, 3.5vw, 42px);
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    margin-bottom: 12px;
-  }
-  .section-sub { font-size: 16px; color: var(--text-secondary); max-width: 480px; margin: 0 auto; }
-
-  /* Features Grid */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-  .feature-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .feature-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
-  .feature-card.featured {
-    border-color: rgba(99, 102, 241, 0.3);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(139, 92, 246, 0.04));
-  }
-  .feature-card.figma-featured {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
-    border-color: rgba(99, 102, 241, 0.5);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.10), rgba(139, 92, 246, 0.06));
-    box-shadow: 0 4px 32px rgba(99, 102, 241, 0.15);
-  }
-  .feature-card.figma-featured .feature-icon { font-size: 36px; flex-shrink: 0; }
-  .feature-card.figma-featured h3 { font-size: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .feature-card.figma-featured p { font-size: 15px; }
-  .feature-badge {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 100px;
-    background: var(--gradient);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    vertical-align: middle;
-  }
-  .figma-badge {
-    font-size: 11px;
-    color: #a78bfa;
-    font-family: monospace;
-    font-weight: 700;
-  }
-  .feature-icon { font-size: 24px; margin-bottom: 12px; }
-  .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .feature-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-
-  /* Steps */
-  .steps {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 24px;
-  }
-  .step {
-    text-align: center;
-    max-width: 260px;
-  }
-  .step-num {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--accent-light);
-    color: var(--accent);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 16px;
-    margin-bottom: 16px;
-    border: 1px solid rgba(99, 102, 241, 0.2);
-  }
-  .step h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-  .step p { font-size: 14px; color: var(--text-secondary); }
-  .step-arrow { font-size: 24px; color: var(--text-muted); margin-top: 12px; }
-  kbd {
-    padding: 2px 6px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-strong);
-    border-radius: 4px;
-    font-size: 12px;
-    font-family: monospace;
-  }
-
-  /* Pricing */
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    align-items: start;
-  }
-  .price-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px 24px;
-    text-align: center;
-    position: relative;
-    transition: border-color 0.2s;
-  }
-  .price-card:hover { border-color: var(--border-strong); }
-  .price-card.popular {
-    border-color: rgba(99, 102, 241, 0.4);
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.06), var(--bg-card));
-    transform: scale(1.03);
-  }
-  .price-badge {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 14px;
-    background: var(--gradient);
-    color: white;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-  .price-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-  .price-amount { font-size: 42px; font-weight: 800; letter-spacing: -0.02em; }
-  .price-amount span { font-size: 16px; font-weight: 500; color: var(--text-secondary); }
-  .price-period { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
-  .price-features {
-    list-style: none;
-    text-align: left;
-    margin-bottom: 24px;
-  }
-  .price-features li {
-    padding: 6px 0;
-    font-size: 14px;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border);
-  }
-  .price-features li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
-  .price-card .btn { width: 100%; }
-
-  /* FAQ */
-  .faq-list { max-width: 680px; margin: 0 auto; }
-  .faq-item {
-    border-bottom: 1px solid var(--border);
-    padding: 20px 0;
-  }
-  .faq-item summary {
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .faq-item summary::after { content: "+"; font-size: 20px; color: var(--text-muted); }
-  .faq-item[open] summary::after { content: "−"; }
-  .faq-item p {
-    margin-top: 12px;
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-  }
-
-  /* Waitlist */
-  .waitlist-box {
-    text-align: center;
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 48px 32px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-strong);
-    border-radius: 20px;
-  }
-  .waitlist-form {
-    display: flex;
-    gap: 8px;
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  .waitlist-input {
-    flex: 1;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1px solid var(--border-strong);
-    background: var(--bg-elevated);
-    color: var(--text);
-    font-size: 14px;
-    font-family: var(--font);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .waitlist-input:focus { border-color: var(--accent); }
-  .waitlist-input::placeholder { color: var(--text-muted); }
-  .waitlist-note { font-size: 12px; color: var(--text-muted); margin-top: 12px; }
-
-  /* Footer */
-  .footer {
-    padding: 32px 0;
-    border-top: 1px solid var(--border);
-  }
-  .footer-inner {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .footer-left { display: flex; align-items: center; gap: 16px; }
-  .footer-brand { font-weight: 700; font-size: 14px; }
-  .footer-copy { font-size: 12px; color: var(--text-muted); }
-  .footer-links { display: flex; gap: 20px; font-size: 13px; color: var(--text-secondary); }
-  .footer-links a:hover { color: var(--text); }
-
-  /* Mobile */
-  @media (max-width: 768px) {
-    .nav-links a:not(.nav-cta) { display: none; }
-    .features-grid { grid-template-columns: 1fr; }
-    .pricing-grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
-    .price-card.popular { transform: none; }
-    .steps { flex-direction: column; align-items: center; }
-    .step-arrow { transform: rotate(90deg); }
-    .hero-actions { flex-direction: column; align-items: center; }
-    .waitlist-form { flex-direction: column; }
-    .footer-inner { flex-direction: column; gap: 16px; }
-  }
-
-  /* ── Feature Showcase Demos ── */
-  .showcases-section {
-    border-top: 1px solid var(--border);
-  }
-
-  .demo-mock {
-    background: var(--bg-card);
-    border: 1px solid var(--border-strong);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-  }
-
-  /* ── Inspector Demo ── */
-  .di-page {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .di-element {
-    border-radius: 8px;
-    position: relative;
-  }
-  .di-el-1 { height: 28px; background: var(--bg-elevated); }
-  .di-el-2 {
-    height: 120px;
-    background: rgba(99, 102, 241, 0.06);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    position: relative;
-  }
-  .di-el-3 { height: 40px; background: var(--bg-elevated); }
-  .di-cursor {
-    position: absolute; top: 30px; left: 60px;
-    width: 14px; height: 14px;
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    animation: pulse-cursor 2s ease-in-out infinite;
-  }
-  .di-overlay {
-    position: absolute; inset: 0;
-    animation: fade-overlay 2s ease-in-out infinite;
-  }
-  .di-margin-box {
-    position: absolute; inset: -8px;
-    border: 2px dashed rgba(251, 146, 60, 0.5);
-    border-radius: 12px;
-  }
-  .di-padding-box {
-    position: absolute; inset: 0;
-    border: 2px solid rgba(74, 222, 128, 0.4);
-    border-radius: 8px;
-  }
-  .di-content-box {
-    position: absolute; inset: 8px;
-    background: rgba(96, 165, 250, 0.08);
-    border-radius: 4px;
-  }
-  .di-tooltip {
-    position: absolute; top: -72px; right: 12px;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-strong);
-    border-radius: 8px;
-    padding: 8px 10px;
-    min-width: 160px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    animation: slide-in-tooltip 0.5s ease-out both;
-  }
-  .di-tooltip-row {
-    display: flex; justify-content: space-between; gap: 16px;
-    font-size: 11px; font-family: monospace;
-    padding: 2px 0;
-  }
-  .di-tooltip-row span:first-child { color: var(--text-muted); }
-  .di-tooltip-row span:last-child { color: var(--text); }
-
-  @keyframes pulse-cursor {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.4); opacity: 0.6; }
-  }
-  @keyframes fade-overlay {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  @keyframes slide-in-tooltip {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── Colors Demo ── */
-  .dc-header {
-    display: flex; gap: 2px; padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .dc-tab {
-    padding: 4px 12px; font-size: 12px; border-radius: 6px;
-    color: var(--text-muted);
-  }
-  .dc-tab-active {
-    background: var(--accent-light); color: var(--accent); font-weight: 600;
-  }
-  .dc-palette { padding: 12px; }
-  .dc-swatch-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 8px 10px; border-radius: 8px;
-    transition: background 0.15s;
-    animation: slide-swatch 0.4s ease-out both;
-  }
-  .dc-swatch-row:nth-child(1) { animation-delay: 0.1s; }
-  .dc-swatch-row:nth-child(2) { animation-delay: 0.2s; }
-  .dc-swatch-row:nth-child(3) { animation-delay: 0.3s; }
-  .dc-swatch-row:nth-child(4) { animation-delay: 0.4s; }
-  .dc-swatch-row:nth-child(5) { animation-delay: 0.5s; }
-  .dc-swatch-row:hover { background: rgba(255,255,255,0.03); }
-  .dc-swatch {
-    width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .dc-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
-  .dc-hex { font-family: monospace; font-size: 12px; font-weight: 600; }
-  .dc-role { font-size: 11px; color: var(--text-muted); }
-  .dc-count { font-size: 11px; color: var(--text-muted); font-family: monospace; }
-  .dc-swatch-pulse { animation: slide-swatch 0.4s ease-out both, glow-swatch 2s ease-in-out infinite 0.6s; }
-  .dc-contrast {
-    display: flex; justify-content: space-between; padding: 10px 14px;
-    border-top: 1px solid var(--border); font-size: 12px;
-  }
-  .dc-contrast-label { color: var(--text-muted); }
-  .dc-contrast-pass { color: #4ade80; font-weight: 600; }
-
-  @keyframes slide-swatch {
-    from { opacity: 0; transform: translateX(-12px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes glow-swatch {
-    0%, 100% { box-shadow: none; }
-    50% { box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.3); border-radius: 8px; }
-  }
-
-  /* ── AI Code Demo ── */
-  .da-header {
-    display: flex; gap: 2px; padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .da-tab {
-    padding: 4px 12px; font-size: 12px; border-radius: 6px;
-    color: var(--text-muted);
-  }
-  .da-tab-active {
-    background: var(--accent-light); color: var(--accent); font-weight: 600;
-  }
-  .da-code { padding: 14px 16px; font-size: 12px; font-family: 'SF Mono', 'JetBrains Mono', monospace; line-height: 1.7; }
-  .da-line { white-space: nowrap; }
-  .da-indent { padding-left: 20px; }
-  .da-indent-2 { padding-left: 40px; }
-  .da-indent-3 { padding-left: 60px; }
-  .da-indent-4 { padding-left: 80px; }
-  .da-kw { color: #c084fc; }
-  .da-fn { color: #60a5fa; }
-  .da-name { color: #fbbf24; }
-  .da-p { color: var(--text-secondary); }
-  .da-prop { color: #fb923c; }
-  .da-tag { color: #f87171; }
-  .da-attr { color: #a5b4fc; }
-  .da-str { color: #4ade80; }
-  .da-typing {
-    position: relative;
-  }
-  .da-typing::after {
-    content: "";
-    width: 2px; height: 14px;
-    background: var(--accent);
-    display: inline-block;
-    margin-left: 2px;
-    animation: blink-cursor 1s step-end infinite;
-  }
-  .da-status {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 14px; border-top: 1px solid var(--border);
-  }
-  .da-ai-badge {
-    font-size: 11px; font-weight: 700; color: #c084fc;
-    display: flex; align-items: center; gap: 4px;
-  }
-  .da-copy {
-    font-size: 11px; color: var(--accent); font-weight: 600;
-    padding: 3px 10px; border: 1px solid rgba(99,102,241,0.3);
-    border-radius: 6px; cursor: pointer;
-  }
-
-  @keyframes blink-cursor {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  /* ── Layout DNA Demo ── */
-  .dl-tree { padding: 20px; }
-  .dl-node {
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 12px; border-radius: 8px;
-    font-size: 12px; font-family: monospace;
-    animation: slide-node 0.4s ease-out both;
-  }
-  .dl-root {
-    background: rgba(99, 102, 241, 0.12);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-  }
-  .dl-child {
-    background: rgba(251, 146, 60, 0.1);
-    border: 1px solid rgba(251, 146, 60, 0.25);
-    animation-delay: 0.15s;
-  }
-  .dl-leaf {
-    background: rgba(74, 222, 128, 0.08);
-    border: 1px solid rgba(74, 222, 128, 0.2);
-    animation-delay: 0.3s;
-  }
-  .dl-tag { color: #60a5fa; font-weight: 700; }
-  .dl-dir { color: #c084fc; }
-  .dl-gap { color: var(--text-muted); }
-  .dl-cols { color: #fbbf24; }
-  .dl-size { color: var(--text-muted); }
-  .dl-branch {
-    width: 1px; height: 16px; background: var(--border-strong);
-    margin-left: 24px;
-  }
-  .dl-children { padding-left: 16px; }
-  .dl-grandchildren { padding-left: 32px; }
-  .dl-output {
-    padding: 10px 14px; border-top: 1px solid var(--border);
-  }
-  .dl-output code {
-    font-size: 12px; color: #4ade80;
-    background: rgba(74, 222, 128, 0.08);
-    padding: 4px 10px; border-radius: 6px;
-  }
-
-  @keyframes slide-node {
-    from { opacity: 0; transform: translateX(-16px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-</style>
-
-<script>
-  const SUPABASE_URL = 'https://lgueqndrxxkcssjclyxp.supabase.co';
-  const SUPABASE_ANON_KEY = '***REMOVED_SUPABASE_ANON_KEY***';
-
-  const form = document.getElementById('waitlist-form');
-  const msg = document.getElementById('waitlist-msg');
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = new FormData(form).get('email');
-    if (!email) return;
-
-    const btn = form.querySelector('button');
-    btn.disabled = true;
-    btn.textContent = 'Joining...';
-
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      if (res.ok) {
-        msg.textContent = "You're on the list! We'll notify you at launch.";
-        msg.style.color = '#4ade80';
-        form.reset();
-      } else if (res.status === 409) {
-        msg.textContent = "You're already on the list!";
-        msg.style.color = '#fbbf24';
-      } else {
-        throw new Error('Request failed');
-      }
-    } catch {
-      msg.textContent = 'Something went wrong. Try again.';
-      msg.style.color = '#f87171';
-    }
-    btn.disabled = false;
-    btn.textContent = 'Join Waitlist';
-  });
-</script>

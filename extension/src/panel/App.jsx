@@ -45,7 +45,7 @@ function App() {
         getAuthState().then(({ plan }) => {
             // plan is synced to local storage inside getAuthState
             console.log('[DesignGrab] Plan:', plan);
-        }).catch(() => {});
+        }).catch(() => { });
     }, []);
 
     useEffect(() => {
@@ -178,6 +178,8 @@ function App() {
                     <AnimationsTab
                         assets={assets}
                         onExtract={handleExtractAssets}
+                        pinnedElement={pinnedElement}
+                        onStartInspect={handleStartInspect}
                     />
                 )}
                 {activeTab === 'library' && (

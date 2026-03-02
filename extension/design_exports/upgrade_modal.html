@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DesignGrab Upgrade Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3713ec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0f0f1a",
+                        "modal-bg": "#1a1a2e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-border {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .modal-backdrop {
+            background-color: rgba(15, 15, 26, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased">
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop backdrop-blur-sm">
+<!-- Modal Container -->
+<div class="relative w-full max-w-[480px] bg-modal-bg rounded-xl shadow-2xl overflow-hidden glass-border">
+<!-- Top Accent Strip -->
+<div class="h-1 w-full bg-gradient-to-r from-primary to-indigo-400"></div>
+<!-- Close Button -->
+<button class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<!-- Modal Content -->
+<div class="p-6 flex flex-col items-center">
+<!-- Warning Icon -->
+<div class="mb-4 flex items-center justify-center size-12 rounded-full bg-amber-500/10 text-amber-500">
+<span class="material-symbols-outlined text-3xl">warning</span>
+</div>
+<!-- Header -->
+<h2 class="text-slate-100 text-xl font-bold leading-tight tracking-tight text-center">
+                    You've reached your limit
+                </h2>
+<p class="text-slate-400 text-sm font-normal mt-1 mb-8 text-center">
+                    You've used 15/15 free downloads this month
+                </p>
+<!-- Pricing Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+<!-- Starter Plan -->
+<div class="flex flex-col gap-4 rounded-lg border border-slate-700/50 bg-slate-800/30 p-5 transition-all hover:bg-slate-800/50">
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-200 text-sm font-bold uppercase tracking-wider">Starter</h3>
+<div class="flex items-baseline gap-1 text-slate-100">
+<span class="text-3xl font-black leading-tight tracking-tight">$9</span>
+<span class="text-slate-400 text-sm font-medium">/mo</span>
+</div>
+</div>
+<div class="flex flex-col gap-2.5">
+<div class="text-xs font-medium flex items-center gap-2 text-slate-300">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                150 downloads
+                            </div>
+<div class="text-xs font-medium flex items-center gap-2 text-slate-300">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                30 code exports
+                            </div>
+<div class="text-xs font-medium flex items-center gap-2 text-slate-300">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                20 design systems
+                            </div>
+</div>
+<button class="mt-2 w-full cursor-pointer rounded-lg py-2.5 bg-gradient-to-br from-primary/80 to-primary text-white text-xs font-bold transition-transform active:scale-[0.98]">
+                            Upgrade to Starter
+                        </button>
+</div>
+<!-- Pro Plan (Recommended) -->
+<div class="relative flex flex-col gap-4 rounded-lg border-2 border-primary bg-primary/5 p-5 shadow-[0_0_20px_rgba(55,19,236,0.15)]">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2">
+<span class="bg-primary text-[10px] font-bold text-white px-2.5 py-1 rounded-full whitespace-nowrap">
+                                MOST POPULAR
+                            </span>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-slate-100 text-sm font-bold uppercase tracking-wider">Pro</h3>
+<div class="flex items-baseline gap-1 text-slate-100">
+<span class="text-3xl font-black leading-tight tracking-tight">$19</span>
+<span class="text-slate-400 text-sm font-medium">/mo</span>
+</div>
+</div>
+<div class="flex flex-col gap-2.5">
+<div class="text-xs font-medium flex items-center gap-2 text-slate-200">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1">check_circle</span>
+                                2000 downloads
+                            </div>
+<div class="text-xs font-medium flex items-center gap-2 text-slate-200">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1">check_circle</span>
+                                Unlimited exports
+                            </div>
+<div class="text-xs font-medium flex items-center gap-2 text-slate-200">
+<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1">check_circle</span>
+                                AI React export
+                            </div>
+</div>
+<button class="mt-2 w-full cursor-pointer rounded-lg py-2.5 bg-primary text-white text-xs font-bold shadow-lg shadow-primary/25 transition-transform active:scale-[0.98]">
+                            Go Pro
+                        </button>
+</div>
+</div>
+<!-- Footer Link -->
+<div class="mt-8 mb-2">
+<a class="text-slate-500 hover:text-slate-300 text-xs font-medium transition-colors underline underline-offset-4 decoration-slate-700" href="#">
+                        Or try Lifetime — $49 one-time
+                    </a>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Mockup for context (Non-interactive) -->
+<div class="p-8 opacity-20 pointer-events-none select-none">
+<div class="max-w-4xl mx-auto space-y-6">
+<div class="h-8 w-48 bg-slate-700 rounded"></div>
+<div class="grid grid-cols-3 gap-4">
+<div class="aspect-video bg-slate-800 rounded-xl" data-alt="Abstract UI dashboard preview card"></div>
+<div class="aspect-video bg-slate-800 rounded-xl" data-alt="Dark mode analytics widget pattern"></div>
+<div class="aspect-video bg-slate-800 rounded-xl" data-alt="Modern geometric data visualization abstract"></div>
+</div>
+<div class="h-64 w-full bg-slate-800/50 rounded-xl" data-alt="Large canvas area with dark workspace aesthetic"></div>
+</div>
+</div>
+</body></html>

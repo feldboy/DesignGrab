@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2e0bda",
+                        "background-light": "#f6f5f8",
+                        "background-dark": "#0f0f1a",
+                        "surface-dark": "#1a1a2e",
+                        "border-indigo": "#2e0bda4d",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.625rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-border {
+            border: 1px solid rgba(46, 11, 218, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 0px;
+            width: 0px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased selection:bg-primary/30">
+<!-- Chrome Extension Side Panel Container (Fixed 350px width for mockup) -->
+<div class="relative flex h-screen w-[350px] flex-col bg-background-light dark:bg-background-dark overflow-hidden border-l border-white/10 mx-auto shadow-2xl">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-background-dark/50 backdrop-blur-md sticky top-0 z-10">
+<div class="flex items-center gap-2">
+<div class="size-7 flex items-center justify-center rounded-lg bg-primary text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+</div>
+<h2 class="text-slate-100 text-base font-bold tracking-tight">DesignGrab</h2>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 transition-colors">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+<div class="size-7 rounded-full bg-primary/20 border border-primary/30 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCabNoUpPhg4gHCsLzERDvAI1iD4JzRjT1VLz-e7ikesIfOGZ53KhrcFzE8VV3qVbVKd4AI0OezJThTFaord_E0rUo_30WIBRTxARB2sr8e_6i6QhZtEF3gNqhmnXcaCDpq0VXXmvluGBTsa1gdpciLgfxD_iWwxWzvfSoB4fE2id0RupsQ7igfUR_SPhuoU4_B-0Iz3hKvUpmtnp4eDBZ8KS059fnPzOe66C3ti5-giyKzPko5B_oHZNrhZ7eO_XaHdlaiWNSYjug"/>
+</div>
+</div>
+<!-- Bottom Accent Gradient -->
+<div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+</header>
+<!-- Horizontal Scrollable Tabs -->
+<nav class="flex items-center gap-1 px-2 py-1 overflow-x-auto custom-scrollbar border-b border-white/5 bg-background-dark/30">
+<a class="flex flex-col items-center min-w-[64px] py-2 px-1 text-slate-500 hover:text-slate-300 transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">frame_inspect</span>
+<span class="text-[10px] font-medium uppercase tracking-wider mt-0.5">Inspect</span>
+</a>
+<a class="flex flex-col items-center min-w-[64px] py-2 px-1 text-slate-500 hover:text-slate-300" href="#">
+<span class="material-symbols-outlined text-lg">category</span>
+<span class="text-[10px] font-medium uppercase tracking-wider mt-0.5">Assets</span>
+</a>
+<a class="flex flex-col items-center min-w-[64px] py-2 px-1 text-slate-500 hover:text-slate-300" href="#">
+<span class="material-symbols-outlined text-lg">palette</span>
+<span class="text-[10px] font-medium uppercase tracking-wider mt-0.5">Colors</span>
+</a>
+<a class="flex flex-col items-center min-w-[64px] py-2 px-1 text-primary relative" href="#">
+<span class="material-symbols-outlined text-lg">code</span>
+<span class="text-[10px] font-bold uppercase tracking-wider mt-0.5">Code</span>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full"></div>
+</a>
+<a class="flex flex-col items-center min-w-[64px] py-2 px-1 text-slate-500 hover:text-slate-300" href="#">
+<span class="material-symbols-outlined text-lg">library_books</span>
+<span class="text-[10px] font-medium uppercase tracking-wider mt-0.5">Library</span>
+</a>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar p-4 gap-4">
+<!-- Content Header -->
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<h1 class="text-xl font-bold text-slate-100 tracking-tight">Code Export</h1>
+<span class="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-[10px] font-mono text-primary font-bold">
+                        &lt;section.hero&gt;
+                    </span>
+</div>
+<p class="text-xs text-slate-400">Export clean, production-ready code snippets.</p>
+</div>
+<!-- Format Toggle (Segmented Control) -->
+<div class="p-1 rounded-xl bg-surface-dark border border-white/5 flex items-center shadow-inner">
+<button class="flex-1 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 transition-all rounded-lg">
+                    HTML/CSS
+                </button>
+<button class="flex-1 py-1.5 text-xs font-bold text-slate-100 bg-primary/20 border border-primary/30 shadow-sm rounded-lg">
+                    React + TW
+                </button>
+<button class="flex-1 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 transition-all rounded-lg">
+                    Vue
+                </button>
+</div>
+<!-- Code Editor Block -->
+<div class="relative flex-1 min-h-[300px] flex flex-col rounded-lg bg-[#0d0d17] border border-white/10 overflow-hidden shadow-2xl">
+<!-- Editor Header -->
+<div class="flex items-center justify-between px-3 py-2 bg-white/5 border-b border-white/5">
+<span class="text-[11px] font-mono text-slate-500">HeroComponent.tsx</span>
+<button class="flex items-center gap-1.5 text-[11px] font-bold text-primary hover:text-primary/80 transition-colors">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+                        Copy Code
+                    </button>
+</div>
+<!-- Code Content with Line Numbers -->
+<div class="flex flex-1 p-3 font-mono text-[11px] leading-relaxed overflow-x-auto custom-scrollbar">
+<div class="text-slate-600 pr-3 text-right select-none border-r border-white/5 mr-3">
+                        1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>11<br/>12
+                    </div>
+<div class="flex-1 whitespace-pre text-slate-300">
+<span class="text-purple-400">export default function</span> <span class="text-blue-400">Hero</span>() {
+  <span class="text-purple-400">return</span> (
+    &lt;<span class="text-red-400">section</span> <span class="text-yellow-400">className</span>=<span class="text-green-400">"relative py-20"</span>&gt;
+      &lt;<span class="text-red-400">div</span> <span class="text-yellow-400">className</span>=<span class="text-green-400">"container mx-auto"</span>&gt;
+        &lt;<span class="text-red-400">h1</span> <span class="text-yellow-400">className</span>=<span class="text-green-400">"text-4xl font-bold"</span>&gt;
+          Design Reimagined
+        &lt;/<span class="text-red-400">h1</span>&gt;
+        &lt;<span class="text-red-400">p</span> <span class="text-yellow-400">className</span>=<span class="text-green-400">"mt-4 text-slate-400"</span>&gt;
+          Build faster with precision.
+        &lt;/<span class="text-red-400">p</span>&gt;
+      &lt;/<span class="text-red-400">div</span>&gt;
+    &lt;/<span class="text-red-400">section</span>&gt;
+  )
+}</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Buttons -->
+<footer class="p-4 bg-background-dark border-t border-white/5 flex flex-col gap-2">
+<button class="w-full py-2.5 px-4 text-xs font-bold text-slate-300 border border-white/10 rounded-lg hover:bg-white/5 transition-colors">
+                Save Component
+            </button>
+<button class="w-full py-2.5 px-4 text-xs font-bold text-white bg-gradient-to-r from-primary to-indigo-700 rounded-lg shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                Download File
+            </button>
+</footer>
+</div>
+</body></html>

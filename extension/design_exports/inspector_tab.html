@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DesignGrab Side Panel Inspector</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3713ec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0f0f1a",
+                        "surface-dark": "#16162a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 2px;
+            width: 2px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3713ec;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .glass-border {
+            border: 1px solid rgba(55, 19, 236, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden">
+<!-- Chrome Extension Side Panel Container (Fixed 350px width) -->
+<div class="flex h-screen w-[350px] flex-col border-l border-primary/20 bg-background-light dark:bg-background-dark shadow-2xl mx-auto">
+<!-- Top Bar -->
+<header class="flex items-center justify-between px-4 py-3 border-b border-primary/10 relative">
+<div class="flex items-center gap-2">
+<div class="size-7 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-lg">auto_awesome</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 text-base font-bold tracking-tight">DesignGrab</h1>
+</div>
+<button class="p-1.5 hover:bg-primary/10 rounded-lg transition-colors text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<div class="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+</header>
+<!-- Tab Navigation (Horizontal Scrollable) -->
+<nav class="flex overflow-x-auto custom-scrollbar border-b border-slate-200 dark:border-slate-800 px-2">
+<a class="flex flex-col items-center justify-center px-4 py-2 gap-1 border-b-2 border-primary text-primary shrink-0" href="#">
+<span class="material-symbols-outlined text-[20px] fill-1">search</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Inspector</span>
+</a>
+<a class="flex flex-col items-center justify-center px-4 py-2 gap-1 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary shrink-0" href="#">
+<span class="material-symbols-outlined text-[20px]">package</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Assets</span>
+</a>
+<a class="flex flex-col items-center justify-center px-4 py-2 gap-1 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary shrink-0" href="#">
+<span class="material-symbols-outlined text-[20px]">palette</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Colors</span>
+</a>
+<a class="flex flex-col items-center justify-center px-4 py-2 gap-1 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary shrink-0" href="#">
+<span class="material-symbols-outlined text-[20px]">text_format</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Fonts</span>
+</a>
+<a class="flex flex-col items-center justify-center px-4 py-2 gap-1 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary shrink-0" href="#">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Layout</span>
+</a>
+<a class="flex flex-col items-center justify-center px-4 py-2 gap-1 border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-primary shrink-0" href="#">
+<span class="material-symbols-outlined text-[20px]">code</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Code</span>
+</a>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
+<!-- Pinned Element Section -->
+<section>
+<h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Pinned Element</h2>
+<div class="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2">
+<span class="material-symbols-outlined text-primary text-sm">link</span>
+<code class="text-primary text-sm font-medium leading-none">&lt;div class='hero-section'&gt;</code>
+</div>
+</section>
+<!-- Box Model Visualization -->
+<section>
+<h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Box Model</h2>
+<div class="relative w-full aspect-[4/3] bg-slate-100 dark:bg-surface-dark rounded-xl p-4 flex items-center justify-center text-[10px] font-bold">
+<!-- Margin -->
+<div class="w-full h-full border-2 border-orange-500/50 bg-orange-500/10 rounded flex items-center justify-center relative">
+<span class="absolute top-1 left-2 text-orange-500 uppercase">Margin</span>
+<!-- Border -->
+<div class="w-[85%] h-[80%] border-2 border-yellow-500/50 bg-yellow-500/10 rounded flex items-center justify-center relative">
+<span class="absolute top-1 left-2 text-yellow-500 uppercase">Border</span>
+<!-- Padding -->
+<div class="w-[80%] h-[75%] border-2 border-green-500/50 bg-green-500/10 rounded flex items-center justify-center relative">
+<span class="absolute top-1 left-2 text-green-500 uppercase">Padding</span>
+<!-- Content -->
+<div class="w-[70%] h-[65%] bg-primary/40 border border-primary flex items-center justify-center rounded text-white">
+                                    1280 x 720
+                                </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Property Cards -->
+<div class="space-y-3">
+<!-- Typography Card -->
+<div class="bg-white dark:bg-surface-dark p-4 rounded-xl glass-border shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">title</span>
+                            Typography
+                        </h3>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Family</p>
+<p class="text-sm font-semibold text-primary">Inter Display</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Size</p>
+<p class="text-sm font-semibold text-primary">48px</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Weight</p>
+<p class="text-sm font-semibold text-primary">700 (Bold)</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Line Height</p>
+<p class="text-sm font-semibold text-primary">1.2</p>
+</div>
+</div>
+</div>
+<!-- Visual Card -->
+<div class="bg-white dark:bg-surface-dark p-4 rounded-xl glass-border shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">brush</span>
+                            Visual
+                        </h3>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Color</p>
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-primary"></div>
+<p class="text-sm font-semibold text-primary">#3713EC</p>
+</div>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Opacity</p>
+<p class="text-sm font-semibold text-primary">100%</p>
+</div>
+</div>
+</div>
+<!-- Layout Card -->
+<div class="bg-white dark:bg-surface-dark p-4 rounded-xl glass-border shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">aspect_ratio</span>
+                            Layout
+                        </h3>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Display</p>
+<p class="text-sm font-semibold text-primary">Flex</p>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase">Radius</p>
+<p class="text-sm font-semibold text-primary">16px</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Actions & Status Bar -->
+<footer class="p-4 border-t border-slate-200 dark:border-slate-800 bg-background-light dark:bg-background-dark/50 backdrop-blur-md">
+<button class="w-full bg-gradient-to-r from-primary to-[#6e4ff5] text-white font-bold py-3 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined text-lg">code_blocks</span>
+                Copy All CSS
+            </button>
+<div class="flex items-center justify-between px-1">
+<div class="flex flex-col">
+<p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Free Plan — 8/15 downloads</p>
+<div class="w-24 h-1 bg-slate-200 dark:bg-slate-800 rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-primary w-[53%]"></div>
+</div>
+</div>
+<a class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1" href="#">
+                    Upgrade
+                    <span class="material-symbols-outlined text-[14px]">bolt</span>
+</a>
+</div>
+</footer>
+</div>
+</body></html>

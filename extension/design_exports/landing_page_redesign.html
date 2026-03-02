@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2e0bda",
+                        "background-light": "#f6f5f8",
+                        "background-dark": "#0f0f1a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f1a;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .hero-glow {
+            background: radial-gradient(circle at center, rgba(46, 11, 218, 0.15) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased font-display">
+<div class="relative min-h-screen overflow-x-hidden">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] hero-glow pointer-events-none"></div>
+<nav class="sticky top-0 z-50 w-full border-b border-white/5 bg-background-dark/80 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">rocket_launch</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-100">DesignGrab</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#">Pricing</a>
+<a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#">FAQ</a>
+<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-primary/20">
+                        Get Extension
+                    </button>
+</div>
+</div>
+</nav>
+<section class="relative pt-24 pb-16 px-6 overflow-hidden">
+<div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+                    Now with AI-Powered Code Export
+                </div>
+<h1 class="text-6xl md:text-8xl font-black tracking-tight text-white leading-[1.1]">
+                    Steal Any <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-400">Design.</span>
+</h1>
+<p class="text-lg md:text-xl text-slate-400 max-w-2xl leading-relaxed">
+                    The ultimate design inspection tool for modern creators. <br class="hidden md:block"/> Extract colors, fonts, and production-ready code in seconds.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 mt-4">
+<button class="bg-gradient-to-r from-primary to-indigo-600 hover:opacity-90 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-xl shadow-primary/30 flex items-center gap-2">
+<span class="material-symbols-outlined">add_to_drive</span>
+                        Add to Chrome
+                    </button>
+<button class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all">
+                        View Demo
+                    </button>
+</div>
+</div>
+<div class="mt-20 max-w-6xl mx-auto relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary/30 to-indigo-500/30 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+<div class="relative glass rounded-2xl overflow-hidden shadow-2xl">
+<div class="h-8 bg-white/5 flex items-center px-4 gap-1.5 border-b border-white/10">
+<div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+</div>
+<div class="aspect-[16/10] bg-slate-900/50 flex items-center justify-center p-8">
+<div class="w-full h-full rounded-lg border border-white/5 bg-[#1a1a2e] flex shadow-inner relative overflow-hidden" data-alt="Screenshot of browser window with DesignGrab sidebar open">
+<div class="flex-1 bg-slate-800/20 backdrop-blur-xl p-6">
+<div class="w-3/4 h-8 bg-white/5 rounded-lg mb-6"></div>
+<div class="grid grid-cols-3 gap-4">
+<div class="aspect-square bg-white/5 rounded-xl"></div>
+<div class="aspect-square bg-white/5 rounded-xl"></div>
+<div class="aspect-square bg-white/5 rounded-xl"></div>
+</div>
+<div class="mt-8 space-y-4">
+<div class="w-full h-4 bg-white/5 rounded-full"></div>
+<div class="w-full h-4 bg-white/5 rounded-full"></div>
+<div class="w-1/2 h-4 bg-white/5 rounded-full"></div>
+</div>
+</div>
+<div class="w-72 border-l border-white/10 bg-background-dark/80 p-6 flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Inspector</div>
+<div class="text-primary text-xs">Active</div>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-white/5 rounded-lg border border-white/10">
+<div class="text-[10px] text-slate-500 mb-2">PRIMARY COLOR</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 rounded bg-primary"></div>
+<span class="text-xs font-mono">#2E0BDA</span>
+</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/10">
+<div class="text-[10px] text-slate-500 mb-2">TYPOGRAPHY</div>
+<div class="text-xs font-medium">Inter SemiBold, 48px</div>
+</div>
+<div class="p-3 bg-white/5 rounded-lg border border-white/10">
+<div class="text-[10px] text-slate-500 mb-2">CSS SNIPPET</div>
+<div class="text-[10px] font-mono text-primary leading-tight">
+                                            display: flex;<br/>
+                                            border-radius: 1rem;<br/>
+                                            background: var(--bg);
+                                        </div>
+</div>
+</div>
+<button class="mt-auto w-full py-2 bg-primary/20 text-primary text-xs font-bold rounded-lg border border-primary/30">Copy All Code</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 px-6 max-w-7xl mx-auto">
+<div class="flex flex-col items-center gap-4 mb-16 text-center">
+<h2 class="text-4xl font-bold text-white tracking-tight">Powerful Features</h2>
+<p class="text-slate-400 max-w-xl">Everything you need to analyze and replicate beautiful web designs without breaking a sweat.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="glass p-8 rounded-2xl border border-white/5 hover:border-primary/30 transition-all group">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">search_insights</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-3">Inspect &amp; Extract</h3>
+<p class="text-slate-400 leading-relaxed text-sm">Deep dive into any element on the page instantly. Get dimensions, padding, margins and hierarchy details.</p>
+</div>
+<div class="glass p-8 rounded-2xl border border-white/5 hover:border-primary/30 transition-all group">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">palette</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-3">Colors &amp; Fonts</h3>
+<p class="text-slate-400 leading-relaxed text-sm">Automatically identify brand palettes and typography scales. Export them to your design tool in one click.</p>
+</div>
+<div class="glass p-8 rounded-2xl border border-white/5 hover:border-primary/30 transition-all group">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">terminal</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-3">Code Export</h3>
+<p class="text-slate-400 leading-relaxed text-sm">Copy production-ready CSS, Tailwind classes, and clean HTML structures. Optimized for modern frameworks.</p>
+</div>
+</div>
+</section>
+<section class="py-24 px-6 max-w-5xl mx-auto">
+<div class="flex flex-col items-center gap-4 mb-16 text-center">
+<h2 class="text-4xl font-bold text-white tracking-tight">Simple Pricing</h2>
+<p class="text-slate-400">Choose the plan that fits your creative workflow.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="glass p-10 rounded-2xl flex flex-col items-start relative overflow-hidden group">
+<div class="mb-8">
+<h3 class="text-2xl font-bold text-white mb-2">Free</h3>
+<div class="flex items-baseline gap-1">
+<span class="text-5xl font-black text-white">$0</span>
+<span class="text-slate-500 font-medium">/mo</span>
+</div>
+</div>
+<ul class="space-y-4 mb-10 w-full">
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                            Basic Inspection Tools
+                        </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                            3 Projects per month
+                        </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                            Community Support
+                        </li>
+</ul>
+<button class="mt-auto w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition-all">
+                        Get Started
+                    </button>
+</div>
+<div class="bg-primary/5 border-2 border-primary/40 p-10 rounded-2xl flex flex-col items-start relative overflow-hidden">
+<div class="absolute top-4 right-4 bg-primary text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                        Most Popular
+                    </div>
+<div class="mb-8">
+<h3 class="text-2xl font-bold text-white mb-2">Pro</h3>
+<div class="flex items-baseline gap-1">
+<span class="text-5xl font-black text-white">$12</span>
+<span class="text-slate-500 font-medium">/mo</span>
+</div>
+</div>
+<ul class="space-y-4 mb-10 w-full">
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                            Unlimited Inspections
+                        </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                            Unlimited Projects
+                        </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                            Priority Support
+                        </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                            Advanced AI Code Export
+                        </li>
+</ul>
+<button class="mt-auto w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold transition-all shadow-xl shadow-primary/20">
+                        Go Pro
+                    </button>
+</div>
+</div>
+</section>
+<footer class="py-16 px-6 border-t border-white/5 mt-12 bg-black/20">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-2 opacity-80">
+<div class="w-6 h-6 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">rocket_launch</span>
+</div>
+<span class="text-sm font-bold tracking-tight text-white">DesignGrab</span>
+</div>
+<div class="flex gap-10">
+<a class="text-xs font-medium text-slate-500 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-xs font-medium text-slate-500 hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-xs font-medium text-slate-500 hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+<p class="text-xs text-slate-600 font-medium">
+                    © 2023 DesignGrab. All rights reserved.
+                </p>
+</div>
+</footer>
+</div>
+</body></html>
