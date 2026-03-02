@@ -6,6 +6,10 @@ dist/
 .DS_Store
 .vite/
 
+# Sensitive config files
+extension/src/config/env.js
+*.bak
+
 # Claude Code skills/commands
 .claude/commands/
 

@@ -171,3 +171,29 @@ body {
     color: #52525b;
     font-family: 'SF Mono', monospace;
 }
+
+/* Google Sign-in */
+.google-signin-section {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.popup-btn.google-signin {
+    background: rgba(255, 255, 255, 0.06);
+    color: #d4d4d8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: center;
+}
+
+.popup-btn.google-signin:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.popup-btn.google-signin:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+}

@@ -2,13 +2,11 @@
  * DesignGrab — Supabase Client
  * Initialize Supabase with Chrome extension storage adapter.
  *
- * To activate: replace the placeholder values below with your Supabase project credentials.
- * You can also set them via chrome.storage.sync under the key 'supabaseConfig'.
+ * Configure by editing extension/src/config/env.js (git-ignored).
+ * Copy env.example.js → env.js and fill in your Supabase credentials.
  */
 
-// Placeholder — replace with your actual Supabase project URL and anon key
-const SUPABASE_URL = 'https://lgueqndrxxkcssjclyxp.supabase.co';
-const SUPABASE_ANON_KEY = '***REMOVED_SUPABASE_ANON_KEY***';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/env.js';
 
 let supabaseClient = null;
 

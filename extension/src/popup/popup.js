@@ -2,12 +2,47 @@
  * DesignGrab Popup — Quick actions
  */
 
+import { getAuthState, signInWithGoogle } from '../lib/auth.js';
+
 let isInspecting = false;
 
 const btnFigma = document.getElementById('btn-figma');
 const btnInspect = document.getElementById('btn-inspect');
 const btnAssets = document.getElementById('btn-assets');
 const btnPanel = document.getElementById('btn-panel');
+const btnGoogleSignin = document.getElementById('btn-google-signin');
+const googleSigninSection = document.getElementById('google-signin-section');
+const planBadge = document.getElementById('plan-badge');
+
+// Check auth state and show/hide sign-in button
+getAuthState().then(({ isLoggedIn, plan }) => {
+    if (!isLoggedIn) {
+        googleSigninSection.style.display = 'block';
+    }
+    if (plan && plan !== 'free') {
+        planBadge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+        planBadge.classList.add(plan);
+    }
+}).catch(() => {
+    googleSigninSection.style.display = 'block';
+});
+
+// Sign in with Google
+btnGoogleSignin.addEventListener('click', async () => {
+    btnGoogleSignin.disabled = true;
+    btnGoogleSignin.querySelector('span').textContent = 'Signing in...';
+    const result = await signInWithGoogle();
+    if (result.error) {
+        btnGoogleSignin.disabled = false;
+        btnGoogleSignin.querySelector('span').textContent = 'Sign in with Google';
+    } else {
+        googleSigninSection.style.display = 'none';
+        const state = await getAuthState();
+        if (state.plan && state.plan !== 'free') {
+            planBadge.textContent = state.plan.charAt(0).toUpperCase() + state.plan.slice(1);
+        }
+    }
+});
 
 // Export to Figma — open side panel on Figma tab
 btnFigma.addEventListener('click', () => {

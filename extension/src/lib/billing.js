@@ -4,8 +4,7 @@
  */
 
 import { getSupabase, isSupabaseConfigured } from './supabase.js';
-
-const SUPABASE_URL = 'https://lgueqndrxxkcssjclyxp.supabase.co';
+import { SUPABASE_URL } from '../config/env.js';
 
 /**
  * Start upgrade checkout flow

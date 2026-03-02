@@ -34,7 +34,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
                 // Content script not loaded — inject and retry
                 injectContentScript(tab.id).then(() => {
                     chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_INSPECT' });
-                }).catch(() => {});
+                }).catch(() => { });
             }
         });
     }
@@ -367,10 +367,27 @@ ${(css || '').slice(0, 8000)}`;
 }
 
 /**
- * Handle AI export — call Google Gemini API with built-in API key
+ * Handle AI export — call Google Gemini API
+ * API key is loaded from chrome.storage.local (set via extension config or env.js)
  */
-const GEMINI_API_KEY = '***REMOVED_GEMINI_API_KEY***';
 const GEMINI_MODEL = 'gemini-3-flash-preview';
+
+async function getGeminiApiKey() {
+    const data = await chrome.storage.local.get(['geminiApiKey']);
+    if (data.geminiApiKey) return data.geminiApiKey;
+
+    // Fallback: try loading from bundled env config
+    try {
+        const { GEMINI_API_KEY } = await import('../config/env.js');
+        if (GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY') {
+            return GEMINI_API_KEY;
+        }
+    } catch (e) {
+        // env.js not found — expected if not configured
+    }
+
+    return null;
+}
 
 async function handleAIExport(payload, isFigma = false) {
     const { context, html, css, layout, framework = 'react' } = payload;
@@ -389,6 +406,12 @@ async function handleAIExport(payload, isFigma = false) {
     const hasContext = context && context.html;
     if (!hasContext && !html) {
         return { error: 'Missing html parameter' };
+    }
+
+    // Get API key securely
+    const apiKey = await getGeminiApiKey();
+    if (!apiKey) {
+        return { error: 'Gemini API key not configured. Set it in extension settings.' };
     }
 
     let prompt;
@@ -417,7 +440,7 @@ Output the complete ${fileExt} file:`;
     }
 
     const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
