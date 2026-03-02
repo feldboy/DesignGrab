@@ -121,7 +121,51 @@ create trigger profiles_updated_at
   before update on public.profiles
   for each row execute function public.set_updated_at();
 
--- 6. Waitlist — early access signups from landing page
+-- 6. Plans — editable plan limits (manage from Supabase Dashboard)
+-- Use -1 for unlimited. Edit rows in the Dashboard to change limits instantly.
+create table if not exists public.plans (
+  id text primary key,                       -- 'free', 'pro', 'lifetime'
+  name text not null,
+  price_cents integer not null default 0,
+  billing_period text default 'monthly',     -- 'monthly', 'one_time', null
+  downloads_limit integer not null default 15,
+  code_exports_limit integer not null default 5,
+  design_systems_limit integer not null default 3,
+  ai_exports_limit integer not null default 0,
+  is_active boolean not null default true,
+  display_order integer not null default 0,
+  features jsonb default '[]',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.plans enable row level security;
+
+-- Anyone can read plans (needed by extension + landing page)
+create policy "Anyone can read active plans"
+  on public.plans for select
+  using (true);
+
+-- Only service_role can modify plans (via Supabase Dashboard or API)
+-- No insert/update/delete policies for anon/authenticated = admin-only writes
+
+-- Auto-update updated_at on plans
+create trigger plans_updated_at
+  before update on public.plans
+  for each row execute function public.set_updated_at();
+
+-- Seed default plans
+insert into public.plans (id, name, price_cents, billing_period, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit, is_active, display_order, features)
+values
+  ('free', 'Free', 0, null, 15, 5, 3, 0, true, 1,
+   '["15 asset downloads/mo", "5 code exports/mo", "3 design system exports/mo", "Basic inspector"]'::jsonb),
+  ('pro', 'Pro', 1200, 'monthly', 2000, -1, -1, 50, true, 2,
+   '["2,000 asset downloads/mo", "Unlimited code exports", "Unlimited design systems", "50 AI exports/mo", "Priority support"]'::jsonb),
+  ('lifetime', 'Lifetime', 9900, 'one_time', 2000, -1, -1, 50, true, 3,
+   '["Everything in Pro", "One-time payment", "Founder badge", "Lifetime updates"]'::jsonb)
+on conflict (id) do nothing;
+
+-- 7. Waitlist — early access signups from landing page
 create table if not exists public.waitlist (
   id bigint generated always as identity primary key,
   email text not null unique,

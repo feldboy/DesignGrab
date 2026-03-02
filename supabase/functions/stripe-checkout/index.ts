@@ -14,7 +14,6 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const PRICE_MAP: Record<string, string> = {
-  starter: Deno.env.get("STRIPE_PRICE_STARTER") || "",
   pro: Deno.env.get("STRIPE_PRICE_PRO") || "",
   lifetime: Deno.env.get("STRIPE_PRICE_LIFETIME") || "",
 };

@@ -1,17 +1,59 @@
 /**
  * DesignGrab — Usage Tracker
  * Tracks monthly feature usage and enforces plan limits.
- * Local-first: works without Supabase, syncs when available.
+ * Fetches limits from Supabase plans table (editable in Dashboard).
+ * Falls back to hardcoded defaults when offline.
  */
 
 import storage from './storage.js';
 
-const LIMITS = {
+// Fallback limits (used when Supabase is unavailable)
+const DEFAULT_LIMITS = {
     free:     { downloads: 15, codeExports: 5,  designSystems: 3,  aiExports: 0 },
-    starter:  { downloads: 150, codeExports: 30, designSystems: 20, aiExports: 0 },
     pro:      { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50 },
     lifetime: { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50 },
 };
+
+/**
+ * Get the active limits for a plan.
+ * Uses cached Supabase limits if available, otherwise falls back to defaults.
+ */
+async function getLimitsForPlan(plan) {
+    const cached = await storage.get(['planLimits']);
+    if (cached.planLimits && cached.planLimits[plan]) {
+        return cached.planLimits[plan];
+    }
+    return DEFAULT_LIMITS[plan] || DEFAULT_LIMITS.free;
+}
+
+/**
+ * Sync plan limits from Supabase plans table.
+ * Call this on login and periodically to pick up Dashboard changes.
+ */
+async function syncPlanLimits(supabase) {
+    try {
+        const { data: plans, error } = await supabase
+            .from('plans')
+            .select('id, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit')
+            .eq('is_active', true);
+
+        if (error || !plans) return;
+
+        const limitsMap = {};
+        for (const p of plans) {
+            limitsMap[p.id] = {
+                downloads: p.downloads_limit,
+                codeExports: p.code_exports_limit,
+                designSystems: p.design_systems_limit,
+                aiExports: p.ai_exports_limit,
+            };
+        }
+        await storage.set({ planLimits: limitsMap });
+    } catch (e) {
+        // Offline or plans table doesn't exist yet — use defaults
+        console.warn('[DesignGrab] Could not sync plan limits:', e.message);
+    }
+}
 
 const ACTION_MAP = {
     download: 'downloads',
@@ -52,8 +94,9 @@ async function getUsage() {
  */
 async function checkLimit(action) {
     const { usage, plan } = await getUsage();
+    const limits = await getLimitsForPlan(plan);
     const field = ACTION_MAP[action];
-    const limit = LIMITS[plan]?.[field] ?? 0;
+    const limit = limits[field] ?? 0;
     const current = usage[field] || 0;
 
     // -1 means unlimited
@@ -89,7 +132,7 @@ async function recordUsage(action) {
  */
 async function getUsageSummary() {
     const { usage, plan } = await getUsage();
-    const limits = LIMITS[plan] || LIMITS.free;
+    const limits = await getLimitsForPlan(plan);
 
     return {
         plan,
@@ -131,8 +174,8 @@ async function getUsageSummary() {
 /**
  * Get plan limits for display
  */
-function getPlanLimits(plan) {
-    return LIMITS[plan] || LIMITS.free;
+async function getPlanLimits(plan) {
+    return await getLimitsForPlan(plan);
 }
 
-export { checkLimit, recordUsage, getUsage, getUsageSummary, getPlanLimits, LIMITS };
+export { checkLimit, recordUsage, getUsage, getUsageSummary, getPlanLimits, syncPlanLimits, DEFAULT_LIMITS };

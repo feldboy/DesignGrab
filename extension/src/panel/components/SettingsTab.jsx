@@ -1,20 +1,14 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
-import { getAuthState, signIn, signUp, signOut } from '../../lib/auth.js';
+import { getAuthState, signInWithGoogle, signOut } from '../../lib/auth.js';
 import { getUsageSummary } from '../../lib/usageTracker.js';
 import { startUpgrade } from '../../lib/billing.js';
 
 export function SettingsTab() {
-    const [apiKey, setApiKey] = useState('');
-    const [showKey, setShowKey] = useState(false);
-    const [saved, setSaved] = useState(false);
     const [loaded, setLoaded] = useState(false);
 
     // Auth state
     const [authState, setAuthState] = useState({ user: null, plan: 'free', isLoggedIn: false });
-    const [authMode, setAuthMode] = useState(null); // null | 'signin' | 'signup'
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [authError, setAuthError] = useState('');
     const [authLoading, setAuthLoading] = useState(false);
 
@@ -22,47 +16,22 @@ export function SettingsTab() {
     const [usage, setUsage] = useState(null);
 
     useEffect(() => {
-        // Load API key
-        chrome.storage.local.get(['anthropic_api_key'], (data) => {
-            if (data.anthropic_api_key) setApiKey(data.anthropic_api_key);
-            setLoaded(true);
-        });
+        setLoaded(true);
 
         // Load auth state & usage
         getAuthState().then(setAuthState).catch(() => {});
         getUsageSummary().then(setUsage).catch(() => {});
     }, []);
 
-    const handleSaveKey = () => {
-        const trimmed = apiKey.trim();
-        if (trimmed) {
-            chrome.storage.local.set({ anthropic_api_key: trimmed });
-        } else {
-            chrome.storage.local.remove(['anthropic_api_key']);
-        }
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-    };
-
-    const handleClearKey = () => {
-        setApiKey('');
-        chrome.storage.local.remove(['anthropic_api_key']);
-        setSaved(false);
-    };
-
-    const handleAuth = async () => {
+    const handleGoogleSignIn = async () => {
         setAuthError('');
         setAuthLoading(true);
-        const fn = authMode === 'signup' ? signUp : signIn;
-        const result = await fn(email, password);
+        const result = await signInWithGoogle();
         setAuthLoading(false);
 
         if (result.error) {
             setAuthError(result.error);
         } else {
-            setAuthMode(null);
-            setEmail('');
-            setPassword('');
             const state = await getAuthState();
             setAuthState(state);
             getUsageSummary().then(setUsage);
@@ -72,13 +41,10 @@ export function SettingsTab() {
     const handleSignOut = async () => {
         await signOut();
         setAuthState({ user: null, plan: 'free', isLoggedIn: false });
+        getUsageSummary().then(setUsage);
     };
 
-    const maskedKey = apiKey
-        ? apiKey.slice(0, 7) + '\u2022'.repeat(Math.max(0, apiKey.length - 11)) + apiKey.slice(-4)
-        : '';
-
-    const planLabels = { free: 'Free', starter: 'Starter', pro: 'Pro', lifetime: 'Lifetime' };
+    const planLabels = { free: 'Free', pro: 'Pro', lifetime: 'Lifetime' };
 
     if (!loaded) return null;
 
@@ -102,46 +68,40 @@ export function SettingsTab() {
                             Sign Out
                         </button>
                     </div>
-                ) : authMode ? (
-                    <div className="settings-auth-form">
-                        <input
-                            type="email"
-                            className="settings-input"
-                            placeholder="Email"
-                            value={email}
-                            onInput={(e) => setEmail(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            className="settings-input"
-                            placeholder="Password"
-                            value={password}
-                            onInput={(e) => setPassword(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleAuth()}
-                        />
-                        {authError && <p className="settings-auth-error">{authError}</p>}
-                        <div className="settings-actions">
-                            <button className="panel-btn primary" onClick={handleAuth} disabled={authLoading}>
-                                {authLoading ? 'Loading...' : authMode === 'signup' ? 'Create Account' : 'Sign In'}
-                            </button>
-                            <button className="panel-btn outline" onClick={() => { setAuthMode(null); setAuthError(''); }}>
-                                Cancel
-                            </button>
-                        </div>
-                        <p className="settings-auth-toggle">
-                            {authMode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-                            <a href="#" onClick={(e) => { e.preventDefault(); setAuthMode(authMode === 'signin' ? 'signup' : 'signin'); setAuthError(''); }}>
-                                {authMode === 'signin' ? 'Sign Up' : 'Sign In'}
-                            </a>
-                        </p>
-                    </div>
                 ) : (
                     <div>
-                        <p className="settings-description">Sign in to sync your library across devices and manage your subscription.</p>
-                        <div className="settings-actions">
-                            <button className="panel-btn primary" onClick={() => setAuthMode('signin')}>Sign In</button>
-                            <button className="panel-btn outline" onClick={() => setAuthMode('signup')}>Create Account</button>
-                        </div>
+                        <p className="settings-description">Sign in with Google to sync your library and unlock AI exports.</p>
+                        {authError && <p className="settings-auth-error">{authError}</p>}
+                        <button
+                            className="panel-btn google-signin-btn"
+                            onClick={handleGoogleSignIn}
+                            disabled={authLoading}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                width: '100%',
+                                padding: '10px 16px',
+                                marginTop: '8px',
+                                background: '#fff',
+                                color: '#3c4043',
+                                border: '1px solid #dadce0',
+                                borderRadius: '6px',
+                                fontSize: '13px',
+                                fontWeight: 500,
+                                cursor: authLoading ? 'wait' : 'pointer',
+                                opacity: authLoading ? 0.7 : 1,
+                            }}
+                        >
+                            <svg width="18" height="18" viewBox="0 0 48 48">
+                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                            </svg>
+                            {authLoading ? 'Signing in...' : 'Sign in with Google'}
+                        </button>
                     </div>
                 )}
             </div>
@@ -176,60 +136,6 @@ export function SettingsTab() {
                     )}
                 </div>
             )}
-
-            {/* AI Export Section */}
-            <div className="settings-section">
-                <h3 className="settings-heading">AI Export</h3>
-                <p className="settings-description">
-                    Enter your Anthropic API key to enable AI-powered React and Vue component generation.
-                    Your key is stored locally and never sent to any server except Anthropic's API.
-                </p>
-
-                <label className="settings-label">Anthropic API Key</label>
-                <div className="settings-key-row">
-                    <input
-                        type={showKey ? 'text' : 'password'}
-                        className="settings-input"
-                        placeholder="sk-ant-..."
-                        value={showKey ? apiKey : (apiKey ? maskedKey : '')}
-                        onInput={(e) => {
-                            setShowKey(true);
-                            setApiKey(e.target.value);
-                            setSaved(false);
-                        }}
-                        onFocus={() => {
-                            if (apiKey && !showKey) setShowKey(true);
-                        }}
-                    />
-                    <button
-                        className="settings-toggle-btn"
-                        onClick={() => setShowKey(!showKey)}
-                        title={showKey ? 'Hide key' : 'Show key'}
-                    >
-                        {showKey ? '\uD83D\uDE48' : '\uD83D\uDC41'}
-                    </button>
-                </div>
-
-                <div className="settings-actions">
-                    <button className="panel-btn primary" onClick={handleSaveKey}>
-                        {saved ? 'Saved!' : 'Save Key'}
-                    </button>
-                    {apiKey && (
-                        <button className="panel-btn outline" onClick={handleClearKey}>
-                            Clear
-                        </button>
-                    )}
-                </div>
-
-                <a
-                    className="settings-link"
-                    href="https://console.anthropic.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Get an API key at console.anthropic.com &rarr;
-                </a>
-            </div>
 
             {/* About */}
             <div className="settings-section">

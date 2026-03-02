@@ -119,7 +119,7 @@ serve(async (req) => {
       if (subscription.status === "active") {
         // Look up which price to determine the plan
         const priceId = subscription.items?.data?.[0]?.price?.id;
-        let plan = "starter"; // default
+        let plan = "pro"; // default
 
         // Fetch price to check metadata or match against known prices
         const priceRes = await fetch(

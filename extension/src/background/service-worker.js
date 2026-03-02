@@ -75,7 +75,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         case 'AI_EXPORT':
         case 'FIGMA_EXPORT':
-            // Call Claude API directly from service worker using user's API key
+            // Call Gemini API from service worker
             handleAIExport(payload, type === 'FIGMA_EXPORT').then(result => {
                 sendResponse(result);
             }).catch(err => {
@@ -367,23 +367,28 @@ ${(css || '').slice(0, 8000)}`;
 }
 
 /**
- * Handle AI export — call Claude API directly using the user's API key
+ * Handle AI export — call Google Gemini API with built-in API key
  */
+const GEMINI_API_KEY = '***REMOVED_GEMINI_API_KEY***';
+const GEMINI_MODEL = 'gemini-3-flash-preview';
+
 async function handleAIExport(payload, isFigma = false) {
     const { context, html, css, layout, framework = 'react' } = payload;
+
+    // Check subscription — only pro/lifetime can use AI exports
+    const storageData = await chrome.storage.local.get(['plan', 'userId']);
+    const plan = storageData.plan || 'free';
+    if (!storageData.userId) {
+        return { error: 'Sign in with Google to use AI exports.' };
+    }
+    if (plan === 'free') {
+        return { error: 'AI exports require a Pro or Lifetime subscription. Upgrade in Settings.' };
+    }
 
     // Support both old (html/css only) and new (full context) payloads
     const hasContext = context && context.html;
     if (!hasContext && !html) {
         return { error: 'Missing html parameter' };
-    }
-
-    // Read API key from storage
-    const data = await chrome.storage.local.get(['anthropic_api_key']);
-    const apiKey = data.anthropic_api_key;
-
-    if (!apiKey) {
-        return { error: 'NO_API_KEY' };
     }
 
     let prompt;
@@ -411,37 +416,38 @@ ${layout ? `\nLayout:\n${layout.slice(0, 2000)}` : ''}
 Output the complete ${fileExt} file:`;
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-            model: 'claude-sonnet-4-5-20250929',
-            max_tokens: isFigma ? 16384 : 8192,
-            messages: [{ role: 'user', content: prompt }],
-        }),
-    });
+    const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    maxOutputTokens: isFigma ? 16384 : 8192,
+                },
+            }),
+        }
+    );
 
     if (!response.ok) {
         const errText = await response.text();
-        throw new Error(`Claude API error (${response.status}): ${errText}`);
+        throw new Error(`Gemini API error (${response.status}): ${errText}`);
     }
 
     const result = await response.json();
-    let code = result.content?.[0]?.text || '';
+    let code = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Strip markdown code fences if present
+    code = code.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
 
     // For Figma exports, extract only the raw SVG — strip any surrounding text/markdown
     if (isFigma) {
-        // Try to extract SVG from the response (handle markdown fences, explanations, etc.)
         const svgMatch = code.match(/<svg[\s\S]*<\/svg>/i);
         if (svgMatch) {
             code = svgMatch[0];
         }
     }
 
-    return { code, framework: isFigma ? 'figma' : framework, model: 'claude-sonnet-4-5-20250929' };
+    return { code, framework: isFigma ? 'figma' : framework, model: GEMINI_MODEL };
 }

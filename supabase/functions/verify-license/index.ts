@@ -56,13 +56,40 @@ serve(async (req) => {
       .eq("id", user.id)
       .single();
 
-    if (profileError || !profile) {
+    const userPlan = profile?.plan || "free";
+
+    // Fetch plan limits from plans table (editable in Supabase Dashboard)
+    const { data: planConfig } = await supabase
+      .from("plans")
+      .select("downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit, features")
+      .eq("id", userPlan)
+      .eq("is_active", true)
+      .single();
+
+    // Fallback limits if plans table not populated
+    const defaultLimits: Record<string, any> = {
+      free:     { downloads: 15, codeExports: 5,  designSystems: 3,  aiExports: 0 },
+      pro:      { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50 },
+      lifetime: { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50 },
+    };
+
+    const limits = planConfig
+      ? {
+          downloads: planConfig.downloads_limit,
+          codeExports: planConfig.code_exports_limit,
+          designSystems: planConfig.design_systems_limit,
+          aiExports: planConfig.ai_exports_limit,
+        }
+      : defaultLimits[userPlan] || defaultLimits.free;
+
+    if (!profile) {
       return new Response(
         JSON.stringify({
           userId: user.id,
           plan: "free",
           active: true,
           hasSubscription: false,
+          limits,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -92,6 +119,7 @@ serve(async (req) => {
         plan: profile.plan,
         active: true,
         hasSubscription: !!profile.stripe_subscription_id,
+        limits,
         usage: {
           downloads: usage["download"] || 0,
           codeExports: usage["code_export"] || 0,

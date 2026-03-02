@@ -9,7 +9,7 @@ const SUPABASE_URL = 'https://lgueqndrxxkcssjclyxp.supabase.co';
 
 /**
  * Start upgrade checkout flow
- * @param {'starter'|'pro'|'lifetime'} plan
+ * @param {'pro'|'lifetime'} plan
  */
 export async function startUpgrade(plan) {
     if (!isSupabaseConfigured()) {
