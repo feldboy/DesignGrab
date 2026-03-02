@@ -129,6 +129,6 @@ export async function signOut() {
     if (supabase) {
         await supabase.auth.signOut();
     }
-    await storage.set({ userId: null, plan: 'free' });
+    await storage.set({ userId: null, plan: 'free', usage: null });
     return { error: null };
 }

@@ -6,6 +6,7 @@
  */
 
 import storage from './storage.js';
+import { getSupabase } from './supabase.js';
 
 // Fallback limits (used when Supabase is unavailable)
 const DEFAULT_LIMITS = {
@@ -63,9 +64,66 @@ const ACTION_MAP = {
 };
 
 /**
- * Get current usage, resetting if month changed
+ * Fetch real usage counts from Supabase usage_logs for the current month.
+ * Returns null if user is not logged in or Supabase is unavailable.
+ */
+async function getUsageFromSupabase() {
+    const state = await storage.getState();
+    if (!state.userId) return null;
+
+    const supabase = await getSupabase();
+    if (!supabase) return null;
+
+    try {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+        const { data, error } = await supabase
+            .from('usage_logs')
+            .select('action')
+            .eq('user_id', state.userId)
+            .gte('created_at', monthStart);
+
+        if (error) {
+            console.warn('[DesignGrab] Supabase usage fetch error:', error.message);
+            return null;
+        }
+
+        const counts = {
+            month: now.getMonth() + 1,
+            year: now.getFullYear(),
+            downloads: 0,
+            codeExports: 0,
+            designSystems: 0,
+            aiExports: 0,
+        };
+
+        for (const row of data) {
+            const field = ACTION_MAP[row.action];
+            if (field) counts[field]++;
+        }
+
+        await storage.set({ usage: counts });
+        return counts;
+    } catch (e) {
+        console.warn('[DesignGrab] Failed to fetch usage from Supabase:', e.message);
+        return null;
+    }
+}
+
+/**
+ * Get current usage, fetching from Supabase when logged in.
+ * Falls back to local storage when offline.
  */
 async function getUsage() {
+    // Try Supabase first for real per-user data
+    const supabaseUsage = await getUsageFromSupabase();
+    if (supabaseUsage) {
+        const state = await storage.getState();
+        return { usage: supabaseUsage, plan: state.plan };
+    }
+
+    // Fall back to local storage (offline)
     const state = await storage.getState();
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
@@ -88,11 +146,17 @@ async function getUsage() {
 }
 
 /**
- * Check if an action is allowed under the current plan
+ * Check if an action is allowed under the current plan.
+ * Requires user to be signed in.
  * @param {string} action - 'download' | 'code_export' | 'design_system' | 'ai_export'
- * @returns {{ allowed: boolean, current: number, limit: number, plan: string }}
+ * @returns {{ allowed: boolean, current: number, limit: number, plan: string, requiresAuth?: boolean }}
  */
 async function checkLimit(action) {
+    const state = await storage.getState();
+    if (!state.userId) {
+        return { allowed: false, current: 0, limit: 0, plan: 'free', requiresAuth: true };
+    }
+
     const { usage, plan } = await getUsage();
     const limits = await getLimitsForPlan(plan);
     const field = ACTION_MAP[action];
@@ -106,22 +170,41 @@ async function checkLimit(action) {
 }
 
 /**
- * Record a usage event. Returns false if limit exceeded.
+ * Record a usage event to Supabase and local cache. Returns false if limit exceeded or not signed in.
  * @param {string} action - 'download' | 'code_export' | 'design_system' | 'ai_export'
- * @returns {{ allowed: boolean, current: number, limit: number, plan: string }}
+ * @returns {{ allowed: boolean, current: number, limit: number, plan: string, requiresAuth?: boolean }}
  */
 async function recordUsage(action) {
     const check = await checkLimit(action);
     if (!check.allowed) return check;
 
-    const { usage } = await getUsage();
+    const state = await storage.getState();
     const field = ACTION_MAP[action];
-    usage[field] = (usage[field] || 0) + 1;
+
+    // Write to Supabase
+    if (state.userId) {
+        const supabase = await getSupabase();
+        if (supabase) {
+            try {
+                await supabase.from('usage_logs').insert({
+                    user_id: state.userId,
+                    action,
+                });
+            } catch (e) {
+                console.warn('[DesignGrab] Failed to log usage to Supabase:', e.message);
+            }
+        }
+    }
+
+    // Update local cache
+    const newCount = check.current + 1;
+    const usage = (await storage.get(['usage'])).usage || {};
+    usage[field] = newCount;
     await storage.set({ usage });
 
     return {
         allowed: true,
-        current: usage[field],
+        current: newCount,
         limit: check.limit,
         plan: check.plan,
     };

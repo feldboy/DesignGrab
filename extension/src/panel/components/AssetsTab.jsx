@@ -122,11 +122,16 @@ export function AssetsTab({ assets, onExtract }) {
             {downloadBlock && (
                 <div class="usage-limit-banner">
                     <div class="usage-limit-text">
-                        You've used <strong>{downloadBlock.current}/{downloadBlock.limit}</strong> free downloads this month
+                        {downloadBlock.requiresAuth
+                            ? 'Sign in with Google in Settings to download assets'
+                            : <>You've used <strong>{downloadBlock.current}/{downloadBlock.limit}</strong> free downloads this month</>
+                        }
                     </div>
-                    <button class="upgrade-btn" onClick={() => startUpgrade('pro')}>
-                        Upgrade to Pro
-                    </button>
+                    {!downloadBlock.requiresAuth && (
+                        <button class="upgrade-btn" onClick={() => startUpgrade('pro')}>
+                            Upgrade to Pro
+                        </button>
+                    )}
                 </div>
             )}
 

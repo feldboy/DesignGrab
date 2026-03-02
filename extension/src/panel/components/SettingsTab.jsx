@@ -18,9 +18,13 @@ export function SettingsTab() {
     useEffect(() => {
         setLoaded(true);
 
-        // Load auth state & usage
-        getAuthState().then(setAuthState).catch(() => {});
-        getUsageSummary().then(setUsage).catch(() => {});
+        // Load auth state, then load usage only if logged in
+        getAuthState().then((state) => {
+            setAuthState(state);
+            if (state.isLoggedIn) {
+                getUsageSummary().then(setUsage).catch(() => {});
+            }
+        }).catch(() => {});
     }, []);
 
     const handleGoogleSignIn = async () => {
@@ -41,7 +45,7 @@ export function SettingsTab() {
     const handleSignOut = async () => {
         await signOut();
         setAuthState({ user: null, plan: 'free', isLoggedIn: false });
-        getUsageSummary().then(setUsage);
+        setUsage(null);
     };
 
     const planLabels = { free: 'Free', pro: 'Pro', lifetime: 'Lifetime' };
@@ -106,8 +110,8 @@ export function SettingsTab() {
                 )}
             </div>
 
-            {/* Usage Section */}
-            {usage && (
+            {/* Usage Section — only shown when signed in */}
+            {authState.isLoggedIn && usage && (
                 <div className="settings-section">
                     <h3 className="settings-heading">Usage This Month</h3>
                     <div className="settings-usage-grid">

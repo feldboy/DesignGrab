@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { copyToClipboard } from '../../lib/downloadUtils';
 import { checkLimit, recordUsage } from '../../lib/usageTracker.js';
 import { startUpgrade } from '../../lib/billing.js';
+import { getAuthState } from '../../lib/auth.js';
 
 export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
     const [data, setData] = useState(null);
@@ -11,25 +12,17 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
     const [mode, setMode] = useState(initialMode);
     const [copied, setCopied] = useState(false);
     const [usageBlock, setUsageBlock] = useState(null);
-    const [hasApiKey, setHasApiKey] = useState(false);
     const [childElements, setChildElements] = useState([]);
     const [selectedDiv, setSelectedDiv] = useState('root');
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const codeRef = useRef(null);
 
     const isAIMode = mode === 'react' || mode === 'vue';
     const isFigmaMode = mode === 'figma';
 
+    // Check auth state
     useEffect(() => {
-        chrome.storage.local.get(['anthropic_api_key'], (data) => {
-            setHasApiKey(!!data.anthropic_api_key);
-        });
-        const listener = (changes) => {
-            if (changes.anthropic_api_key) {
-                setHasApiKey(!!changes.anthropic_api_key.newValue);
-            }
-        };
-        chrome.storage.onChanged.addListener(listener);
-        return () => chrome.storage.onChanged.removeListener(listener);
+        getAuthState().then((state) => setIsLoggedIn(state.isLoggedIn)).catch(() => {});
     }, []);
 
     // Fetch child divs when entering Figma mode
@@ -47,14 +40,19 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
     }, [isFigmaMode, pinnedElement]);
 
     const exportElement = async () => {
-        if (isAIMode && !hasApiKey) {
-            setError('Set your Anthropic API key in the Settings tab to use AI export.');
-            return;
-        }
-
-        if (!(isAIMode && hasApiKey) && !isFigmaMode) {
-            const action = isAIMode ? 'ai_export' : 'code_export';
-            const limit = await checkLimit(action);
+        // Gate AI exports: require sign-in and check usage limits
+        if (isAIMode) {
+            if (!isLoggedIn) {
+                setError('Sign in with Google in the Settings tab to use AI exports.');
+                return;
+            }
+            const limit = await checkLimit('ai_export');
+            if (!limit.allowed) {
+                setUsageBlock(limit);
+                return;
+            }
+        } else if (!isFigmaMode) {
+            const limit = await checkLimit('code_export');
             if (!limit.allowed) {
                 setUsageBlock(limit);
                 return;
@@ -101,9 +99,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                                 return;
                             }
                             if (aiData?.error) {
-                                setError(aiData.error === 'NO_API_KEY'
-                                    ? 'Set your Anthropic API key in the Settings tab to use AI export.'
-                                    : aiData.error);
+                                setError(aiData.error);
                             } else {
                                 setData({ mode: `ai-${mode}`, code: aiData.code, framework: aiData.framework });
                                 await recordUsage('ai_export');
@@ -242,10 +238,10 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                 </div>
 
                 {isAIMode && (
-                    <div className={`ai-mode-hint ${!hasApiKey ? 'ai-mode-warning' : ''}`}>
-                        {hasApiKey
-                            ? `Powered by Claude — generates a ${mode === 'react' ? 'React TSX' : 'Vue SFC'} component with Tailwind`
-                            : 'Set your Anthropic API key in Settings to enable AI export'}
+                    <div className={`ai-mode-hint ${!isLoggedIn ? 'ai-mode-warning' : ''}`}>
+                        {isLoggedIn
+                            ? `Powered by Gemini — generates a ${mode === 'react' ? 'React TSX' : 'Vue SFC'} component with Tailwind`
+                            : 'Sign in with Google in Settings to use AI exports'}
                     </div>
                 )}
             </div>
@@ -254,9 +250,14 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                 {usageBlock && (
                     <div className="usage-limit-banner">
                         <div className="usage-limit-text">
-                            You've used <strong>{usageBlock.current}/{usageBlock.limit}</strong> free {isAIMode ? 'AI' : 'code'} exports this month
+                            {usageBlock.requiresAuth
+                                ? 'Sign in with Google in Settings to use exports'
+                                : <>You've used <strong>{usageBlock.current}/{usageBlock.limit}</strong> free {isAIMode ? 'AI' : 'code'} exports this month</>
+                            }
                         </div>
-                        <button className="upgrade-btn" onClick={() => startUpgrade('pro')}>Upgrade to Pro</button>
+                        {!usageBlock.requiresAuth && (
+                            <button className="upgrade-btn" onClick={() => startUpgrade('pro')}>Upgrade to Pro</button>
+                        )}
                     </div>
                 )}
 
