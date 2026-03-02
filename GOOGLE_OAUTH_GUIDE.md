@@ -40,52 +40,118 @@ You need this ID before creating the Google OAuth client.
 
 ---
 
-## Step 3: Configure the OAuth Consent Screen
+## Step 3: Enable Google Auth Platform & Configure Branding
 
-Google requires a consent screen before you can create credentials.
+> ⚠️ **Google updated their console in 2025.** The old "OAuth consent screen" wizard is now split
+> across multiple pages under **Google Auth Platform**. If you still see the old wizard, the
+> steps are similar — just follow the fields as described below.
 
-1. In Google Cloud Console, go to **APIs & Services → OAuth consent screen**
-   - Direct URL: https://console.cloud.google.com/apis/credentials/consent
-2. Select **External** (allows any Google account to sign in)
-3. Click **Create**
-4. Fill in the form:
+### 3a. Open Google Auth Platform
+
+1. In the left sidebar of Google Cloud Console, scroll down to **APIs & Services**
+2. You should see **Google Auth Platform** (or **OAuth consent screen** in older UI)
+   - Direct link (new UI): https://console.cloud.google.com/auth/branding
+   - Direct link (old UI): https://console.cloud.google.com/apis/credentials/consent
+3. If prompted to **"Get started"** or **"Configure consent screen"**, click it
+4. If asked to choose **Internal** vs **External**:
+   - Select **External** (allows any Google account to sign in, not just your organization)
+   - Click **Create**
+
+### 3b. Branding Page
+
+This is where you set your app's public identity.
+
+1. Go to **Google Auth Platform → Branding**
+   - Direct link: https://console.cloud.google.com/auth/branding
+2. Fill in these fields:
    - **App name**: `DesignGrab`
-   - **User support email**: your email
-   - **App logo**: optional (upload your 128px icon if you want)
-   - **App domain**: leave blank for now (or enter `designgrab.app` if you own it)
-   - **Developer contact email**: your email
-5. Click **Save and Continue**
-6. **Scopes** page:
-   - Click **Add or Remove Scopes**
-   - Search for and check these 3 scopes:
-     - `openid`
-     - `email` (`.../auth/userinfo.email`)
-     - `profile` (`.../auth/userinfo.profile`)
-   - Click **Update**
-   - Click **Save and Continue**
-7. **Test users** page:
-   - Click **Add Users**
-   - Add your own Google email address
-   - Click **Save and Continue**
+   - **User support email**: select your email from the dropdown
+     - If your email doesn't appear, you may need to use the email of the account you're logged in with
+   - **App logo**: optional — you can upload `extension/src/assets/icons/icon-128.png` (must be ≤1MB, square, ideally 120×120px)
+3. Under **App domain** (all optional during development):
+   - **Application home page**: `https://designgrab.app` (or leave blank)
+   - **Application privacy policy link**: `https://designgrab.app/privacy` (or leave blank)
+   - **Application terms of service link**: leave blank
+4. Under **Authorized domains**:
+   - Click **Add domain**
+   - Type `designgrab.app` and press Enter (only needed if you filled in URLs above)
+5. Under **Developer contact information**:
+   - Enter your email address
+6. Click **Save**
 
-> ℹ️ While in "Testing" mode, only the test users you add can sign in. To allow anyone, you'll need to **Publish** the app later (Step 7).
+### 3c. Audience Page
+
+This controls who can use your app.
+
+1. Go to **Google Auth Platform → Audience**
+   - Direct link: https://console.cloud.google.com/auth/audience
+2. Under **User type**, confirm it says **External**
+3. Under **Publishing status**, it will say **Testing**
+   - This is fine for now — only test users can sign in during testing
+4. Under **Test users**:
+   - Click **Add users**
+   - Enter your own Google email address (e.g., `you@gmail.com`)
+   - Click **Save**
+5. You can add up to 100 test users during development
+
+> ℹ️ While in "Testing" mode, only the emails you add here can sign in.
+> Before launching publicly, you'll click **Publish App** on this page (see Step 8).
+
+### 3d. Data Access (Scopes) Page
+
+This tells Google what data your app will request.
+
+1. Go to **Google Auth Platform → Data Access**
+   - Direct link: https://console.cloud.google.com/auth/scopes
+2. Click **Add or Remove Scopes**
+3. In the search/filter box, search for each of these and check them:
+
+   | Scope | API | Description |
+   |---|---|---|
+   | `openid` | OpenID Connect | Authenticate with your Google identity |
+   | `.../auth/userinfo.email` | Google People API | See your primary email address |
+   | `.../auth/userinfo.profile` | Google People API | See your personal info (name, picture) |
+
+   > 💡 **Tip:** If you can't find them by searching, look under "Google APIs" or filter by
+   > "Google Identity". These are non-sensitive scopes and don't require extended verification.
+
+4. Click **Update** (at the bottom of the scope selector)
+5. Click **Save**
+
+### 3e. Verify Everything Is Set
+
+Before moving on, confirm:
+- ✅ Branding page shows your app name and email
+- ✅ Audience page shows "External" + your test email
+- ✅ Data Access page shows 3 scopes (openid, email, profile)
 
 ---
 
 ## Step 4: Create OAuth Client ID for Chrome Extension
 
-1. Go to **APIs & Services → Credentials**
-   - Direct URL: https://console.cloud.google.com/apis/credentials
-2. Click **+ Create Credentials → OAuth client ID**
-3. Fill in:
-   - **Application type**: `Chrome extension`
+> In the new Google Auth Platform UI, clients are under **Google Auth Platform → Clients**.
+> In the old UI, they're under **APIs & Services → Credentials**.
+
+1. Navigate to the Clients page:
+   - **New UI**: Go to **Google Auth Platform → Clients**
+     - Direct link: https://console.cloud.google.com/auth/clients
+   - **Old UI**: Go to **APIs & Services → Credentials**
+     - Direct link: https://console.cloud.google.com/apis/credentials
+2. Click **+ Create Client** (new UI) or **+ Create Credentials → OAuth client ID** (old UI)
+3. Fill in the form:
+   - **Application type**: select `Chrome extension` from the dropdown
    - **Name**: `DesignGrab Extension`
-   - **Item ID**: paste your extension ID from Step 1 (e.g., `abcdefghijklmnopqrstuvwxyz123456`)
+   - **Item ID**: paste your extension ID from Step 1
+     - It looks like: `abcdefghijklmnopqrstuvwxyz123456` (32 lowercase letters)
+     - ⚠️ Just the ID — NOT the full `chrome-extension://...` URL
 4. Click **Create**
-5. A dialog shows your credentials:
-   - **Client ID**: something like `123456789-abcdef.apps.googleusercontent.com`
-   - You do NOT need the client secret for Chrome extensions
-6. **Copy the Client ID** — you'll need it in the next two steps
+5. A dialog will show your credentials:
+   - **Client ID**: something like `123456789012-abcdefg.apps.googleusercontent.com`
+   - **Client secret**: shown but NOT needed for Chrome extensions
+6. **Copy the Client ID** and save it somewhere — you'll need it in Steps 5 and 6
+
+> 💡 You can always find your Client ID later by going back to the Clients/Credentials page
+> and clicking on "DesignGrab Extension".
 
 ---
 
@@ -132,33 +198,56 @@ Then reload in Chrome:
 
 ## Step 6: Configure Google Provider in Supabase
 
-This tells Supabase to accept Google OAuth tokens.
+This step connects Supabase to Google so it can verify the OAuth tokens from the extension.
 
-1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
-2. Select your project (`lgueqndrxxkcssjclyxp`)
-3. Navigate to **Authentication → Providers** (left sidebar)
-4. Find **Google** in the provider list
-5. Toggle it **ON**
-6. Fill in:
-   - **Client ID**: paste the same Client ID from Step 4
-   - **Client Secret**: 
-     - Go back to Google Cloud Console → Credentials
-     - You need to create a **Web application** OAuth client (in addition to the Chrome extension one):
-       1. Click **+ Create Credentials → OAuth client ID**
-       2. Application type: **Web application**
-       3. Name: `DesignGrab Web`
-       4. Authorized redirect URIs: add `https://lgueqndrxxkcssjclyxp.supabase.co/auth/v1/callback`
-       5. Click **Create**
-       6. Copy the **Client Secret** from this web client
-     - Paste the Client Secret into Supabase
-   - **Authorized Client IDs**: paste your Chrome Extension Client ID here too (this allows the extension's tokens to be accepted)
-7. Click **Save**
+> ⚠️ **Important:** You need to create a SECOND OAuth client in Google Cloud — a "Web application"
+> type — because Supabase requires a Client Secret, and Chrome extension OAuth clients don't have one.
 
-> ⚠️ You need TWO OAuth clients in Google Cloud:
-> 1. **Chrome extension** type — used by `chrome.identity.getAuthToken()` in the extension
-> 2. **Web application** type — provides the Client Secret that Supabase needs
+### 6a. Create a Web Application OAuth Client in Google Cloud
+
+1. Go back to Google Cloud Console → **Clients** (or **Credentials**)
+   - https://console.cloud.google.com/auth/clients
+2. Click **+ Create Client** (or **+ Create Credentials → OAuth client ID**)
+3. Fill in:
+   - **Application type**: select `Web application`
+   - **Name**: `DesignGrab Web (for Supabase)`
+4. Under **Authorized redirect URIs**, click **+ Add URI** and enter:
+   ```
+   https://lgueqndrxxkcssjclyxp.supabase.co/auth/v1/callback
+   ```
+5. Click **Create**
+6. You'll see both a **Client ID** and **Client Secret** — **copy BOTH**
+
+> You now have TWO OAuth clients in Google Cloud:
 >
-> Both should use the same project and consent screen.
+> | Client | Type | Purpose |
+> |---|---|---|
+> | DesignGrab Extension | Chrome extension | Used by `chrome.identity` in the extension |
+> | DesignGrab Web | Web application | Provides Client Secret for Supabase |
+
+### 6b. Enable Google in Supabase
+
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard)
+2. Select your project (the one at `lgueqndrxxkcssjclyxp`)
+3. In the left sidebar, click **Authentication**
+4. Click **Providers** (under Configuration)
+5. Scroll down to find **Google** → click to expand it
+6. Toggle the switch to **Enabled**
+7. Fill in the fields:
+   - **Client ID (for oauth)**: paste the Client ID from the **Web application** client (Step 6a)
+   - **Client Secret (for oauth)**: paste the Client Secret from the **Web application** client (Step 6a)
+8. Look for **Authorized Client IDs** (sometimes labeled "for Android, One Tap" or similar):
+   - Paste the **Chrome Extension** Client ID from Step 4 here
+   - This is critical — it tells Supabase to also accept tokens from your Chrome extension
+9. Click **Save**
+
+### 6c. Verify the Config
+
+Your Supabase Google provider should now show:
+- ✅ Enabled
+- ✅ Client ID = Web application client ID
+- ✅ Client Secret = Web application client secret
+- ✅ Authorized Client IDs = Chrome extension client ID
 
 ---
 
