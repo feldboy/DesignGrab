@@ -5,3 +5,11 @@ dist/
 *.local
 .DS_Store
 .vite/
+
+# Claude Code skills/commands
+.claude/commands/
+
+# Project docs (keep README.md only)
+designgrab-spec.md
+phase3-plan.md
+progress-compact.md

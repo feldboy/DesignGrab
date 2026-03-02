@@ -62,7 +62,7 @@ const storage = {
                 designSystems: 0,
                 aiExports: 0
             },
-            plan: data.plan || 'pro',
+            plan: data.plan || 'free',
             userId: data.userId || null,
             library: data.library || [],
             settings: data.settings || {

@@ -1,563 +1,343 @@
 ---
 import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 import FeatureShowcase from '../components/FeatureShowcase.astro';
 ---
 
 <Base title="DesignGrab — Extract any website's design in seconds" description="Inspect, extract, and export colors, fonts, CSS, SVGs, and production-ready React/Vue code from any website. Powered by AI.">
-  <div class="relative min-h-screen overflow-x-hidden" style="background-color: #0f0f1a;">
+  <div class="relative min-h-screen flex flex-col overflow-x-hidden" style="background-color: #0f0f1a;">
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] pointer-events-none" style="background: radial-gradient(circle at center, rgba(46, 11, 218, 0.15) 0%, transparent 70%);"></div>
     
-    <nav class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#0f0f1a]/80 backdrop-blur-md">
-      <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: #2e0bda;">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <rect width="20" height="20" rx="5" fill="none" />
-              <path d="M6 7L10 10L6 13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              <line x1="11" y1="13" x2="15" y2="13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" />
-            </svg>
-          </div>
-          <span class="text-xl font-bold tracking-tight text-slate-100">DesignGrab</span>
-        </a>
-        <div class="hidden md:flex items-center gap-8">
-          <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#features">Features</a>
-          <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#pricing">Pricing</a>
-          <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="#faq">FAQ</a>
-          <a href="#waitlist" class="hover:opacity-90 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-indigo-500/20" style="background-color: #2e0bda;">
-            Get Early Access
-          </a>
-        </div>
-      </div>
-    </nav>
+    <Nav />
 
-    <section class="relative pt-24 pb-16 px-6 overflow-hidden">
-      <div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 text-xs font-bold uppercase tracking-wider" style="color: #6366f1; background-color: rgba(99, 102, 241, 0.1);">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background-color: #6366f1;"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2" style="background-color: #6366f1;"></span>
-          </span>
-          Now with AI-Powered Code Export
-        </div>
-        
-        <h1 class="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-white leading-[1.1]">
-          Steal Any <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-indigo-300">Design.</span>
-        </h1>
-        
-        <p class="text-lg md:text-xl text-slate-400 max-w-2xl leading-relaxed">
-          The ultimate design inspection tool for modern creators. <br class="hidden md:block"/> Extract colors, fonts, and production-ready code in seconds.
-        </p>
-        
-        <div class="flex flex-col sm:flex-row gap-4 mt-4">
-          <a href="#waitlist" class="bg-gradient-to-r from-indigo-600 to-indigo-400 hover:opacity-90 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-xl flex items-center justify-center gap-2 border-0">
-            Join the Waitlist
-          </a>
-          <a href="#features" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all flex items-center justify-center">
-            View Features
-          </a>
-        </div>
-      </div>
-
-      <div class="mt-20 max-w-5xl mx-auto relative group">
-        <div class="absolute -inset-1 bg-gradient-to-r from-indigo-600/30 to-purple-500/30 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
-        <div class="relative rounded-2xl overflow-hidden shadow-2xl" style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08);">
-          <div class="h-8 bg-white/5 flex items-center px-4 gap-1.5 border-b border-white/10">
-            <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
-            <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-            <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+    <main class="flex-grow">
+      <!-- Hero Section -->
+      <section class="relative pt-24 pb-16 px-6 overflow-hidden z-10">
+        <div class="max-w-4xl mx-auto text-center flex flex-col items-center gap-8">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 text-xs font-bold uppercase tracking-wider" style="color: #6366f1; background-color: rgba(99, 102, 241, 0.1);">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style="background-color: #6366f1;"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2" style="background-color: #6366f1;"></span>
+            </span>
+            Now with AI-Powered Code Export
           </div>
-          <div class="aspect-[16/10] bg-slate-900/50 flex flex-col md:flex-row items-stretch justify-center relative overflow-hidden">
-            
-            <div class="flex-1 bg-slate-800/20 p-8 flex flex-col justify-center items-center">
-              <div class="w-3/4 max-w-md bg-white/5 rounded-2xl p-6 border border-white/5 shadow-xl">
-                 <div class="w-1/2 h-6 bg-white/10 rounded-md mb-6"></div>
-                 <div class="w-full h-32 bg-indigo-500/20 rounded-xl mb-4 border border-indigo-500/30"></div>
-                 <div class="flex gap-3">
-                   <div class="w-20 h-8 bg-white/10 rounded-md"></div>
-                   <div class="w-20 h-8 bg-indigo-500/80 rounded-md"></div>
-                 </div>
-              </div>
+          
+          <h1 class="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-white leading-[1.1]">
+            Grab Any <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-indigo-300">Design.</span>
+          </h1>
+          
+          <p class="text-lg md:text-xl text-slate-400 max-w-2xl leading-relaxed">
+            The ultimate design inspection tool for modern creators. <br class="hidden md:block"/> Extract colors, fonts, and production-ready code in seconds.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4 mt-4">
+            <a href="#waitlist" class="bg-gradient-to-r from-indigo-600 to-indigo-400 hover:opacity-90 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all shadow-xl flex items-center justify-center gap-2 border-0">
+              Join the Waitlist
+            </a>
+            <a href="#features" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all flex items-center justify-center">
+              View Features
+            </a>
+          </div>
+        </div>
+
+        <!-- Inspector Preview Visual -->
+        <div class="mt-20 max-w-5xl mx-auto relative group">
+          <div class="absolute -inset-1 bg-gradient-to-r from-indigo-600/30 to-purple-500/30 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+          <div class="relative rounded-2xl overflow-hidden shadow-2xl" style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="h-8 bg-white/5 flex items-center px-4 gap-1.5 border-b border-white/10">
+              <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
             </div>
-
-            <div class="w-72 border-l border-white/10 p-6 flex flex-col gap-6" style="background-color: rgba(15, 15, 26, 0.9);">
-              <div class="flex items-center justify-between">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Inspector</div>
-                <div class="text-indigo-400 text-xs font-medium">Active</div>
+            <div class="aspect-[16/10] bg-slate-900/50 flex flex-col md:flex-row items-stretch justify-center relative overflow-hidden">
+              
+              <div class="flex-1 bg-slate-800/20 p-8 flex flex-col justify-center items-center">
+                <div class="w-3/4 max-w-md bg-white/5 rounded-2xl p-6 border border-white/5 shadow-xl">
+                   <div class="w-1/2 h-6 bg-white/10 rounded-md mb-6"></div>
+                   <div class="w-full h-32 bg-indigo-500/20 rounded-xl mb-4 border border-indigo-500/30"></div>
+                   <div class="flex gap-3">
+                     <div class="w-20 h-8 bg-white/10 rounded-md"></div>
+                     <div class="w-20 h-8 bg-indigo-500/80 rounded-md"></div>
+                   </div>
+                </div>
               </div>
-              <div class="space-y-4">
-                <div class="p-3 bg-white/5 rounded-lg border border-white/10">
-                  <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">PRIMARY COLOR</div>
-                  <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 rounded" style="background-color: #6366f1;"></div>
-                    <span class="text-xs font-mono text-slate-300">#6366f1</span>
+
+              <div class="w-72 border-l border-white/10 p-6 flex flex-col gap-6" style="background-color: rgba(15, 15, 26, 0.9);">
+                <div class="flex items-center justify-between">
+                  <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">Inspector</div>
+                  <div class="text-indigo-400 text-xs font-medium">Active</div>
+                </div>
+                <div class="space-y-4">
+                  <div class="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">PRIMARY COLOR</div>
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 h-4 rounded" style="background-color: #6366f1;"></div>
+                      <span class="text-xs font-mono text-slate-300">#6366f1</span>
+                    </div>
+                  </div>
+                  <div class="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">TYPOGRAPHY</div>
+                    <div class="text-xs font-medium text-slate-300">Inter SemiBold, 48px</div>
+                  </div>
+                  <div class="p-4 bg-slate-950 rounded-lg border border-white/10">
+                    <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">COMPUTED CSS</div>
+                    <div class="text-[11px] font-mono text-indigo-300 leading-relaxed">
+                        display: flex;<br/>
+                        border-radius: 1rem;<br/>
+                        padding: 1.5rem;<br/>
+                        background: var(--bg);
+                    </div>
                   </div>
                 </div>
-                <div class="p-3 bg-white/5 rounded-lg border border-white/10">
-                  <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">TYPOGRAPHY</div>
-                  <div class="text-xs font-medium text-slate-300">Inter SemiBold, 48px</div>
+                <button class="mt-auto w-full py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-bold rounded-lg border border-indigo-500/30 transition-colors">Copy Component Code</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Clean Features Grid -->
+      <section id="features" class="py-24 px-6 max-w-7xl mx-auto z-10 relative">
+        <div class="flex flex-col items-center gap-4 mb-16 text-center">
+          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight">Powerful Features</h2>
+          <p class="text-slate-400 max-w-xl text-lg">Everything you need to analyze and replicate beautiful web designs without breaking a sweat.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-8 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+            <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Inspect &amp; Extract</h3>
+            <p class="text-slate-400 leading-relaxed text-sm">Deep dive into any element on the page instantly. Get dimensions, padding, margins and hierarchy details. Copy values instantly.</p>
+          </div>
+
+          <div class="p-8 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+            <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 mb-6 group-hover:scale-110 transition-transform">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Colors &amp; Fonts</h3>
+            <p class="text-slate-400 leading-relaxed text-sm">Automatically identify brand palettes and typography scales. View accessibility contrast ratios and export straight to Tailwind config.</p>
+          </div>
+
+          <div class="p-8 rounded-2xl border border-white/5 hover:border-green-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+            <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 mb-6 group-hover:scale-110 transition-transform">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">AI Code Export</h3>
+            <p class="text-slate-400 leading-relaxed text-sm">Copy production-ready CSS, Tailwind classes, and clean HTML structures. Use Claude AI to generate ready-to-use React and Vue components.</p>
+          </div>
+          
+          <div class="p-8 rounded-2xl border border-white/5 hover:border-pink-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
+            <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 mb-6 group-hover:scale-110 transition-transform">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Asset Extraction</h3>
+            <p class="text-slate-400 leading-relaxed text-sm">Find every image, SVG, video, and Lottie animation on a page. Download them all as a ZIP file or copy the raw SVG code instantly.</p>
+          </div>
+
+          <div class="p-8 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all group md:col-span-2" style="background: rgba(255, 255, 255, 0.02);">
+            <div class="flex h-full flex-col md:flex-row gap-8 items-center">
+              <div class="flex-1">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
                 </div>
-                <div class="p-4 bg-slate-950 rounded-lg border border-white/10">
-                  <div class="text-[10px] text-slate-500 mb-2 font-semibold tracking-wider">COMPUTED CSS</div>
-                  <div class="text-[11px] font-mono text-indigo-300 leading-relaxed">
-                      display: flex;<br/>
-                      border-radius: 1rem;<br/>
-                      padding: 1.5rem;<br/>
-                      background: var(--bg);
-                  </div>
+                <h3 class="text-xl font-bold text-white mb-3">Figma Integration</h3>
+                <p class="text-slate-400 leading-relaxed text-sm">Copy any element and paste it directly into Figma as a fully editable vector graphic. Bridging the gap between the live web and your design files seamlessly.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feature Showcases -->
+      <section class="showcases-section z-10 relative">
+        <FeatureShowcase
+          heading="Inspect any element instantly"
+          desc="Hover over any element on any website. See its full computed styles — dimensions, colors, typography, spacing, shadows — all in a beautiful overlay."
+          bullets={[
+            "Box model visualization (margin, padding, border)",
+            "Click-to-copy any CSS value",
+            "Pin elements for deeper analysis",
+            "Works on any website, any framework",
+          ]}
+          badge="Core Feature"
+        >
+          <div class="demo-mock demo-inspector">
+            <div class="di-page">
+              <div class="di-element di-el-1"></div>
+              <div class="di-element di-el-2">
+                <div class="di-cursor"></div>
+                <div class="di-overlay">
+                  <div class="di-margin-box"></div>
+                  <div class="di-padding-box"></div>
+                  <div class="di-content-box"></div>
+                </div>
+                <div class="di-tooltip">
+                  <div class="di-tooltip-row"><span>width</span><span>420px</span></div>
+                  <div class="di-tooltip-row"><span>padding</span><span>24px</span></div>
+                  <div class="di-tooltip-row"><span>border-radius</span><span>12px</span></div>
+                  <div class="di-tooltip-row"><span>font-family</span><span>Inter</span></div>
                 </div>
               </div>
-              <button class="mt-auto w-full py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-bold rounded-lg border border-indigo-500/30 transition-colors">Copy Component Code</button>
+              <div class="di-element di-el-3"></div>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </FeatureShowcase>
 
-    <!-- Clean Features Grid -->
-    <section id="features" class="py-24 px-6 max-w-7xl mx-auto">
-      <div class="flex flex-col items-center gap-4 mb-16 text-center">
-        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight">Powerful Features</h2>
-        <p class="text-slate-400 max-w-xl text-lg">Everything you need to analyze and replicate beautiful web designs without breaking a sweat.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-8 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
-          <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">Inspect &amp; Extract</h3>
-          <p class="text-slate-400 leading-relaxed text-sm">Deep dive into any element on the page instantly. Get dimensions, padding, margins and hierarchy details. Copy values instantly.</p>
-        </div>
-
-        <div class="p-8 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
-          <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 mb-6 group-hover:scale-110 transition-transform">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">Colors &amp; Fonts</h3>
-          <p class="text-slate-400 leading-relaxed text-sm">Automatically identify brand palettes and typography scales. View accessibility contrast ratios and export straight to Tailwind config.</p>
-        </div>
-
-        <div class="p-8 rounded-2xl border border-white/5 hover:border-green-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
-          <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 mb-6 group-hover:scale-110 transition-transform">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">AI Code Export</h3>
-          <p class="text-slate-400 leading-relaxed text-sm">Copy production-ready CSS, Tailwind classes, and clean HTML structures. Use Claude AI to generate ready-to-use React and Vue components.</p>
-        </div>
-        
-        <div class="p-8 rounded-2xl border border-white/5 hover:border-pink-500/30 transition-all group" style="background: rgba(255, 255, 255, 0.02);">
-          <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 mb-6 group-hover:scale-110 transition-transform">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-          </div>
-          <h3 class="text-xl font-bold text-white mb-3">Asset Extraction</h3>
-          <p class="text-slate-400 leading-relaxed text-sm">Find every image, SVG, video, and Lottie animation on a page. Download them all as a ZIP file or copy the raw SVG code instantly.</p>
-        </div>
-
-        <div class="p-8 rounded-2xl border border-white/5 hover:border-purple-500/30 transition-all group md:col-span-2" style="background: rgba(255, 255, 255, 0.02);">
-          <div class="flex h-full flex-col md:flex-row gap-8 items-center">
-            <div class="flex-1">
-              <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
-              </div>
-              <h3 class="text-xl font-bold text-white mb-3">Figma Integration</h3>
-              <p class="text-slate-400 leading-relaxed text-sm">Copy any element and paste it directly into Figma as a fully editable vector graphic. Bridging the gap between the live web and your design files seamlessly.</p>
+        <FeatureShowcase
+          heading="Extract colors & fonts automatically"
+          desc="Scan an entire page in one click. Get the complete color palette grouped by role, and every font family with usage breakdown and typography scale."
+          bullets={[
+            "Colors grouped: primary, text, background, accent",
+            "WCAG contrast accessibility audit",
+            "Font weights, sources, and load URLs",
+            "One-click copy as HEX, RGB, or HSL",
+          ]}
+          reverse={true}
+        >
+          <div class="demo-mock demo-colors">
+            <div class="dc-header">
+              <span class="dc-tab dc-tab-active">Colors</span>
+              <span class="dc-tab">Fonts</span>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Feature Showcases -->
-    <section class="showcases-section">
-      <FeatureShowcase
-        heading="Inspect any element instantly"
-        desc="Hover over any element on any website. See its full computed styles — dimensions, colors, typography, spacing, shadows — all in a beautiful overlay."
-        bullets={[
-          "Box model visualization (margin, padding, border)",
-          "Click-to-copy any CSS value",
-          "Pin elements for deeper analysis",
-          "Works on any website, any framework",
-        ]}
-        badge="Core Feature"
-      >
-        <div class="demo-mock demo-inspector">
-          <div class="di-page">
-            <div class="di-element di-el-1"></div>
-            <div class="di-element di-el-2">
-              <div class="di-cursor"></div>
-              <div class="di-overlay">
-                <div class="di-margin-box"></div>
-                <div class="di-padding-box"></div>
-                <div class="di-content-box"></div>
+            <div class="dc-palette">
+              <div class="dc-swatch-row">
+                <div class="dc-swatch" style="background:#6366f1"></div>
+                <div class="dc-info"><span class="dc-hex">#6366f1</span><span class="dc-role">Primary</span></div>
+                <div class="dc-count">142×</div>
               </div>
-              <div class="di-tooltip">
-                <div class="di-tooltip-row"><span>width</span><span>420px</span></div>
-                <div class="di-tooltip-row"><span>padding</span><span>24px</span></div>
-                <div class="di-tooltip-row"><span>border-radius</span><span>12px</span></div>
-                <div class="di-tooltip-row"><span>font-family</span><span>Inter</span></div>
+              <div class="dc-swatch-row">
+                <div class="dc-swatch" style="background:#1a1a2e"></div>
+                <div class="dc-info"><span class="dc-hex">#1a1a2e</span><span class="dc-role">Text</span></div>
+                <div class="dc-count">89×</div>
+              </div>
+              <div class="dc-swatch-row">
+                <div class="dc-swatch" style="background:#f8f9fa"></div>
+                <div class="dc-info"><span class="dc-hex">#f8f9fa</span><span class="dc-role">Background</span></div>
+                <div class="dc-count">67×</div>
+              </div>
+              <div class="dc-swatch-row">
+                <div class="dc-swatch" style="background:#4ade80"></div>
+                <div class="dc-info"><span class="dc-hex">#4ade80</span><span class="dc-role">Accent</span></div>
+                <div class="dc-count">23×</div>
+              </div>
+              <div class="dc-swatch-row dc-swatch-pulse">
+                <div class="dc-swatch" style="background:#e94560"></div>
+                <div class="dc-info"><span class="dc-hex">#e94560</span><span class="dc-role">CTA</span></div>
+                <div class="dc-count">11×</div>
               </div>
             </div>
-            <div class="di-element di-el-3"></div>
+            <div class="dc-contrast">
+              <span class="dc-contrast-label">WCAG AA</span>
+              <span class="dc-contrast-pass">✓ Pass 7.4:1</span>
+            </div>
           </div>
-        </div>
-      </FeatureShowcase>
+        </FeatureShowcase>
 
-      <FeatureShowcase
-        heading="Extract colors & fonts automatically"
-        desc="Scan an entire page in one click. Get the complete color palette grouped by role, and every font family with usage breakdown and typography scale."
-        bullets={[
-          "Colors grouped: primary, text, background, accent",
-          "WCAG contrast accessibility audit",
-          "Font weights, sources, and load URLs",
-          "One-click copy as HEX, RGB, or HSL",
-        ]}
-        reverse={true}
-      >
-        <div class="demo-mock demo-colors">
-          <div class="dc-header">
-            <span class="dc-tab dc-tab-active">Colors</span>
-            <span class="dc-tab">Fonts</span>
-          </div>
-          <div class="dc-palette">
-            <div class="dc-swatch-row">
-              <div class="dc-swatch" style="background:#6366f1"></div>
-              <div class="dc-info"><span class="dc-hex">#6366f1</span><span class="dc-role">Primary</span></div>
-              <div class="dc-count">142×</div>
+        <FeatureShowcase
+          heading="AI-powered code export"
+          desc="Select any section and export it as a production-ready React TSX or Vue SFC component. Claude AI generates clean, typed, responsive code with Tailwind CSS."
+          bullets={[
+            "React TSX with TypeScript props",
+            "Vue 3 SFC with Composition API",
+            "Tailwind CSS — no inline styles",
+            "Accessible, responsive, production-ready",
+          ]}
+          badge="Pro Feature"
+        >
+          <div class="demo-mock demo-ai">
+            <div class="da-header">
+              <span class="da-tab da-tab-active">React TSX</span>
+              <span class="da-tab">Vue SFC</span>
+              <span class="da-tab">HTML+CSS</span>
             </div>
-            <div class="dc-swatch-row">
-              <div class="dc-swatch" style="background:#1a1a2e"></div>
-              <div class="dc-info"><span class="dc-hex">#1a1a2e</span><span class="dc-role">Text</span></div>
-              <div class="dc-count">89×</div>
+            <div class="da-code">
+              <div class="da-line"><span class="da-kw">export default</span> <span class="da-fn">function</span> <span class="da-name">HeroCard</span><span class="da-p">(</span><span class="da-prop">{'{ title, subtitle }'}</span><span class="da-p">)</span> <span class="da-p">{'{'}</span></div>
+              <div class="da-line da-indent"><span class="da-kw">return</span> <span class="da-p">(</span></div>
+              <div class="da-line da-indent-2"><span class="da-tag">&lt;section</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"flex flex-col items-center gap-8 py-20"</span><span class="da-tag">&gt;</span></div>
+              <div class="da-line da-indent-3"><span class="da-tag">&lt;h1</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"text-5xl font-bold"</span><span class="da-tag">&gt;</span></div>
+              <div class="da-line da-indent-4 da-typing"><span class="da-p">{'{title}'}</span></div>
+              <div class="da-line da-indent-3"><span class="da-tag">&lt;/h1&gt;</span></div>
+              <div class="da-line da-indent-3"><span class="da-tag">&lt;p</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"text-lg text-gray-400"</span><span class="da-tag">&gt;</span></div>
+              <div class="da-line da-indent-4"><span class="da-p">{'{subtitle}'}</span></div>
+              <div class="da-line da-indent-3"><span class="da-tag">&lt;/p&gt;</span></div>
+              <div class="da-line da-indent-2"><span class="da-tag">&lt;/section&gt;</span></div>
+              <div class="da-line da-indent"><span class="da-p">{')'}</span></div>
+              <div class="da-line"><span class="da-p">{'}'}</span></div>
             </div>
-            <div class="dc-swatch-row">
-              <div class="dc-swatch" style="background:#f8f9fa"></div>
-              <div class="dc-info"><span class="dc-hex">#f8f9fa</span><span class="dc-role">Background</span></div>
-              <div class="dc-count">67×</div>
-            </div>
-            <div class="dc-swatch-row">
-              <div class="dc-swatch" style="background:#4ade80"></div>
-              <div class="dc-info"><span class="dc-hex">#4ade80</span><span class="dc-role">Accent</span></div>
-              <div class="dc-count">23×</div>
-            </div>
-            <div class="dc-swatch-row dc-swatch-pulse">
-              <div class="dc-swatch" style="background:#e94560"></div>
-              <div class="dc-info"><span class="dc-hex">#e94560</span><span class="dc-role">CTA</span></div>
-              <div class="dc-count">11×</div>
+            <div class="da-status">
+              <span class="da-ai-badge">⚡ Claude AI</span>
+              <span class="da-copy">Copy Component</span>
             </div>
           </div>
-          <div class="dc-contrast">
-            <span class="dc-contrast-label">WCAG AA</span>
-            <span class="dc-contrast-pass">✓ Pass 7.4:1</span>
-          </div>
-        </div>
-      </FeatureShowcase>
+        </FeatureShowcase>
 
-      <FeatureShowcase
-        heading="AI-powered code export"
-        desc="Select any section and export it as a production-ready React TSX or Vue SFC component. Claude AI generates clean, typed, responsive code with Tailwind CSS."
-        bullets={[
-          "React TSX with TypeScript props",
-          "Vue 3 SFC with Composition API",
-          "Tailwind CSS — no inline styles",
-          "Accessible, responsive, production-ready",
-        ]}
-        badge="Pro Feature"
-      >
-        <div class="demo-mock demo-ai">
-          <div class="da-header">
-            <span class="da-tab da-tab-active">React TSX</span>
-            <span class="da-tab">Vue SFC</span>
-            <span class="da-tab">HTML+CSS</span>
-          </div>
-          <div class="da-code">
-            <div class="da-line"><span class="da-kw">export default</span> <span class="da-fn">function</span> <span class="da-name">HeroCard</span><span class="da-p">(</span><span class="da-prop">{'{ title, subtitle }'}</span><span class="da-p">)</span> <span class="da-p">{'{'}</span></div>
-            <div class="da-line da-indent"><span class="da-kw">return</span> <span class="da-p">(</span></div>
-            <div class="da-line da-indent-2"><span class="da-tag">&lt;section</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"flex flex-col items-center gap-8 py-20"</span><span class="da-tag">&gt;</span></div>
-            <div class="da-line da-indent-3"><span class="da-tag">&lt;h1</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"text-5xl font-bold"</span><span class="da-tag">&gt;</span></div>
-            <div class="da-line da-indent-4 da-typing"><span class="da-p">{'{title}'}</span></div>
-            <div class="da-line da-indent-3"><span class="da-tag">&lt;/h1&gt;</span></div>
-            <div class="da-line da-indent-3"><span class="da-tag">&lt;p</span> <span class="da-attr">className</span><span class="da-p">=</span><span class="da-str">"text-lg text-gray-400"</span><span class="da-tag">&gt;</span></div>
-            <div class="da-line da-indent-4"><span class="da-p">{'{subtitle}'}</span></div>
-            <div class="da-line da-indent-3"><span class="da-tag">&lt;/p&gt;</span></div>
-            <div class="da-line da-indent-2"><span class="da-tag">&lt;/section&gt;</span></div>
-            <div class="da-line da-indent"><span class="da-p">{')'}</span></div>
-            <div class="da-line"><span class="da-p">{'}'}</span></div>
-          </div>
-          <div class="da-status">
-            <span class="da-ai-badge">⚡ Claude AI</span>
-            <span class="da-copy">Copy Component</span>
-          </div>
-        </div>
-      </FeatureShowcase>
-
-      <FeatureShowcase
-        heading="Layout DNA — understand structure, not just styles"
-        desc="Other tools show you CSS values. DesignGrab shows you how the layout actually works — Flexbox directions, Grid templates, alignment, and gaps. Reverse-engineer any layout."
-        bullets={[
-          "Flexbox: direction, align, justify, gap",
-          "Grid: template columns, rows, areas",
-          "Structural HTML with layout classes",
-          "Export as Tailwind layout utilities",
-        ]}
-        badge="Differentiator"
-        reverse={true}
-      >
-        <div class="demo-mock demo-layout">
-          <div class="dl-tree">
-            <div class="dl-node dl-root">
-              <span class="dl-tag">flex</span>
-              <span class="dl-dir">column</span>
-              <span class="dl-gap">gap: 32px</span>
-            </div>
-            <div class="dl-children">
-              <div class="dl-branch"></div>
-              <div class="dl-node dl-child">
+        <FeatureShowcase
+          heading="Layout DNA — understand structure, not just styles"
+          desc="Other tools show you CSS values. DesignGrab shows you how the layout actually works — Flexbox directions, Grid templates, alignment, and gaps. Reverse-engineer any layout."
+          bullets={[
+            "Flexbox: direction, align, justify, gap",
+            "Grid: template columns, rows, areas",
+            "Structural HTML with layout classes",
+            "Export as Tailwind layout utilities",
+          ]}
+          badge="Differentiator"
+          reverse={true}
+        >
+          <div class="demo-mock demo-layout">
+            <div class="dl-tree">
+              <div class="dl-node dl-root">
                 <span class="dl-tag">flex</span>
-                <span class="dl-dir">row</span>
-                <span class="dl-gap">gap: 16px</span>
+                <span class="dl-dir">column</span>
+                <span class="dl-gap">gap: 32px</span>
               </div>
-              <div class="dl-grandchildren">
+              <div class="dl-children">
                 <div class="dl-branch"></div>
-                <div class="dl-node dl-leaf"><span class="dl-tag">img</span><span class="dl-size">w: 50%</span></div>
+                <div class="dl-node dl-child">
+                  <span class="dl-tag">flex</span>
+                  <span class="dl-dir">row</span>
+                  <span class="dl-gap">gap: 16px</span>
+                </div>
+                <div class="dl-grandchildren">
+                  <div class="dl-branch"></div>
+                  <div class="dl-node dl-leaf"><span class="dl-tag">img</span><span class="dl-size">w: 50%</span></div>
+                  <div class="dl-branch"></div>
+                  <div class="dl-node dl-leaf"><span class="dl-tag">flex</span><span class="dl-dir">col</span></div>
+                </div>
                 <div class="dl-branch"></div>
-                <div class="dl-node dl-leaf"><span class="dl-tag">flex</span><span class="dl-dir">col</span></div>
-              </div>
-              <div class="dl-branch"></div>
-              <div class="dl-node dl-child">
-                <span class="dl-tag">grid</span>
-                <span class="dl-cols">1fr 1fr 1fr</span>
-                <span class="dl-gap">gap: 24px</span>
+                <div class="dl-node dl-child">
+                  <span class="dl-tag">grid</span>
+                  <span class="dl-cols">1fr 1fr 1fr</span>
+                  <span class="dl-gap">gap: 24px</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="dl-output">
-            <code>flex flex-col items-center gap-8</code>
-          </div>
-        </div>
-      </FeatureShowcase>
-    </section>
-
-    <!-- Pre-existing Pricing Section (preserved functionality & tiers, restyled slightly to match minimal dark theme) -->
-    <section id="pricing" class="py-24 px-6 max-w-5xl mx-auto border-t border-white/5">
-      <div class="flex flex-col items-center gap-4 mb-16 text-center">
-        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight">Simple Pricing</h2>
-        <p class="text-slate-400 text-lg">Start free. Upgrade when you need more power.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Free -->
-        <div class="p-8 rounded-2xl border border-white/10 flex flex-col items-start relative overflow-hidden group" style="background: rgba(255, 255, 255, 0.02);">
-          <div class="mb-8">
-            <h3 class="text-xl font-bold text-white mb-2">Free</h3>
-            <div class="flex items-baseline gap-1">
-              <span class="text-4xl font-black text-white">$0</span>
+            <div class="dl-output">
+              <code>flex flex-col items-center gap-8</code>
             </div>
-            <div class="text-sm text-slate-500 mt-1">forever</div>
           </div>
-          <ul class="space-y-4 mb-10 w-full flex-1">
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-              Inspector, colors, fonts, layout
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-              15 asset downloads / month
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-              5 code exports / month
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-              Local design library
-            </li>
-          </ul>
-          <a href="#waitlist" class="mt-auto w-full py-3 text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition-all text-sm">
-            Get Started
-          </a>
+        </FeatureShowcase>
+      </section>
+
+      <!-- Waitlist -->
+      <section id="waitlist" class="py-32 px-6 max-w-3xl mx-auto text-center z-10 relative">
+        <div class="p-12 rounded-3xl border border-white/10 relative overflow-hidden" style="background: rgba(255,255,255,0.03);">
+          <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none"></div>
+          <div class="relative z-10">
+            <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">Get early access</h2>
+            <p class="text-slate-400 mb-8 max-w-md mx-auto">Be the first to know when DesignGrab launches on the Chrome Web Store.</p>
+            <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" id="waitlist-form">
+              <input type="email" name="email" placeholder="you@email.com" required class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all shadow-inner" />
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-6 py-3 font-bold transition-all shadow-lg shadow-indigo-500/25 border-0 whitespace-nowrap">Join Waitlist</button>
+            </form>
+            <p class="text-xs text-slate-500 mt-4" id="waitlist-msg">No spam. Unsubscribe anytime.</p>
+          </div>
         </div>
-
-        <!-- Pro -->
-        <div class="p-8 rounded-2xl border-2 border-indigo-500/50 flex flex-col items-start relative overflow-hidden transform md:-translate-y-4 shadow-2xl shadow-indigo-500/10" style="background: rgba(99, 102, 241, 0.05);">
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-b-lg">
-            Most Popular
-          </div>
-          <div class="mb-8 mt-4">
-            <h3 class="text-xl font-bold text-white mb-2">Pro</h3>
-            <div class="flex items-baseline gap-1">
-              <span class="text-4xl font-black text-white">$12</span>
-              <span class="text-slate-500 font-medium">/mo</span>
-            </div>
-            <div class="text-sm text-slate-500 mt-1">billed monthly</div>
-          </div>
-          <ul class="space-y-4 mb-10 w-full flex-1">
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-indigo-400 mt-0.5">✓</span>
-              <strong class="font-semibold text-white">Everything in Free</strong>
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-indigo-400 mt-0.5">✓</span>
-              2,000 downloads / month
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-indigo-400 mt-0.5">✓</span>
-              Unlimited code exports
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-indigo-400 mt-0.5">✓</span>
-              50 AI React/Vue exports / month
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-indigo-400 mt-0.5">✓</span>
-              Figma export
-            </li>
-          </ul>
-          <a href="#waitlist" class="mt-auto w-full py-3 text-center bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/25 border-0 text-sm">
-            Join Waitlist
-          </a>
-        </div>
-
-        <!-- Lifetime -->
-        <div class="p-8 rounded-2xl border border-white/10 flex flex-col items-start relative overflow-hidden group" style="background: rgba(255, 255, 255, 0.02);">
-          <div class="mb-8">
-            <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
-            <div class="flex items-baseline gap-1">
-              <span class="text-4xl font-black text-white">$99</span>
-            </div>
-             <div class="text-sm text-slate-500 mt-1">one-time payment</div>
-          </div>
-          <ul class="space-y-4 mb-10 w-full flex-1">
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-               <strong class="font-semibold text-white">Everything in Pro</strong>
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-              Pay once, use forever
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-              All future updates
-            </li>
-            <li class="flex items-start gap-3 text-slate-300 text-sm">
-              <span class="text-slate-500 mt-0.5">✓</span>
-              Early access to features
-            </li>
-          </ul>
-          <a href="#waitlist" class="mt-auto w-full py-3 text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition-all text-sm">
-            Join Waitlist
-          </a>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section id="faq" class="py-24 px-6 max-w-3xl mx-auto border-t border-white/5">
-      <div class="flex flex-col items-center gap-4 mb-16 text-center">
-        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight">Frequently Asked Questions</h2>
-      </div>
-      
-      <div class="space-y-4">
-        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
-          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
-            <span>Is it really free?</span>
-            <span class="transition group-open:rotate-180">
-              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-            </span>
-          </summary>
-          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
-            Yes. The free plan gives you full access to the inspector, color/font/layout analysis, and a generous monthly quota of downloads and code exports. No credit card required.
-          </div>
-        </details>
-        
-        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
-          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
-            <span>How does the AI export work?</span>
-            <span class="transition group-open:rotate-180">
-              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-            </span>
-          </summary>
-          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
-            DesignGrab captures the full design context of a pinned element — HTML, CSS, colors, fonts, layout structure — and sends it to Claude (Anthropic's AI) to generate a production-ready React TSX, Vue SFC, or Figma-compatible SVG component.
-          </div>
-        </details>
-
-        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
-          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
-            <span>Do I need my own API key?</span>
-            <span class="transition group-open:rotate-180">
-              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-            </span>
-          </summary>
-          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
-            For AI exports, yes — you provide your own Anthropic API key in Settings. This means your usage is billed directly by Anthropic at their rates, and your data never touches our servers.
-          </div>
-        </details>
-
-        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
-          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
-            <span>Does it work on any website?</span>
-            <span class="transition group-open:rotate-180">
-              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-            </span>
-          </summary>
-          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
-            DesignGrab works on any publicly accessible website. It reads the live DOM and computed styles, so it works regardless of what framework or CSS methodology the site uses.
-          </div>
-        </details>
-
-        <details class="group bg-white/5 border border-white/10 rounded-xl [&_summary::-webkit-details-marker]:hidden">
-          <summary class="flex cursor-pointer items-center justify-between p-6 font-semibold text-white">
-            <span>Is my data private?</span>
-            <span class="transition group-open:rotate-180">
-              <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
-            </span>
-          </summary>
-          <div class="px-6 pb-6 text-slate-400 text-sm leading-relaxed">
-            Absolutely. DesignGrab runs entirely in your browser. Your design data, saved library, and API keys are stored locally in Chrome storage. Nothing is sent to our servers.
-          </div>
-        </details>
-      </div>
-    </section>
-
-    <!-- Pre-existing Waitlist (maintained) -->
-    <section id="waitlist" class="py-32 px-6 max-w-3xl mx-auto text-center">
-      <div class="p-12 rounded-3xl border border-white/10 relative overflow-hidden" style="background: rgba(255,255,255,0.03);">
-        <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent pointer-events-none"></div>
-        <div class="relative z-10">
-          <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">Get early access</h2>
-          <p class="text-slate-400 mb-8 max-w-md mx-auto">Be the first to know when DesignGrab launches on the Chrome Web Store.</p>
-          <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" id="waitlist-form">
-            <input type="email" name="email" placeholder="you@email.com" required class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all" />
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-6 py-3 font-bold transition-all shadow-lg shadow-indigo-500/25 border-0 whitespace-nowrap">Join Waitlist</button>
-          </form>
-          <p class="text-xs text-slate-500 mt-4" id="waitlist-msg">No spam. Unsubscribe anytime.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-12 px-6 border-t border-white/5 bg-black/20">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-        <div class="flex items-center gap-2 opacity-80">
-          <div class="w-6 h-6 rounded flex items-center justify-center" style="background-color: #2e0bda;">
-            <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
-              <rect width="20" height="20" rx="5" fill="none" />
-              <path d="M6 7L10 10L6 13" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
-          <span class="text-sm font-bold tracking-tight text-white">DesignGrab</span>
-        </div>
-        <div class="flex gap-8">
-          <a class="text-xs font-medium text-slate-500 hover:text-white transition-colors" href="/privacy">Privacy Policy</a>
-          <a class="text-xs font-medium text-slate-500 hover:text-white transition-colors" href="mailto:support@designgrab.app">Contact</a>
-        </div>
-        <p class="text-xs text-slate-600 font-medium tracking-wide">
-          © 2026 DesignGrab. All rights reserved.
-        </p>
-      </div>
-    </footer>
+      </section>
+    </main>
+    <Footer />
   </div>
 </Base>
 
@@ -798,12 +578,10 @@ import FeatureShowcase from '../components/FeatureShowcase.astro';
   }
   .dl-output code {
     font-size: 12px; color: #4ade80;
-    background: rgba(74, 222, 128, 0.08);
-    padding: 4px 10px; border-radius: 6px;
   }
 
   @keyframes slide-node {
-    from { opacity: 0; transform: translateX(-16px); }
+    from { opacity: 0; transform: translateX(-8px); }
     to { opacity: 1; transform: translateX(0); }
   }
 </style>

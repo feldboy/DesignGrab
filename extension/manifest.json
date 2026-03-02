@@ -14,8 +14,17 @@
         "scripting",
         "storage",
         "downloads",
-        "sidePanel"
+        "sidePanel",
+        "identity"
     ],
+    "oauth2": {
+        "client_id": "783180663354-idjnv92nubl3e1dbe5ufm7jq8ll6m1pd.apps.googleusercontent.com",
+        "scopes": [
+            "openid",
+            "email",
+            "profile"
+        ]
+    },
     "host_permissions": [
         "<all_urls>"
     ],
