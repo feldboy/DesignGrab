@@ -5,7 +5,7 @@
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
-  plan text not null default 'free' check (plan in ('free', 'starter', 'pro', 'lifetime')),
+  plan text not null default 'free' references public.plans(id),
   stripe_customer_id text,
   stripe_subscription_id text,
   created_at timestamptz not null default now(),
