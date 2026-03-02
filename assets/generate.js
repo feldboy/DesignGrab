@@ -21,15 +21,28 @@ async function generate() {
     const page = await browser.newPage();
 
     // Ensure the output folder exists
-    const outDir = path.join(PWD, 'out');
+    const outDir = path.join(PWD, 'out', 'store-ready');
     if (!fs.existsSync(outDir)) {
-        fs.mkdirSync(outDir);
+        fs.mkdirSync(outDir, { recursive: true });
     }
 
     for (const screen of SCREENS) {
         console.log(`Generating ${screen.filename}...`);
-        await page.setViewport({ width: screen.width, height: screen.height, deviceScaleFactor: 2 });
-        await page.goto(`${HTML_PATH}#${screen.id}`, { waitUntil: 'networkidle0' });
+        await page.setViewport({ width: screen.width, height: screen.height, deviceScaleFactor: 1 });
+        await page.goto(`${HTML_PATH}`, { waitUntil: 'networkidle0' });
+
+        // Hide ALL screens, then show only the target one
+        await page.evaluate((targetId) => {
+            document.querySelectorAll('.container').forEach(el => {
+                el.style.display = 'none';
+            });
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.style.display = 'flex';
+            } else {
+                console.error('Target not found:', targetId);
+            }
+        }, screen.id);
 
         // Slight pause to ensure animations/fonts have rendered
         await new Promise(r => setTimeout(r, 500));
@@ -41,7 +54,7 @@ async function generate() {
     }
 
     await browser.close();
-    console.log('Done! All assets generated in ./out folder.');
+    console.log('Done! All assets generated in ./out/store-ready folder.');
 }
 
 generate().catch(console.error);
