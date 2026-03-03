@@ -42,6 +42,11 @@ function App() {
         ensureContentScript();
     }, []);
 
+    // Inject content script into active tab on panel load
+    useEffect(() => {
+        ensureContentScript();
+    }, []);
+
     // Check for openTab request from popup
     useEffect(() => {
         chrome.storage.local.get(['openTab'], (data) => {
