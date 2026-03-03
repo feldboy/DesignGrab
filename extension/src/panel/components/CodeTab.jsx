@@ -102,64 +102,86 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
         } else if (isFigmaMode && figmaSubMode === 'ai-prompt') {
             // AI Prompt description
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (!tabs[0]) {
+                    setIsLoading(false);
+                    setError('No active tab found. Try again.');
+                    return;
+                }
                 chrome.tabs.sendMessage(tabs[0].id, { type: 'EXPORT_FULL_CONTEXT' }, async (response) => {
                     if (chrome.runtime.lastError || !response?.success) {
                         setIsLoading(false);
                         setError('Could not connect to page. Try pinning an element first.');
                         return;
                     }
-                    try {
-                        chrome.runtime.sendMessage({
-                            type: 'AI_DESCRIBE_COMPONENT',
-                            payload: { context: response.context }
-                        }, async (aiData) => {
+                    let didRespond = false;
+                    const timeoutId = setTimeout(() => {
+                        if (!didRespond) {
+                            didRespond = true;
                             setIsLoading(false);
-                            if (chrome.runtime.lastError) {
-                                setError('AI description failed: could not reach service worker.');
-                                return;
-                            }
-                            if (aiData?.error) {
-                                setError(aiData.error);
-                            } else {
-                                setData({ mode: 'ai-prompt', description: aiData.description });
-                                await recordUsage('ai_export');
-                            }
-                        });
-                    } catch (err) {
+                            setError('AI description timed out. Please try again.');
+                        }
+                    }, 60000);
+                    chrome.runtime.sendMessage({
+                        type: 'AI_DESCRIBE_COMPONENT',
+                        payload: { context: response.context }
+                    }, async (aiData) => {
+                        if (didRespond) return;
+                        didRespond = true;
+                        clearTimeout(timeoutId);
                         setIsLoading(false);
-                        setError(`AI description failed: ${err.message}`);
-                    }
+                        if (chrome.runtime.lastError) {
+                            setError('AI description failed: could not reach service worker.');
+                            return;
+                        }
+                        if (aiData?.error) {
+                            setError(aiData.error);
+                        } else {
+                            setData({ mode: 'ai-prompt', description: aiData.description });
+                            await recordUsage('ai_export');
+                        }
+                    });
                 });
             });
         } else if (isAIMode) {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (!tabs[0]) {
+                    setIsLoading(false);
+                    setError('No active tab found. Try again.');
+                    return;
+                }
                 chrome.tabs.sendMessage(tabs[0].id, { type: 'EXPORT_FULL_CONTEXT' }, async (response) => {
                     if (chrome.runtime.lastError || !response?.success) {
                         setIsLoading(false);
                         setError('Could not connect to page. Try pinning an element first.');
                         return;
                     }
-                    try {
-                        chrome.runtime.sendMessage({
-                            type: 'AI_EXPORT',
-                            payload: { context: response.context, framework: mode }
-                        }, async (aiData) => {
+                    let didRespond = false;
+                    const timeoutId = setTimeout(() => {
+                        if (!didRespond) {
+                            didRespond = true;
                             setIsLoading(false);
-                            if (chrome.runtime.lastError) {
-                                setError('AI export failed: could not reach service worker.');
-                                return;
-                            }
-                            if (aiData?.error) {
-                                setError(aiData.error);
-                            } else {
-                                setData({ mode: `ai-${mode}`, code: aiData.code, framework: aiData.framework });
-                                await recordUsage('ai_export');
-                            }
-                        });
-                    } catch (err) {
+                            setError('AI export timed out. Please try again.');
+                        }
+                    }, 60000);
+                    chrome.runtime.sendMessage({
+                        type: 'AI_EXPORT',
+                        payload: { context: response.context, framework: mode }
+                    }, async (aiData) => {
+                        if (didRespond) return;
+                        didRespond = true;
+                        clearTimeout(timeoutId);
                         setIsLoading(false);
-                        setError(`AI export failed: ${err.message}`);
-                    }
+                        if (chrome.runtime.lastError) {
+                            setError('AI export failed: could not reach service worker.');
+                            return;
+                        }
+                        if (aiData?.error) {
+                            setError(aiData.error);
+                        } else {
+                            setData({ mode: `ai-${mode}`, code: aiData.code, framework: aiData.framework });
+                            await recordUsage('ai_export');
+                        }
+                    });
                 });
             });
         } else {
