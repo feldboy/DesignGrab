@@ -346,10 +346,11 @@ export async function exportForFigma(element) {
     const body = [];
     let clipId = 0;
     let filterId = 0;
+    let gradientId = 0;
+    const groupIdMap = new Map(); // element → groupId (for interaction CSS)
 
     function walkElement(el, depth) {
         const rect = el.getBoundingClientRect();
-        // Skip elements outside the root or invisible
         if (rect.width === 0 && rect.height === 0) return;
 
         const x = Math.round(rect.left - rootRect.left);
@@ -363,6 +364,7 @@ export async function exportForFigma(element) {
         // Build a group id from tag + class/id
         const elId = el.id ? el.id : (el.className && typeof el.className === 'string' ? el.className.split(' ')[0] : '');
         const groupId = elId ? `${tag}-${elId}`.replace(/[^a-zA-Z0-9_-]/g, '') : `${tag}-d${depth}`;
+        groupIdMap.set(el, groupId);
 
         // Determine if we need clipping (overflow hidden)
         const overflow = cs.overflow || cs.overflowX || cs.overflowY;
@@ -370,32 +372,74 @@ export async function exportForFigma(element) {
         let clipRef = '';
         if (needsClip) {
             const cid = `clip-${clipId++}`;
-            const r = parseFloat(cs.borderTopLeftRadius) || 0;
-            defs.push(`<clipPath id="${cid}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" ry="${r}"/></clipPath>`);
+            const rtl = parseFloat(cs.borderTopLeftRadius) || 0;
+            const rtr = parseFloat(cs.borderTopRightRadius) || 0;
+            const rMax = Math.max(rtl, rtr);
+            defs.push(`<clipPath id="${cid}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rMax}" ry="${rMax}"/></clipPath>`);
             clipRef = ` clip-path="url(#${cid})"`;
         }
 
         body.push(`<g id="${esc(groupId)}"${clipRef}>`);
 
-        // --- Background rect ---
+        // --- All 4 border-radius corners ---
+        const rTL = parseFloat(cs.borderTopLeftRadius) || 0;
+        const rTR = parseFloat(cs.borderTopRightRadius) || 0;
+        const rBR = parseFloat(cs.borderBottomRightRadius) || 0;
+        const rBL = parseFloat(cs.borderBottomLeftRadius) || 0;
+        const allSameRadius = rTL === rTR && rTR === rBR && rBR === rBL;
+        const hasCustomRadius = !allSameRadius && (rTL > 0 || rTR > 0 || rBR > 0 || rBL > 0);
+
+        // Helper: build rounded rect path with per-corner radii
+        function roundedRectPath(rx, ry, rw, rh, tl, tr, br, bl) {
+            tl = Math.min(tl, rw / 2, rh / 2);
+            tr = Math.min(tr, rw / 2, rh / 2);
+            br = Math.min(br, rw / 2, rh / 2);
+            bl = Math.min(bl, rw / 2, rh / 2);
+            return `M${rx + tl},${ry} L${rx + rw - tr},${ry} Q${rx + rw},${ry} ${rx + rw},${ry + tr} L${rx + rw},${ry + rh - br} Q${rx + rw},${ry + rh} ${rx + rw - br},${ry + rh} L${rx + bl},${ry + rh} Q${rx},${ry + rh} ${rx},${ry + rh - bl} L${rx},${ry + tl} Q${rx},${ry} ${rx + tl},${ry} Z`;
+        }
+
+        // --- Background (color or gradient) ---
         const bgColor = cs.backgroundColor;
         const hasBg = bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent';
-        const borderRadius = parseFloat(cs.borderTopLeftRadius) || 0;
+        const bgImage = cs.backgroundImage;
+        const hasGradient = bgImage && bgImage !== 'none' && (bgImage.includes('linear-gradient') || bgImage.includes('radial-gradient'));
 
-        if (hasBg) {
+        let bgFillAttr = '';
+        if (hasGradient) {
+            const gid = `grad-${gradientId++}`;
+            const gradDef = parseGradientToDef(bgImage, gid);
+            if (gradDef) {
+                defs.push(gradDef);
+                bgFillAttr = `fill="url(#${gid})"`;
+            } else if (hasBg) {
+                const fill = rgbaToSvg(bgColor);
+                bgFillAttr = `fill="${fill.color}"${fill.opacity < 1 ? ` opacity="${fill.opacity}"` : ''}`;
+            }
+        } else if (hasBg) {
             const fill = rgbaToSvg(bgColor);
-            const opacity = fill.opacity < 1 ? ` opacity="${fill.opacity}"` : '';
-            body.push(`  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${borderRadius}" ry="${borderRadius}" fill="${fill.color}"${opacity}/>`);
+            bgFillAttr = `fill="${fill.color}"${fill.opacity < 1 ? ` opacity="${fill.opacity}"` : ''}`;
+        }
+
+        if (bgFillAttr) {
+            if (hasCustomRadius) {
+                body.push(`  <path d="${roundedRectPath(x, y, w, h, rTL, rTR, rBR, rBL)}" ${bgFillAttr}/>`);
+            } else {
+                body.push(`  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rTL}" ry="${rTL}" ${bgFillAttr}/>`);
+            }
         }
 
         // --- Border ---
         const bw = parseFloat(cs.borderTopWidth) || 0;
         if (bw > 0 && cs.borderTopStyle !== 'none') {
             const bc = rgbaToSvg(cs.borderTopColor || '#000');
-            body.push(`  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${borderRadius}" ry="${borderRadius}" fill="none" stroke="${bc.color}" stroke-width="${bw}"/>`);
+            if (hasCustomRadius) {
+                body.push(`  <path d="${roundedRectPath(x, y, w, h, rTL, rTR, rBR, rBL)}" fill="none" stroke="${bc.color}" stroke-width="${bw}"/>`);
+            } else {
+                body.push(`  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rTL}" ry="${rTL}" fill="none" stroke="${bc.color}" stroke-width="${bw}"/>`);
+            }
         }
 
-        // --- Box shadow (simple drop shadow) ---
+        // --- Box shadow ---
         const shadow = cs.boxShadow;
         if (shadow && shadow !== 'none') {
             const sm = shadow.match(/rgba?\([^)]+\)\s+([-\d.]+)px\s+([-\d.]+)px\s+([-\d.]+)px/);
@@ -406,11 +450,10 @@ export async function exportForFigma(element) {
                 const blur = parseFloat(sm[3]) || 0;
                 const sc = rgbaToSvg(sm[0].match(/rgba?\([^)]+\)/)[0]);
                 defs.push(`<filter id="${fid}" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="${dx}" dy="${dy}" stdDeviation="${blur / 2}" flood-color="${sc.color}" flood-opacity="${sc.opacity}"/></filter>`);
-                // Re-draw bg rect with shadow filter
-                if (hasBg) {
+                if (bgFillAttr) {
                     const fill = rgbaToSvg(bgColor);
                     body.splice(body.length - (bw > 0 ? 2 : 1), 0,
-                        `  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${borderRadius}" ry="${borderRadius}" fill="${fill.color}" filter="url(#${fid})"/>`);
+                        `  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rTL}" ry="${rTL}" fill="${fill.color}" filter="url(#${fid})"/>`);
                 }
             }
         }
@@ -426,7 +469,6 @@ export async function exportForFigma(element) {
 
         // --- SVG (inline) ---
         if (tag === 'svg') {
-            // Embed the SVG as a nested <svg> at the right position
             const svgClone = el.cloneNode(true);
             svgClone.setAttribute('x', x);
             svgClone.setAttribute('y', y);
@@ -434,7 +476,7 @@ export async function exportForFigma(element) {
             svgClone.setAttribute('height', h);
             body.push(`  ${svgClone.outerHTML}`);
             body.push('</g>');
-            return; // Don't recurse into SVG children
+            return;
         }
 
         // --- Video poster / canvas placeholder ---
@@ -463,31 +505,36 @@ export async function exportForFigma(element) {
             const lineHeight = parseFloat(cs.lineHeight) || fontSize * 1.2;
             const textAlign = cs.textAlign;
 
-            // Apply text-transform
             let displayText = directText;
             if (textTransform === 'uppercase') displayText = displayText.toUpperCase();
             else if (textTransform === 'lowercase') displayText = displayText.toLowerCase();
             else if (textTransform === 'capitalize') displayText = displayText.replace(/\b\w/g, c => c.toUpperCase());
 
-            // Calculate text anchor based on text-align
-            let anchor = 'start';
-            let textX = x + (parseFloat(cs.paddingLeft) || 0);
-            if (textAlign === 'center') {
-                anchor = 'middle';
-                textX = x + w / 2;
-            } else if (textAlign === 'right' || textAlign === 'end') {
-                anchor = 'end';
-                textX = x + w - (parseFloat(cs.paddingRight) || 0);
-            }
-
-            const textY = y + (parseFloat(cs.paddingTop) || 0) + fontSize * 0.85;
-
-            // Split into lines for multiline text
             const words = displayText.split(/\s+/);
-            if (words.length > 0 && w > 0) {
-                // Simple word-wrap: estimate chars per line
+            const paddingLeft = parseFloat(cs.paddingLeft) || 0;
+            const paddingRight = parseFloat(cs.paddingRight) || 0;
+            const paddingTop = parseFloat(cs.paddingTop) || 0;
+            const innerW = w - paddingLeft - paddingRight;
+
+            // Use foreignObject for complex multi-line text (>20 words)
+            if (words.length > 20 && innerW > 0) {
+                body.push(`  <foreignObject x="${x}" y="${y}" width="${w}" height="${h}">`);
+                body.push(`    <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:${esc(fontFamily)};font-size:${fontSize}px;font-weight:${fontWeight};${cs.fontStyle === 'italic' ? 'font-style:italic;' : ''}color:${color.color};line-height:${lineHeight}px;text-align:${textAlign};padding:${paddingTop}px ${paddingRight}px 0 ${paddingLeft}px;${letterSpacing ? `letter-spacing:${letterSpacing}px;` : ''}${textTransform && textTransform !== 'none' ? `text-transform:${textTransform};` : ''}">${esc(displayText)}</div>`);
+                body.push(`  </foreignObject>`);
+            } else if (words.length > 0 && innerW > 0) {
+                let anchor = 'start';
+                let textX = x + paddingLeft;
+                if (textAlign === 'center') {
+                    anchor = 'middle';
+                    textX = x + w / 2;
+                } else if (textAlign === 'right' || textAlign === 'end') {
+                    anchor = 'end';
+                    textX = x + w - paddingRight;
+                }
+
+                const textY = y + paddingTop + fontSize * 0.85;
                 const avgCharWidth = fontSize * 0.55;
-                const maxChars = Math.floor((w - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0)) / avgCharWidth);
+                const maxChars = Math.floor(innerW / avgCharWidth);
                 const lines = [];
                 let currentLine = '';
 
@@ -503,19 +550,14 @@ export async function exportForFigma(element) {
 
                 body.push(`  <text x="${textX}" y="${textY}" font-family="${esc(fontFamily)}" font-size="${fontSize}" font-weight="${fontWeight}"${fontStyle}${lsAttr} fill="${color.color}" text-anchor="${anchor}">`);
                 lines.forEach((line, i) => {
-                    if (i === 0) {
-                        body.push(`    <tspan x="${textX}" dy="0">${esc(line)}</tspan>`);
-                    } else {
-                        body.push(`    <tspan x="${textX}" dy="${lineHeight}">${esc(line)}</tspan>`);
-                    }
+                    body.push(`    <tspan x="${textX}" dy="${i === 0 ? 0 : lineHeight}">${esc(line)}</tspan>`);
                 });
                 body.push('  </text>');
             }
         }
 
-        // --- Background image (CSS) ---
-        const bgImage = cs.backgroundImage;
-        if (bgImage && bgImage !== 'none') {
+        // --- Background image (CSS, non-gradient) ---
+        if (bgImage && bgImage !== 'none' && !hasGradient) {
             const urlMatch = bgImage.match(/url\(["']?(.*?)["']?\)/);
             if (urlMatch && urlMatch[1] && !urlMatch[1].startsWith('data:image/svg')) {
                 const resolved = imageCache.get(urlMatch[1]) || urlMatch[1];
@@ -535,11 +577,152 @@ export async function exportForFigma(element) {
 
     walkElement(element, 0);
 
-    const defsBlock = defs.length > 0 ? `<defs>\n${defs.join('\n')}\n</defs>\n` : '';
+    // Build CSS interaction styles embedded in SVG
+    const interactions = extractInteractions(element);
+    const cssRules = [];
+
+    if (interactions.states.length > 0) {
+        for (const item of interactions.states) {
+            // Map CSS selectors to SVG group IDs
+            const baseSelector = item.selector.replace(/:hover|:focus-visible|:focus|:active/g, '').trim();
+            const pseudoClass = item.selector.match(/:hover|:focus-visible|:focus|:active/)?.[0] || '';
+            let targetGroupId = null;
+
+            // Find matching element and its SVG group ID
+            for (const [el, gid] of groupIdMap) {
+                try {
+                    if (!baseSelector || el.matches(baseSelector)) {
+                        targetGroupId = gid;
+                        break;
+                    }
+                } catch (e) { /* invalid selector */ }
+            }
+
+            if (targetGroupId && pseudoClass) {
+                const props = Object.entries(item.properties)
+                    .map(([prop, val]) => {
+                        // Map CSS properties to SVG-compatible properties
+                        if (prop === 'background-color') return `fill: ${rgbaToSvg(val).color}`;
+                        if (prop === 'color') return `fill: ${rgbaToSvg(val).color}`;
+                        if (prop === 'border-color') return `stroke: ${rgbaToSvg(val).color}`;
+                        if (prop === 'opacity') return `opacity: ${val}`;
+                        if (prop === 'transform') return `transform: ${val}`;
+                        return null;
+                    })
+                    .filter(Boolean);
+
+                if (props.length > 0) {
+                    cssRules.push(`#${targetGroupId}${pseudoClass} rect { ${props.join('; ')}; cursor: pointer; }`);
+                    cssRules.push(`#${targetGroupId}${pseudoClass} text { ${props.filter(p => p.startsWith('fill') || p.startsWith('opacity')).join('; ')}; }`);
+                }
+            }
+        }
+
+        // Add transition rules for interactive elements
+        if (interactions.transitions.length > 0) {
+            const transitionGroupIds = new Set();
+            for (const item of interactions.states) {
+                const baseSelector = item.selector.replace(/:hover|:focus-visible|:focus|:active/g, '').trim();
+                for (const [el, gid] of groupIdMap) {
+                    try {
+                        if (!baseSelector || el.matches(baseSelector)) {
+                            transitionGroupIds.add(gid);
+                        }
+                    } catch (e) { /* invalid selector */ }
+                }
+            }
+            for (const gid of transitionGroupIds) {
+                cssRules.push(`#${gid} rect, #${gid} text { transition: fill 0.2s ease, opacity 0.2s ease, transform 0.2s ease; cursor: pointer; }`);
+            }
+        }
+    }
+
+    // Build defs block with optional style
+    let defsContent = defs.join('\n');
+    if (cssRules.length > 0) {
+        defsContent += (defsContent ? '\n' : '') + `<style>\n${cssRules.join('\n')}\n</style>`;
+    }
+    const defsBlock = defsContent ? `<defs>\n${defsContent}\n</defs>\n` : '';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">\n${defsBlock}${body.join('\n')}\n</svg>`;
 
-    const interactions = extractInteractions(element);
     return { svg, width: W, height: H, mode: 'figma-svg', interactions };
+}
+
+/**
+ * Parse CSS gradient to SVG gradient def
+ */
+function parseGradientToDef(bgImage, id) {
+    // Linear gradient
+    const linearMatch = bgImage.match(/linear-gradient\(([^)]+(?:\([^)]*\))*[^)]*)\)/);
+    if (linearMatch) {
+        const content = linearMatch[1];
+        // Parse direction
+        let x1 = '0%', y1 = '0%', x2 = '0%', y2 = '100%';
+        const dirMatch = content.match(/^(to\s+\w+(?:\s+\w+)?|\d+deg)/);
+        if (dirMatch) {
+            const dir = dirMatch[1];
+            if (dir.includes('to right')) { x1 = '0%'; y1 = '0%'; x2 = '100%'; y2 = '0%'; }
+            else if (dir.includes('to left')) { x1 = '100%'; y1 = '0%'; x2 = '0%'; y2 = '0%'; }
+            else if (dir.includes('to top')) { x1 = '0%'; y1 = '100%'; x2 = '0%'; y2 = '0%'; }
+            else if (dir.includes('to bottom right')) { x1 = '0%'; y1 = '0%'; x2 = '100%'; y2 = '100%'; }
+            else if (dir.includes('to bottom left')) { x1 = '100%'; y1 = '0%'; x2 = '0%'; y2 = '100%'; }
+            else if (dir.includes('to top right')) { x1 = '0%'; y1 = '100%'; x2 = '100%'; y2 = '0%'; }
+            else if (dir.includes('to top left')) { x1 = '100%'; y1 = '100%'; x2 = '0%'; y2 = '0%'; }
+            else if (dir.endsWith('deg')) {
+                const angle = parseFloat(dir) * Math.PI / 180;
+                x1 = `${Math.round(50 - 50 * Math.sin(angle))}%`;
+                y1 = `${Math.round(50 + 50 * Math.cos(angle))}%`;
+                x2 = `${Math.round(50 + 50 * Math.sin(angle))}%`;
+                y2 = `${Math.round(50 - 50 * Math.cos(angle))}%`;
+            }
+        }
+
+        // Parse color stops
+        const colorStops = [];
+        const stopRegex = /(rgba?\([^)]+\)|#[0-9a-fA-F]{3,8}|\w+)\s*(\d+%)?/g;
+        let match;
+        const colorsStr = dirMatch ? content.slice(dirMatch[0].length) : content;
+        while ((match = stopRegex.exec(colorsStr)) !== null) {
+            const color = rgbaToSvg(match[1]);
+            const offset = match[2] || null;
+            colorStops.push({ color: color.color, opacity: color.opacity, offset });
+        }
+
+        if (colorStops.length < 2) return null;
+        // Auto-distribute offsets
+        colorStops.forEach((stop, i) => {
+            if (!stop.offset) stop.offset = `${Math.round(i / (colorStops.length - 1) * 100)}%`;
+        });
+
+        const stops = colorStops.map(s =>
+            `<stop offset="${s.offset}" stop-color="${s.color}"${s.opacity < 1 ? ` stop-opacity="${s.opacity}"` : ''}/>`
+        ).join('');
+        return `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops}</linearGradient>`;
+    }
+
+    // Radial gradient
+    const radialMatch = bgImage.match(/radial-gradient\(([^)]+(?:\([^)]*\))*[^)]*)\)/);
+    if (radialMatch) {
+        const content = radialMatch[1];
+        const colorStops = [];
+        const stopRegex = /(rgba?\([^)]+\)|#[0-9a-fA-F]{3,8}|\w+)\s*(\d+%)?/g;
+        let match;
+        while ((match = stopRegex.exec(content)) !== null) {
+            const color = rgbaToSvg(match[1]);
+            const offset = match[2] || null;
+            colorStops.push({ color: color.color, opacity: color.opacity, offset });
+        }
+        if (colorStops.length < 2) return null;
+        colorStops.forEach((stop, i) => {
+            if (!stop.offset) stop.offset = `${Math.round(i / (colorStops.length - 1) * 100)}%`;
+        });
+        const stops = colorStops.map(s =>
+            `<stop offset="${s.offset}" stop-color="${s.color}"${s.opacity < 1 ? ` stop-opacity="${s.opacity}"` : ''}/>`
+        ).join('');
+        return `<radialGradient id="${id}" cx="50%" cy="50%" r="50%">${stops}</radialGradient>`;
+    }
+
+    return null;
 }
 
 /**
@@ -678,6 +861,138 @@ function extractInteractions(rootElement) {
         states: [...interactionMap.values()],
         transitions: [...transitions],
     };
+}
+
+/**
+ * Export element as responsive HTML+CSS with flexbox/grid, relative units, and media queries
+ */
+export function exportResponsiveHTML(element) {
+    const clone = element.cloneNode(true);
+    const styleMap = new Map();
+    collectStyles(element, clone, styleMap);
+    cleanElement(clone);
+    resolveUrls(clone);
+
+    let classCounter = 1;
+    const cssRules = [];
+    const colorsUsed = new Set();
+    const fontsUsed = new Set();
+    const rootRect = element.getBoundingClientRect();
+    const rootWidth = rootRect.width;
+
+    function processElement(el, originalEl) {
+        const styles = styleMap.get(el);
+        if (!styles || Object.keys(styles).length === 0) {
+            for (let i = 0; i < el.children.length && i < (originalEl?.children.length || 0); i++) {
+                processElement(el.children[i], originalEl?.children[i]);
+            }
+            return;
+        }
+
+        const className = `dg-${el.tagName.toLowerCase()}-${classCounter++}`;
+        el.classList.add(className);
+
+        const responsive = {};
+        for (const [prop, value] of Object.entries(styles)) {
+            // Track design tokens
+            if (prop.includes('color') || prop === 'background-color') {
+                colorsUsed.add(value);
+            }
+            if (prop === 'font-family') {
+                fontsUsed.add(value.split(',')[0].trim().replace(/['"]/g, ''));
+            }
+
+            // Convert absolute widths to responsive
+            if (prop === 'width') {
+                const px = parseFloat(value);
+                if (px > 0 && rootWidth > 0 && px < rootWidth) {
+                    const pct = Math.round((px / rootWidth) * 100);
+                    if (pct >= 10 && pct <= 100) {
+                        responsive['width'] = `${pct}%`;
+                        responsive['max-width'] = value;
+                        continue;
+                    }
+                }
+            }
+
+            responsive[prop] = value;
+        }
+
+        const declarations = Object.entries(responsive)
+            .map(([prop, value]) => `  ${prop}: ${value};`)
+            .join('\n');
+        cssRules.push(`.${className} {\n${declarations}\n}`);
+
+        for (let i = 0; i < el.children.length && i < (originalEl?.children.length || 0); i++) {
+            processElement(el.children[i], originalEl?.children[i]);
+        }
+    }
+
+    processElement(clone, element);
+
+    // Scan stylesheets for media queries matching elements
+    const mediaRules = collectMediaQueries(element);
+    let mediaCss = '';
+    if (mediaRules.length > 0) {
+        mediaCss = '\n\n/* Responsive Breakpoints */\n' + mediaRules.join('\n\n');
+    }
+
+    // Design tokens comment header
+    const tokenHeader = [
+        '/* === Design Tokens ===',
+        ` * Colors: ${[...colorsUsed].slice(0, 10).join(', ')}`,
+        ` * Fonts: ${[...fontsUsed].join(', ')}`,
+        ' * =========================== */',
+    ].join('\n');
+
+    const css = tokenHeader + '\n\n' + cssRules.join('\n\n') + mediaCss;
+    const html = formatHTML(clone.outerHTML);
+
+    return {
+        html,
+        css,
+        mode: 'responsive-html',
+        tokensUsed: { colors: [...colorsUsed], fonts: [...fontsUsed] },
+    };
+}
+
+/**
+ * Collect @media rules from stylesheets that apply to the element
+ */
+function collectMediaQueries(element) {
+    const results = [];
+    const seen = new Set();
+
+    for (const sheet of document.styleSheets) {
+        let rules;
+        try { rules = sheet.cssRules || sheet.rules; } catch (e) { continue; }
+        if (!rules) continue;
+
+        for (const rule of rules) {
+            if (!(rule instanceof CSSMediaRule)) continue;
+            const media = rule.conditionText || rule.media?.mediaText || '';
+            if (!media) continue;
+
+            for (const innerRule of rule.cssRules) {
+                if (!innerRule.selectorText || !innerRule.style) continue;
+                const sel = innerRule.selectorText;
+                try {
+                    if (element.matches(sel) || element.querySelector(sel)) {
+                        const key = `${media}|${innerRule.cssText}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            if (!results.some(r => r.media === media)) {
+                                results.push({ media, rules: [] });
+                            }
+                            results.find(r => r.media === media).rules.push(innerRule.cssText);
+                        }
+                    }
+                } catch (e) { /* invalid selector */ }
+            }
+        }
+    }
+
+    return results.map(r => `@media ${r.media} {\n${r.rules.map(rule => '  ' + rule).join('\n')}\n}`);
 }
 
 /** Get only direct text content of an element (not from children) */

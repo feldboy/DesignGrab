@@ -9,7 +9,7 @@ import { extractAssets } from './extractor.js';
 import { analyzeColors } from './colorAnalyzer.js';
 import { analyzeFonts } from './fontAnalyzer.js';
 import { analyzeLayout } from './layoutAnalyzer.js';
-import { exportCode, exportForFigma } from './codeExporter.js';
+import { exportCode, exportForFigma, exportResponsiveHTML } from './codeExporter.js';
 import { generateTailwindConfig } from './tailwindGen.js';
 import OVERLAY_STYLES from './styles.css?inline';
 
@@ -233,6 +233,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 }
             })();
             return true; // keep message channel open for async response
+
+        case 'EXPORT_RESPONSIVE_HTML':
+            initDesignGrab();
+            try {
+                let responsiveEl = getPinnedElement() || lastPinnedElement || document.querySelector('main') || document.body.children[0];
+                if (payload?.childIndex != null && responsiveEl.children[payload.childIndex]) {
+                    responsiveEl = responsiveEl.children[payload.childIndex];
+                }
+                const responsiveData = exportResponsiveHTML(responsiveEl);
+                sendResponse({ success: true, data: responsiveData });
+            } catch (err) {
+                sendResponse({ success: false, error: err.message });
+            }
+            break;
 
         case 'GET_CHILD_ELEMENTS':
             initDesignGrab();

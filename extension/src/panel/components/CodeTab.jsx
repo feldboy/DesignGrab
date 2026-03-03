@@ -10,6 +10,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [mode, setMode] = useState(initialMode);
+    const [figmaSubMode, setFigmaSubMode] = useState('svg'); // 'svg' | 'responsive' | 'ai-prompt'
     const [copied, setCopied] = useState(false);
     const [usageBlock, setUsageBlock] = useState(null);
     const [childElements, setChildElements] = useState([]);
@@ -19,6 +20,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
 
     const isAIMode = mode === 'react' || mode === 'vue';
     const isFigmaMode = mode === 'figma';
+    const isAIPromptSubMode = isFigmaMode && figmaSubMode === 'ai-prompt';
 
     // Check auth state
     useEffect(() => {
@@ -41,7 +43,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
 
     const exportElement = async () => {
         // Gate AI exports: require sign-in and check usage limits
-        if (isAIMode) {
+        if (isAIMode || isAIPromptSubMode) {
             if (!isLoggedIn) {
                 setError('Sign in with Google in the Settings tab to use AI exports.');
                 return;
@@ -63,8 +65,8 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
         setError(null);
         setUsageBlock(null);
 
-        if (isFigmaMode) {
-            // Generate SVG directly from DOM — no AI
+        if (isFigmaMode && figmaSubMode === 'svg') {
+            // SVG export
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 chrome.tabs.sendMessage(tabs[0].id, {
                     type: 'EXPORT_FIGMA_SVG',
@@ -77,6 +79,55 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                         setData(response.data);
                     } else {
                         setError(response?.error || 'Failed to export SVG for Figma.');
+                    }
+                });
+            });
+        } else if (isFigmaMode && figmaSubMode === 'responsive') {
+            // Responsive HTML+CSS export
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    type: 'EXPORT_RESPONSIVE_HTML',
+                    payload: { childIndex: selectedDiv === 'root' ? null : parseInt(selectedDiv) }
+                }, async (response) => {
+                    setIsLoading(false);
+                    if (chrome.runtime.lastError) {
+                        setError('Could not connect to page. Try pinning an element first.');
+                    } else if (response && response.success) {
+                        setData(response.data);
+                    } else {
+                        setError(response?.error || 'Failed to export responsive HTML.');
+                    }
+                });
+            });
+        } else if (isFigmaMode && figmaSubMode === 'ai-prompt') {
+            // AI Prompt description
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                chrome.tabs.sendMessage(tabs[0].id, { type: 'EXPORT_FULL_CONTEXT' }, async (response) => {
+                    if (chrome.runtime.lastError || !response?.success) {
+                        setIsLoading(false);
+                        setError('Could not connect to page. Try pinning an element first.');
+                        return;
+                    }
+                    try {
+                        chrome.runtime.sendMessage({
+                            type: 'AI_DESCRIBE_COMPONENT',
+                            payload: { context: response.context }
+                        }, async (aiData) => {
+                            setIsLoading(false);
+                            if (chrome.runtime.lastError) {
+                                setError('AI description failed: could not reach service worker.');
+                                return;
+                            }
+                            if (aiData?.error) {
+                                setError(aiData.error);
+                            } else {
+                                setData({ mode: 'ai-prompt', description: aiData.description });
+                                await recordUsage('ai_export');
+                            }
+                        });
+                    } catch (err) {
+                        setIsLoading(false);
+                        setError(`AI description failed: ${err.message}`);
                     }
                 });
             });
@@ -187,6 +238,29 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
         setSelectedDiv('root');
     };
 
+    const switchFigmaSubMode = (subMode) => {
+        setFigmaSubMode(subMode);
+        setData(null);
+        setError(null);
+        setUsageBlock(null);
+    };
+
+    // Export button label
+    const getExportLabel = () => {
+        if (isLoading) {
+            if (isAIMode || isAIPromptSubMode) return 'AI generating...';
+            return 'Exporting...';
+        }
+        if (isFigmaMode) {
+            if (figmaSubMode === 'svg') return pinnedElement ? `Export SVG <${pinnedElement.tagName}>` : 'Export SVG';
+            if (figmaSubMode === 'responsive') return pinnedElement ? `Export HTML <${pinnedElement.tagName}>` : 'Export HTML+CSS';
+            if (figmaSubMode === 'ai-prompt') return pinnedElement ? `Describe <${pinnedElement.tagName}>` : 'AI Describe';
+        }
+        if (pinnedElement) return `${isAIMode ? 'AI ' : ''}Export <${pinnedElement.tagName}>`;
+        if (isAIMode) return 'AI Export';
+        return 'Export Code';
+    };
+
     return (
         <div className="code-tab fade-in">
             <div className="panel-sticky-header">
@@ -200,8 +274,19 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                     </div>
                 </div>
 
+                {/* Figma sub-mode selector */}
+                {isFigmaMode && (
+                    <div className="code-actions-row" style={{ paddingTop: '4px' }}>
+                        <div className="segmented-control figma-sub-control" style={{ fontSize: '11px' }}>
+                            <button className={figmaSubMode === 'svg' ? 'active' : ''} onClick={() => switchFigmaSubMode('svg')}>SVG</button>
+                            <button className={figmaSubMode === 'responsive' ? 'active' : ''} onClick={() => switchFigmaSubMode('responsive')}>HTML+CSS</button>
+                            <button className={figmaSubMode === 'ai-prompt' ? 'active' : ''} onClick={() => switchFigmaSubMode('ai-prompt')}>AI Prompt</button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Figma div picker */}
-                {isFigmaMode && childElements.length > 0 && (
+                {isFigmaMode && figmaSubMode !== 'ai-prompt' && childElements.length > 0 && (
                     <div className="code-actions-row" style={{ paddingTop: '4px' }}>
                         <label style={{ fontSize: '11px', opacity: 0.8, marginRight: '6px', whiteSpace: 'nowrap' }}>Target:</label>
                         <select
@@ -226,11 +311,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
 
                 <div className="code-actions-row">
                     <button className="export-btn" onClick={exportElement} disabled={isLoading}>
-                        {isLoading
-                            ? (isAIMode ? 'AI generating...' : 'Exporting...')
-                            : (pinnedElement
-                                ? `${isAIMode ? 'AI ' : ''}Export <${pinnedElement.tagName}>`
-                                : (isAIMode ? 'AI Export' : (isFigmaMode ? 'Export SVG for Figma' : 'Export Code')))}
+                        {getExportLabel()}
                     </button>
                     {!isAIMode && !isFigmaMode && (
                         <button className="panel-btn outline" onClick={generateTailwindConfig} style={{ flexShrink: 0 }}>Config</button>
@@ -244,6 +325,20 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                             : 'Sign in with Google in Settings to use AI exports'}
                     </div>
                 )}
+
+                {isAIPromptSubMode && (
+                    <div className={`ai-mode-hint ${!isLoggedIn ? 'ai-mode-warning' : ''}`}>
+                        {isLoggedIn
+                            ? 'Powered by Gemini — generates a detailed recreation prompt for this component'
+                            : 'Sign in with Google in Settings to use AI features'}
+                    </div>
+                )}
+
+                {isFigmaMode && figmaSubMode === 'responsive' && (
+                    <div className="ai-mode-hint">
+                        Generates responsive HTML+CSS with flexbox/grid, relative units, and design tokens
+                    </div>
+                )}
             </div>
 
             <div className="panel-scroll-content">
@@ -252,7 +347,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                         <div className="usage-limit-text">
                             {usageBlock.requiresAuth
                                 ? 'Sign in with Google in Settings to use exports'
-                                : <>You've used <strong>{usageBlock.current}/{usageBlock.limit}</strong> free {isAIMode ? 'AI' : 'code'} exports this month</>
+                                : <>You've used <strong>{usageBlock.current}/{usageBlock.limit}</strong> free {isAIMode || isAIPromptSubMode ? 'AI' : 'code'} exports this month</>
                             }
                         </div>
                         {!usageBlock.requiresAuth && (
@@ -263,10 +358,10 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
 
                 {error && <div className="panel-error"><p>{error}</p></div>}
 
-                {isLoading && isAIMode && (
+                {isLoading && (isAIMode || isAIPromptSubMode) && (
                     <div className="panel-loading">
                         <div className="spinner"></div>
-                        <p>{`Generating ${mode === 'react' ? 'React' : 'Vue'} component...`}</p>
+                        <p>{isAIPromptSubMode ? 'Generating component description...' : `Generating ${mode === 'react' ? 'React' : 'Vue'} component...`}</p>
                         <p style={{ fontSize: '11px', opacity: 0.6, marginTop: '4px' }}>This may take 10-20 seconds</p>
                     </div>
                 )}
@@ -338,7 +433,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                         </div>
                         <pre className="code-content"><code ref={codeRef}>{data.svg}</code></pre>
                         <div style={{ padding: '8px 12px', fontSize: '11px', opacity: 0.7, lineHeight: 1.5, borderTop: '1px solid var(--border)' }}>
-                            Copy the SVG above, then paste into Figma (Cmd+V / Ctrl+V). Figma will convert it to native layers, text, and frames.
+                            Copy the SVG above, then paste into Figma (Cmd+V / Ctrl+V). Figma will convert it to native layers, text, and frames. Hover/focus/active states are embedded as CSS in the SVG.
                         </div>
                     </div>
                 )}
@@ -378,7 +473,6 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                                         <div key={prop} style={{ display: 'flex', gap: '8px', paddingLeft: '8px', marginBottom: '2px' }}>
                                             <span style={{ opacity: 0.55, minWidth: '120px', fontFamily: 'monospace' }}>{prop}</span>
                                             <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>
-                                                {/* Show a color swatch for color values */}
                                                 {(prop.includes('color') || prop === 'box-shadow') && (
                                                     <span style={{
                                                         display: 'inline-block', width: '10px', height: '10px',
@@ -392,6 +486,56 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                                     ))}
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Responsive HTML+CSS */}
+                {data?.mode === 'responsive-html' && (
+                    <div className="code-blocks">
+                        <div className="code-block-wrapper">
+                            <div className="code-header">
+                                <span>
+                                    Responsive HTML
+                                    <span className="code-badge">Flexbox/Grid</span>
+                                </span>
+                                <button onClick={() => handleCopy(data.html)}>{copied ? 'Copied!' : 'Copy'}</button>
+                            </div>
+                            <pre className="code-content"><code>{data.html}</code></pre>
+                        </div>
+                        <div className="code-block-wrapper mt-3">
+                            <div className="code-header">
+                                <span>
+                                    CSS
+                                    <span className="code-badge">
+                                        {data.tokensUsed?.colors?.length || 0} colors, {data.tokensUsed?.fonts?.length || 0} fonts
+                                    </span>
+                                </span>
+                                <button onClick={() => handleCopy(data.css)}>{copied ? 'Copied!' : 'Copy'}</button>
+                            </div>
+                            <pre className="code-content"><code>{data.css}</code></pre>
+                        </div>
+                        <div style={{ padding: '8px 12px', fontSize: '11px', opacity: 0.7, lineHeight: 1.5, borderTop: '1px solid var(--border)' }}>
+                            Self-contained responsive HTML+CSS snippet. Preserves flexbox/grid layout, exact colors, and responsive units.
+                        </div>
+                    </div>
+                )}
+
+                {/* AI Prompt description */}
+                {data?.mode === 'ai-prompt' && (
+                    <div className="code-block-wrapper">
+                        <div className="code-header">
+                            <span>
+                                Component Description
+                                <span className="code-badge">AI Generated</span>
+                            </span>
+                            <button onClick={() => handleCopy(data.description)}>{copied ? 'Copied!' : 'Copy'}</button>
+                        </div>
+                        <div className="code-content" style={{ padding: '12px 16px', fontSize: '12px', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                            {data.description}
+                        </div>
+                        <div style={{ padding: '8px 12px', fontSize: '11px', opacity: 0.7, lineHeight: 1.5, borderTop: '1px solid var(--border)' }}>
+                            Copy this description and use it as a prompt for any AI or designer to recreate this component.
                         </div>
                     </div>
                 )}

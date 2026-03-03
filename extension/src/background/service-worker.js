@@ -53,6 +53,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case 'EXTRACT_ASSETS':
         case 'EXPORT_FULL_CONTEXT':
         case 'EXPORT_FIGMA_SVG':
+        case 'EXPORT_RESPONSIVE_HTML':
         case 'GET_CHILD_ELEMENTS':
             // Forward to content script of active tab
             forwardToActiveTab(message, sendResponse);
@@ -77,6 +78,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case 'FIGMA_EXPORT':
             // Call Gemini API from service worker
             handleAIExport(payload, type === 'FIGMA_EXPORT').then(result => {
+                sendResponse(result);
+            }).catch(err => {
+                sendResponse({ error: err.message });
+            });
+            return true; // async response
+
+        case 'AI_DESCRIBE_COMPONENT':
+            // AI-powered component description for recreation prompts
+            handleAIDescribe(payload).then(result => {
                 sendResponse(result);
             }).catch(err => {
                 sendResponse({ error: err.message });
@@ -473,4 +483,124 @@ Output the complete ${fileExt} file:`;
     }
 
     return { code, framework: isFigma ? 'figma' : framework, model: GEMINI_MODEL };
+}
+
+/**
+ * Handle AI component description — generates a natural language prompt for recreation
+ */
+async function handleAIDescribe(payload) {
+    const { context } = payload;
+    if (!context?.html) {
+        return { error: 'Missing component context' };
+    }
+
+    const storageData = await chrome.storage.local.get(['plan', 'userId']);
+    const plan = storageData.plan || 'free';
+    if (!storageData.userId) {
+        return { error: 'Sign in with Google to use AI features.' };
+    }
+    if (plan === 'free') {
+        return { error: 'AI features require a Pro or Lifetime subscription. Upgrade in Settings.' };
+    }
+
+    const apiKey = await getGeminiApiKey();
+    if (!apiKey) {
+        return { error: 'Gemini API key not configured. Set it in extension settings.' };
+    }
+
+    const prompt = buildDescribePrompt(context);
+
+    const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { maxOutputTokens: 4096 },
+            }),
+        }
+    );
+
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Gemini API error (${response.status}): ${errText}`);
+    }
+
+    const result = await response.json();
+    let description = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    description = description.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '');
+
+    return { description, mode: 'ai-prompt', model: GEMINI_MODEL };
+}
+
+/**
+ * Build prompt for AI component description
+ */
+function buildDescribePrompt(context) {
+    const { html, css, layout, colors, fonts, animations } = context;
+
+    let prompt = `You are an expert UI/UX analyst. Analyze the following web component and write a detailed, structured natural language description that another designer or AI could use to recreate this component pixel-perfectly.
+
+## Source HTML
+${(html || '').slice(0, 8000)}
+
+## Source CSS
+${(css || '').slice(0, 5000)}`;
+
+    if (colors) {
+        prompt += `\n\n## Colors`;
+        if (colors.palette?.length) {
+            prompt += `\nPalette: ${colors.palette.slice(0, 12).map(c => `${c.hex} (${c.name || 'unnamed'})`).join(', ')}`;
+        }
+        if (colors.backgrounds?.length) prompt += `\nBackgrounds: ${colors.backgrounds.join(', ')}`;
+        if (colors.textColors?.length) prompt += `\nText: ${colors.textColors.join(', ')}`;
+        if (colors.accentColors?.length) prompt += `\nAccents: ${colors.accentColors.join(', ')}`;
+    }
+
+    if (fonts) {
+        prompt += `\n\n## Typography`;
+        if (fonts.fonts?.length) {
+            for (const f of fonts.fonts.slice(0, 5)) {
+                prompt += `\n- "${f.family}" weights: ${f.weights.join(', ')}`;
+            }
+        }
+        if (fonts.fontScale) {
+            for (const [level, value] of Object.entries(fonts.fontScale)) {
+                prompt += `\n- ${level}: ${value}`;
+            }
+        }
+    }
+
+    if (layout?.structuralHTML) {
+        prompt += `\n\n## Layout Structure\n${layout.structuralHTML.slice(0, 2000)}`;
+    }
+    if (layout?.ascii) {
+        prompt += `\n\n## ASCII Layout\n${layout.ascii.slice(0, 1000)}`;
+    }
+
+    if (animations?.items?.length) {
+        prompt += `\n\n## Animations`;
+        for (const anim of animations.items.slice(0, 5)) {
+            if (anim.type === 'keyframe') prompt += `\n- Keyframe "${anim.name}": ${anim.duration}, ${anim.timingFunction}`;
+            else prompt += `\n- Transition: ${anim.transition}`;
+        }
+    }
+
+    prompt += `\n\n## Output Requirements
+Write a comprehensive recreation prompt with these sections:
+1. **Component Overview** — What type of component is this? (card, hero, nav, form, etc.) What is its purpose?
+2. **Structure & Hierarchy** — Describe the DOM structure, nesting, and semantic elements
+3. **Layout System** — Flex or grid? Direction, alignment, gap values, wrapping behavior
+4. **Dimensions & Spacing** — Exact widths, heights, padding, margins in px
+5. **Colors** — List every color used with exact hex values and where each is applied
+6. **Typography** — Font families, sizes, weights, line heights, letter spacing for each text element
+7. **Borders & Shadows** — Border radius, widths, colors, box shadows with exact values
+8. **Interaction States** — Hover, focus, active states with exact property changes and transitions
+9. **Responsive Behavior** — How should this adapt to different screen sizes?
+10. **Images & Icons** — Describe any images, icons, or SVGs and their sizing/positioning
+
+Be specific with every value. Use exact pixel values and hex colors. Do not generalize.`;
+
+    return prompt;
 }
