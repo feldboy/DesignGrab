@@ -45,46 +45,92 @@ btnGoogleSignin.addEventListener('click', async () => {
 });
 
 // Export to Figma — open side panel on Figma tab
-btnFigma.addEventListener('click', () => {
+btnFigma.addEventListener('click', async () => {
     chrome.storage.local.set({ openTab: 'figma' });
-    chrome.runtime.sendMessage({ type: 'OPEN_SIDE_PANEL' });
-    setTimeout(() => window.close(), 200);
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab) await chrome.sidePanel.open({ tabId: tab.id });
+    } catch (e) {
+        console.error('[DesignGrab] Failed to open side panel:', e);
+    }
+    window.close();
 });
 
-// Toggle Inspect Mode
-btnInspect.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'TOGGLE_INSPECT' }, (response) => {
+// Toggle Inspect Mode — send directly to content script (bypass service worker)
+btnInspect.addEventListener('click', async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+
+    function handleResponse(response) {
         if (response?.active) {
             isInspecting = true;
             btnInspect.classList.add('active');
             btnInspect.querySelector('span').textContent = 'Stop Inspecting';
-            // Close popup after activation to let user interact with page
             setTimeout(() => window.close(), 300);
         } else {
             isInspecting = false;
             btnInspect.classList.remove('active');
             btnInspect.querySelector('span').textContent = 'Start Inspecting';
         }
-    });
+    }
+
+    try {
+        const response = await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_INSPECT' });
+        handleResponse(response);
+    } catch (e) {
+        // Content script not loaded — inject and retry
+        try {
+            await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] });
+            const response = await chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_INSPECT' });
+            handleResponse(response);
+        } catch (e2) {
+            btnInspect.querySelector('span').textContent = 'Cannot inspect this page';
+            setTimeout(() => {
+                btnInspect.querySelector('span').textContent = 'Start Inspecting';
+            }, 2000);
+        }
+    }
 });
 
-// Extract Assets
-btnAssets.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'EXTRACT_ASSETS' }, (response) => {
+// Extract Assets — send directly to content script
+btnAssets.addEventListener('click', async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+
+    async function doExtract() {
+        const response = await chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_ASSETS' });
         if (response?.success) {
-            // Open side panel to show results
-            chrome.runtime.sendMessage({ type: 'OPEN_SIDE_PANEL' });
-            // Store assets for the panel to pick up
             chrome.storage.local.set({ lastExtractedAssets: response.assets });
-            setTimeout(() => window.close(), 300);
+            try {
+                await chrome.sidePanel.open({ tabId: tab.id });
+            } catch (e) {
+                console.error('[DesignGrab] Failed to open side panel:', e);
+            }
+            window.close();
         }
-    });
+    }
+
+    try {
+        await doExtract();
+    } catch (e) {
+        try {
+            await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['content.js'] });
+            await doExtract();
+        } catch (e2) {
+            console.error('[DesignGrab] Extract assets failed:', e2);
+        }
+    }
 });
 
 // Open Side Panel
-btnPanel.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ type: 'OPEN_SIDE_PANEL' });
-    setTimeout(() => window.close(), 200);
+btnPanel.addEventListener('click', async () => {
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab) await chrome.sidePanel.open({ tabId: tab.id });
+    } catch (e) {
+        console.error('[DesignGrab] Failed to open side panel:', e);
+    }
+    window.close();
 });
 
 // Check current inspect state

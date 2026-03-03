@@ -449,19 +449,33 @@ ${layout ? `\nLayout:\n${layout.slice(0, 2000)}` : ''}
 Output the complete ${fileExt} file:`;
     }
 
-    const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    maxOutputTokens: isFigma ? 16384 : 8192,
-                },
-            }),
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 55000);
+
+    let response;
+    try {
+        response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        maxOutputTokens: isFigma ? 16384 : 8192,
+                    },
+                }),
+                signal: controller.signal,
+            }
+        );
+    } catch (err) {
+        clearTimeout(fetchTimeout);
+        if (err.name === 'AbortError') {
+            throw new Error('Gemini API request timed out. Please try again.');
         }
-    );
+        throw err;
+    }
+    clearTimeout(fetchTimeout);
 
     if (!response.ok) {
         const errText = await response.text();
@@ -510,17 +524,31 @@ async function handleAIDescribe(payload) {
 
     const prompt = buildDescribePrompt(context);
 
-    const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { maxOutputTokens: 4096 },
-            }),
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 55000);
+
+    let response;
+    try {
+        response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { maxOutputTokens: 4096 },
+                }),
+                signal: controller.signal,
+            }
+        );
+    } catch (err) {
+        clearTimeout(fetchTimeout);
+        if (err.name === 'AbortError') {
+            throw new Error('Gemini API request timed out. Please try again.');
         }
-    );
+        throw err;
+    }
+    clearTimeout(fetchTimeout);
 
     if (!response.ok) {
         const errText = await response.text();

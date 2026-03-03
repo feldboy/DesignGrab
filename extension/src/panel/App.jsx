@@ -10,6 +10,7 @@ import { LibraryTab } from './components/LibraryTab.jsx';
 import { AnimationsTab } from './components/AnimationsTab.jsx';
 import { SettingsTab } from './components/SettingsTab.jsx';
 import { getAuthState, signInWithGoogle } from '../lib/auth.js';
+import { ensureContentScript } from '../lib/tabMessaging.js';
 
 const TABS = [
     { id: 'figma', label: 'Figma', icon: '🎯', highlight: true },
@@ -32,6 +33,11 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
     const [authLoading, setAuthLoading] = useState(false);
+
+    // Inject content script into active tab on panel load
+    useEffect(() => {
+        ensureContentScript();
+    }, []);
 
     // Check for openTab request from popup
     useEffect(() => {
@@ -98,23 +104,34 @@ function App() {
     }, []);
 
     const handleStartInspect = () => {
-        chrome.runtime.sendMessage({ type: 'START_INSPECT' }, (res) => {
-            if (res?.active) setIsInspecting(true);
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (!tabs[0]) return;
+            chrome.tabs.sendMessage(tabs[0].id, { type: 'START_INSPECT' }, (res) => {
+                if (chrome.runtime.lastError) return;
+                if (res?.active) setIsInspecting(true);
+            });
         });
     };
 
     const handleStopInspect = () => {
-        chrome.runtime.sendMessage({ type: 'STOP_INSPECT' }, (res) => {
-            setIsInspecting(false);
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (!tabs[0]) return;
+            chrome.tabs.sendMessage(tabs[0].id, { type: 'STOP_INSPECT' }, () => {
+                setIsInspecting(false);
+            });
         });
     };
 
     const handleExtractAssets = () => {
-        chrome.runtime.sendMessage({ type: 'EXTRACT_ASSETS' }, (res) => {
-            if (res?.success) {
-                setAssets(res.assets);
-                setActiveTab('assets');
-            }
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (!tabs[0]) return;
+            chrome.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_ASSETS' }, (res) => {
+                if (chrome.runtime.lastError) return;
+                if (res?.success) {
+                    setAssets(res.assets);
+                    setActiveTab('assets');
+                }
+            });
         });
     };
 
