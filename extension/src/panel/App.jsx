@@ -10,8 +10,6 @@ import { LibraryTab } from './components/LibraryTab.jsx';
 import { AnimationsTab } from './components/AnimationsTab.jsx';
 import { SettingsTab } from './components/SettingsTab.jsx';
 import { getAuthState, signInWithGoogle } from '../lib/auth.js';
-import { ensureContentScript } from '../lib/tabMessaging.js';
-
 const TABS = [
     { id: 'figma', label: 'Figma', icon: '🎯', highlight: true },
     { id: 'inspector', label: 'Inspector', icon: '🔍' },
@@ -33,11 +31,6 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [authChecked, setAuthChecked] = useState(false);
     const [authLoading, setAuthLoading] = useState(false);
-
-    // Inject content script into active tab on panel load
-    useEffect(() => {
-        ensureContentScript();
-    }, []);
 
     // Check for openTab request from popup
     useEffect(() => {
@@ -103,35 +96,44 @@ function App() {
         return () => chrome.runtime.onMessage.removeListener(handleMessage);
     }, []);
 
-    const handleStartInspect = () => {
+    const sendToActiveTab = (message, callback) => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (!tabs[0]) return;
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'START_INSPECT' }, (res) => {
-                if (chrome.runtime.lastError) return;
-                if (res?.active) setIsInspecting(true);
+            chrome.tabs.sendMessage(tabs[0].id, message, (res) => {
+                if (chrome.runtime.lastError) {
+                    // Content script not loaded yet — inject then retry
+                    chrome.scripting.executeScript(
+                        { target: { tabId: tabs[0].id }, files: ['content.js'] },
+                        () => {
+                            if (chrome.runtime.lastError) return;
+                            chrome.tabs.sendMessage(tabs[0].id, message, callback);
+                        }
+                    );
+                } else {
+                    callback && callback(res);
+                }
             });
+        });
+    };
+
+    const handleStartInspect = () => {
+        sendToActiveTab({ type: 'START_INSPECT' }, (res) => {
+            if (res?.active) setIsInspecting(true);
         });
     };
 
     const handleStopInspect = () => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (!tabs[0]) return;
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'STOP_INSPECT' }, () => {
-                setIsInspecting(false);
-            });
+        sendToActiveTab({ type: 'STOP_INSPECT' }, () => {
+            setIsInspecting(false);
         });
     };
 
     const handleExtractAssets = () => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (!tabs[0]) return;
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_ASSETS' }, (res) => {
-                if (chrome.runtime.lastError) return;
-                if (res?.success) {
-                    setAssets(res.assets);
-                    setActiveTab('assets');
-                }
-            });
+        sendToActiveTab({ type: 'EXTRACT_ASSETS' }, (res) => {
+            if (res?.success) {
+                setAssets(res.assets);
+                setActiveTab('assets');
+            }
         });
     };
 
@@ -153,17 +155,12 @@ function App() {
             {/* Header */}
             <div class="panel-header">
                 <div class="panel-logo">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <rect width="20" height="20" rx="5" fill="url(#grad)" />
-                        <path d="M6 7L10 10L6 13" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        <line x1="11" y1="13" x2="15" y2="13" stroke="white" stroke-width="1.5" stroke-linecap="round" />
-                        <defs>
-                            <linearGradient id="grad" x1="0" y1="0" x2="20" y2="20">
-                                <stop stop-color="#6366f1" />
-                                <stop offset="1" stop-color="#8b5cf6" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
+                    <div class="panel-logo-icon">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M4 6L8 9L4 12" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="9" y1="12" x2="14" y2="12" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </div>
                     <span class="panel-title">DesignGrab</span>
                 </div>
                 <div class="panel-actions">
@@ -171,7 +168,10 @@ function App() {
                         class={`panel-inspect-btn ${isInspecting ? 'active' : ''}`}
                         onClick={isInspecting ? handleStopInspect : handleStartInspect}
                     >
-                        {isInspecting ? '⬛ Stop' : '🔍 Inspect'}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        {isInspecting ? 'Stop' : 'Inspect'}
                     </button>
                 </div>
             </div>
