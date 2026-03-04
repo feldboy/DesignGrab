@@ -12,6 +12,10 @@ extension/src/config/env.js
 # Claude Code skills/commands
 .claude/commands/
 
+# Editor and OS artifacts
+.vscode/
+extension/__MACOSX/
+
 # Project docs (keep README.md only)
 designgrab-spec.md
 phase3-plan.md
