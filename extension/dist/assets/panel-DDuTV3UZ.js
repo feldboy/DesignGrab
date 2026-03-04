@@ -2484,21 +2484,6 @@ function SettingsTab() {
     ] })
   ] });
 }
-async function ensureContentScript() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab) return;
-  try {
-    await chrome.tabs.sendMessage(tab.id, { type: "PING" });
-  } catch (e2) {
-    try {
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ["content.js"]
-      });
-    } catch (e22) {
-    }
-  }
-}
 const TABS = [
   { id: "figma", label: "Figma", icon: "🎯", highlight: true },
   { id: "inspector", label: "Inspector", icon: "🔍" },
@@ -2519,9 +2504,6 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = d(false);
   const [authChecked, setAuthChecked] = d(false);
   const [authLoading, setAuthLoading] = d(false);
-  y(() => {
-    ensureContentScript();
-  }, []);
   y(() => {
     chrome.storage.local.get(["openTab"], (data) => {
       if (data.openTab) {
@@ -2577,33 +2559,40 @@ function App() {
     });
     return () => chrome.runtime.onMessage.removeListener(handleMessage);
   }, []);
-  const handleStartInspect = () => {
+  const sendToActiveTab = (message, callback) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (!tabs[0]) return;
-      chrome.tabs.sendMessage(tabs[0].id, { type: "START_INSPECT" }, (res) => {
-        if (chrome.runtime.lastError) return;
-        if (res?.active) setIsInspecting(true);
+      chrome.tabs.sendMessage(tabs[0].id, message, (res) => {
+        if (chrome.runtime.lastError) {
+          chrome.scripting.executeScript(
+            { target: { tabId: tabs[0].id }, files: ["content.js"] },
+            () => {
+              if (chrome.runtime.lastError) return;
+              chrome.tabs.sendMessage(tabs[0].id, message, callback);
+            }
+          );
+        } else {
+          callback && callback(res);
+        }
       });
+    });
+  };
+  const handleStartInspect = () => {
+    sendToActiveTab({ type: "START_INSPECT" }, (res) => {
+      if (res?.active) setIsInspecting(true);
     });
   };
   const handleStopInspect = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs[0]) return;
-      chrome.tabs.sendMessage(tabs[0].id, { type: "STOP_INSPECT" }, () => {
-        setIsInspecting(false);
-      });
+    sendToActiveTab({ type: "STOP_INSPECT" }, () => {
+      setIsInspecting(false);
     });
   };
   const handleExtractAssets = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs[0]) return;
-      chrome.tabs.sendMessage(tabs[0].id, { type: "EXTRACT_ASSETS" }, (res) => {
-        if (chrome.runtime.lastError) return;
-        if (res?.success) {
-          setAssets(res.assets);
-          setActiveTab("assets");
-        }
-      });
+    sendToActiveTab({ type: "EXTRACT_ASSETS" }, (res) => {
+      if (res?.success) {
+        setAssets(res.assets);
+        setActiveTab("assets");
+      }
     });
   };
   const handleSignIn = async () => {
@@ -2619,15 +2608,10 @@ function App() {
   return /* @__PURE__ */ u$1("div", { class: "panel", children: [
     /* @__PURE__ */ u$1("div", { class: "panel-header", children: [
       /* @__PURE__ */ u$1("div", { class: "panel-logo", children: [
-        /* @__PURE__ */ u$1("svg", { width: "20", height: "20", viewBox: "0 0 20 20", fill: "none", children: [
-          /* @__PURE__ */ u$1("rect", { width: "20", height: "20", rx: "5", fill: "url(#grad)" }),
-          /* @__PURE__ */ u$1("path", { d: "M6 7L10 10L6 13", stroke: "white", "stroke-width": "1.5", "stroke-linecap": "round", "stroke-linejoin": "round" }),
-          /* @__PURE__ */ u$1("line", { x1: "11", y1: "13", x2: "15", y2: "13", stroke: "white", "stroke-width": "1.5", "stroke-linecap": "round" }),
-          /* @__PURE__ */ u$1("defs", { children: /* @__PURE__ */ u$1("linearGradient", { id: "grad", x1: "0", y1: "0", x2: "20", y2: "20", children: [
-            /* @__PURE__ */ u$1("stop", { "stop-color": "#6366f1" }),
-            /* @__PURE__ */ u$1("stop", { offset: "1", "stop-color": "#8b5cf6" })
-          ] }) })
-        ] }),
+        /* @__PURE__ */ u$1("div", { class: "panel-logo-icon", children: /* @__PURE__ */ u$1("svg", { width: "18", height: "18", viewBox: "0 0 18 18", fill: "none", children: [
+          /* @__PURE__ */ u$1("path", { d: "M4 6L8 9L4 12", stroke: "white", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round" }),
+          /* @__PURE__ */ u$1("line", { x1: "9", y1: "12", x2: "14", y2: "12", stroke: "white", "stroke-width": "1.8", "stroke-linecap": "round" })
+        ] }) }),
         /* @__PURE__ */ u$1("span", { class: "panel-title", children: "DesignGrab" })
       ] }),
       /* @__PURE__ */ u$1("div", { class: "panel-actions", children: /* @__PURE__ */ u$1(
@@ -2635,7 +2619,13 @@ function App() {
         {
           class: `panel-inspect-btn ${isInspecting ? "active" : ""}`,
           onClick: isInspecting ? handleStopInspect : handleStartInspect,
-          children: isInspecting ? "⬛ Stop" : "🔍 Inspect"
+          children: [
+            /* @__PURE__ */ u$1("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": "2.5", "stroke-linecap": "round", "stroke-linejoin": "round", children: [
+              /* @__PURE__ */ u$1("circle", { cx: "11", cy: "11", r: "8" }),
+              /* @__PURE__ */ u$1("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+            ] }),
+            isInspecting ? "Stop" : "Inspect"
+          ]
         }
       ) })
     ] }),

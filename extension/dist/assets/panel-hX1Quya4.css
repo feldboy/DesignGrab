@@ -51,7 +51,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border);
     background: var(--bg-secondary);
     gap: 8px;
@@ -61,26 +61,37 @@ body {
 .panel-logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+}
+
+.panel-logo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .panel-title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: 0.02em;
-    background: linear-gradient(135deg, #818cf8, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
 }
 
 .panel-inspect-btn {
-    padding: 5px 12px;
-    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 20px;
     border: 1px solid var(--border-strong);
-    background: var(--accent-light);
-    color: var(--accent);
-    font-size: 11px;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -89,32 +100,24 @@ body {
 }
 
 .panel-inspect-btn:hover {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: rgba(99, 102, 241, 0.3);
 }
 
 .panel-inspect-btn.active {
     background: rgba(248, 113, 113, 0.1);
     color: var(--red);
-    border-color: rgba(248, 113, 113, 0.2);
+    border-color: rgba(248, 113, 113, 0.3);
 }
 
-/* Tabs */
+/* Tabs — 2-row grid */
 .panel-tabs {
-    display: flex;
-    align-items: center;
-    gap: 1px;
-    padding: 4px 6px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
     border-bottom: 1px solid var(--border);
     background: var(--bg-secondary);
-    overflow-x: auto;
-    scrollbar-width: none;
-    flex-shrink: 0;
-}
-
-.panel-tabs::-webkit-scrollbar {
-    display: none;
 }
 
 .panel-tab {
@@ -122,33 +125,29 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    padding: 6px 0;
-    min-width: 40px;
+    gap: 4px;
+    padding: 10px 4px;
     border: none;
-    border-radius: var(--radius-sm);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     background: transparent;
     color: var(--text-muted);
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 10px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
     white-space: nowrap;
     font-family: inherit;
-    flex: 1 0 0;
-    position: relative;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
 }
 
-.panel-tab::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 25%;
-    right: 25%;
-    height: 2px;
-    border-radius: 2px;
-    background: transparent;
-    transition: background 0.15s ease;
+.panel-tab:nth-child(5n) {
+    border-right: none;
+}
+
+.panel-tab:nth-child(n+6) {
+    border-bottom: none;
 }
 
 .panel-tab:hover:not(.disabled) {
@@ -157,28 +156,20 @@ body {
 }
 
 .panel-tab.active {
+    background: rgba(99, 102, 241, 0.12);
     color: var(--accent);
-    background: transparent;
-}
-
-.panel-tab.active::after {
-    background: var(--accent);
+    border-bottom-color: var(--accent);
 }
 
 .panel-tab.figma-tab {
     color: #a78bfa;
-    background: transparent;
-    border: none;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .panel-tab.figma-tab.active {
+    background: rgba(99, 102, 241, 0.15);
     color: #818cf8;
-    background: rgba(99, 102, 241, 0.08);
-}
-
-.panel-tab.figma-tab.active::after {
-    background: #818cf8;
+    border-bottom-color: #818cf8;
 }
 
 .panel-tab.disabled {
@@ -193,20 +184,7 @@ body {
 
 .tab-label {
     font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    opacity: 0.7;
-    transition: opacity 0.15s ease;
-}
-
-.panel-tab.active .tab-label {
-    opacity: 1;
-    font-weight: 600;
-}
-
-.panel-tab:hover .tab-label {
-    opacity: 1;
+    letter-spacing: 0.04em;
 }
 
 /* Panel Content */

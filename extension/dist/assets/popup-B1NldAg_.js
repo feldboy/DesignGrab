@@ -34,20 +34,15 @@ btnGoogleSignin.addEventListener("click", async () => {
     }
   }
 });
-btnFigma.addEventListener("click", async () => {
+btnFigma.addEventListener("click", () => {
   chrome.storage.local.set({ openTab: "figma" });
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) await chrome.sidePanel.open({ tabId: tab.id });
-  } catch (e) {
-    console.error("[DesignGrab] Failed to open side panel:", e);
-  }
-  window.close();
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]) chrome.sidePanel.open({ tabId: tabs[0].id });
+  });
+  setTimeout(() => window.close(), 200);
 });
-btnInspect.addEventListener("click", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab) return;
-  function handleResponse(response) {
+btnInspect.addEventListener("click", () => {
+  chrome.runtime.sendMessage({ type: "TOGGLE_INSPECT" }, (response) => {
     if (response?.active) {
       btnInspect.classList.add("active");
       btnInspect.querySelector("span").textContent = "Stop Inspecting";
@@ -56,57 +51,24 @@ btnInspect.addEventListener("click", async () => {
       btnInspect.classList.remove("active");
       btnInspect.querySelector("span").textContent = "Start Inspecting";
     }
-  }
-  try {
-    const response = await chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_INSPECT" });
-    handleResponse(response);
-  } catch (e) {
-    try {
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
-      const response = await chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_INSPECT" });
-      handleResponse(response);
-    } catch (e2) {
-      btnInspect.querySelector("span").textContent = "Cannot inspect this page";
-      setTimeout(() => {
-        btnInspect.querySelector("span").textContent = "Start Inspecting";
-      }, 2e3);
-    }
-  }
+  });
 });
-btnAssets.addEventListener("click", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab) return;
-  async function doExtract() {
-    const response = await chrome.tabs.sendMessage(tab.id, { type: "EXTRACT_ASSETS" });
+btnAssets.addEventListener("click", () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]) chrome.sidePanel.open({ tabId: tabs[0].id });
+  });
+  chrome.runtime.sendMessage({ type: "EXTRACT_ASSETS" }, (response) => {
     if (response?.success) {
       chrome.storage.local.set({ lastExtractedAssets: response.assets });
-      try {
-        await chrome.sidePanel.open({ tabId: tab.id });
-      } catch (e) {
-        console.error("[DesignGrab] Failed to open side panel:", e);
-      }
-      window.close();
     }
-  }
-  try {
-    await doExtract();
-  } catch (e) {
-    try {
-      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
-      await doExtract();
-    } catch (e2) {
-      console.error("[DesignGrab] Extract assets failed:", e2);
-    }
-  }
+  });
+  setTimeout(() => window.close(), 300);
 });
-btnPanel.addEventListener("click", async () => {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) await chrome.sidePanel.open({ tabId: tab.id });
-  } catch (e) {
-    console.error("[DesignGrab] Failed to open side panel:", e);
-  }
-  window.close();
+btnPanel.addEventListener("click", () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]) chrome.sidePanel.open({ tabId: tabs[0].id });
+  });
+  setTimeout(() => window.close(), 200);
 });
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   if (tabs[0]) {
