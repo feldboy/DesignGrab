@@ -3,6 +3,9 @@
  * Handles message routing, side panel management, and asset downloads.
  */
 
+// Import config from env (inlined by Vite at build time)
+import { GEMINI_API_KEY as ENV_GEMINI_KEY, GEMINI_MODEL as ENV_GEMINI_MODEL } from '../config/env.js';
+
 // Open side panel when extension icon is clicked (on supported browsers)
 chrome.sidePanel?.setOptions?.({ enabled: true });
 
@@ -380,20 +383,15 @@ ${(css || '').slice(0, 8000)}`;
  * Handle AI export — call Google Gemini API
  * API key is loaded from chrome.storage.local (set via extension config or env.js)
  */
-const GEMINI_MODEL = 'gemini-3-flash-preview';
+const GEMINI_MODEL = ENV_GEMINI_MODEL || 'gemini-2.0-flash';
 
 async function getGeminiApiKey() {
     const data = await chrome.storage.local.get(['geminiApiKey']);
     if (data.geminiApiKey) return data.geminiApiKey;
 
-    // Fallback: try loading from bundled env config
-    try {
-        const { GEMINI_API_KEY } = await import('../config/env.js');
-        if (GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY') {
-            return GEMINI_API_KEY;
-        }
-    } catch (e) {
-        // env.js not found — expected if not configured
+    // Fallback: use key loaded from bundled env config at module init
+    if (ENV_GEMINI_KEY && ENV_GEMINI_KEY !== 'YOUR_GEMINI_API_KEY') {
+        return ENV_GEMINI_KEY;
     }
 
     return null;

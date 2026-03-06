@@ -27,13 +27,24 @@ export async function getAuthState() {
     }
 
     try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
+        // Use getSession() for fast, local-first auth checks.
+        // It reads from storage and auto-refreshes expired tokens.
+        // IMPORTANT: Do NOT call setSession() here — it triggers SIGNED_IN events
+        // that cause storage listeners to fire and re-check auth, creating a
+        // flash of "logged in" then "logged out" on the Settings page.
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+            console.warn('[DesignGrab] Session error:', sessionError.message);
+        }
+
+        if (session?.user) {
+            const user = session.user;
             const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
             const plan = profile?.plan || state.plan;
             await storage.set({ userId: user.id, plan });
             // Sync plan limits from Supabase (picks up Dashboard changes)
-            syncPlanLimits(supabase).catch(() => {});
+            syncPlanLimits(supabase).catch(() => { });
             return { user, plan, isLoggedIn: true, cloudEnabled: true };
         }
     } catch (err) {
@@ -112,7 +123,7 @@ export async function signInWithGoogle() {
             const { data: profile } = await supabase.from('profiles').select('plan').eq('id', data.user.id).single();
             if (profile?.plan) await storage.set({ plan: profile.plan });
             // Sync plan limits from Supabase on fresh login
-            syncPlanLimits(supabase).catch(() => {});
+            syncPlanLimits(supabase).catch(() => { });
         }
 
         return { user: data?.user, error: null };

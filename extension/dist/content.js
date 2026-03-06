@@ -368,6 +368,10 @@ function onElementClick(e) {
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
+  pinElement(target);
+  stopInspecting();
+}
+function pinElement(target) {
   pinnedElement = target;
   const data = getElementData(target);
   data.rawCSS = getRawCSS(target);
@@ -376,8 +380,8 @@ function onElementClick(e) {
     type: "ELEMENT_PINNED",
     payload: data
   });
-  stopInspecting();
   showOverlay(target);
+  return data;
 }
 function onKeyDown(e) {
   if (e.key === "Escape") {
@@ -2702,6 +2706,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "STOP_INSPECT":
       stopInspecting();
       sendResponse({ active: false });
+      break;
+    case "SELECT_PAGE":
+      initDesignGrab();
+      try {
+        const pageData = pinElement(document.body);
+        sendResponse({ success: true, data: pageData });
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
       break;
     case "EXTRACT_ASSETS":
       initDesignGrab();

@@ -1,6 +1,6 @@
-import { g as getSupabase, s as storage, c as checkLimit, r as recordUsage, a as getAuthState, b as getUsageSummary, d as signOut, e as signInWithGoogle } from "./auth-DRu1Lwtc.js";
-import { SUPABASE_URL } from "./env-BLrtva26.js";
-import "./preload-helper-CyNIpbXk.js";
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./auth-jQZeegj1.js","./env-sw2aQK8W.js"])))=>i.map(i=>d[i]);
+import { g as getSupabase, s as storage, c as checkLimit, r as recordUsage, a as getAuthState, b as getUsageSummary, d as signInWithGoogle, _ as __vitePreload } from "./auth-jQZeegj1.js";
+import { S as SUPABASE_URL } from "./env-sw2aQK8W.js";
 var n, l$1, u$2, i$1, r$1, o$1, e$1, f$2, c$1, s$1, a$1, p$1 = {}, v$1 = [], y$1 = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i, d$1 = Array.isArray;
 function w$1(n2, l2) {
   for (var u2 in l2) n2[u2] = l2[u2];
@@ -369,7 +369,7 @@ function C(n2, t2) {
 function D(n2, t2) {
   return "function" == typeof t2 ? t2(n2) : t2;
 }
-function InspectorTab({ element, isInspecting, onStartInspect }) {
+function InspectorTab({ element, isInspecting, onStartInspect, onSelectPage }) {
   const [copiedKey, setCopiedKey] = d(null);
   if (!element && !isInspecting) {
     return /* @__PURE__ */ u$1("div", { class: "inspector-empty", children: [
@@ -380,7 +380,10 @@ function InspectorTab({ element, isInspecting, onStartInspect }) {
       ] }) }),
       /* @__PURE__ */ u$1("h3", { class: "empty-title", children: "No element selected" }),
       /* @__PURE__ */ u$1("p", { class: "empty-text", children: 'Click "Inspect" and hover over any element on the page, then click to pin it.' }),
-      /* @__PURE__ */ u$1("button", { class: "empty-btn", onClick: onStartInspect, children: "🔍 Start Inspecting" })
+      /* @__PURE__ */ u$1("div", { class: "empty-actions", children: [
+        /* @__PURE__ */ u$1("button", { class: "empty-btn", onClick: onStartInspect, children: "🔍 Start Inspecting" }),
+        /* @__PURE__ */ u$1("button", { class: "empty-btn secondary", onClick: onSelectPage, children: "📄 Select Page" })
+      ] })
     ] });
   }
   if (isInspecting && !element) {
@@ -442,7 +445,8 @@ function InspectorTab({ element, isInspecting, onStartInspect }) {
         element.dimensions?.width,
         " × ",
         element.dimensions?.height
-      ] })
+      ] }),
+      /* @__PURE__ */ u$1("button", { class: "select-page-btn", onClick: onSelectPage, title: "Select entire page", children: "📄 Page" })
     ] }),
     element.selectorPath && /* @__PURE__ */ u$1("div", { class: "inspector-selector", onClick: () => copyValue("selector", element.selectorPath), children: [
       /* @__PURE__ */ u$1("span", { class: "selector-label", children: "Selector" }),
@@ -2366,39 +2370,28 @@ function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect }) {
     ] }) })
   ] });
 }
-function SettingsTab() {
+function SettingsTab({ authState: parentAuthState, onSignIn, onSignOut, authLoading: parentAuthLoading }) {
   const [loaded, setLoaded] = d(false);
-  const [authState, setAuthState] = d({ user: null, plan: "free", isLoggedIn: false });
+  const authState = parentAuthState || { user: null, plan: "free", isLoggedIn: false };
   const [authError, setAuthError] = d("");
-  const [authLoading, setAuthLoading] = d(false);
   const [usage, setUsage] = d(null);
   y(() => {
     setLoaded(true);
-    getAuthState().then((state) => {
-      setAuthState(state);
-      if (state.isLoggedIn) {
-        getUsageSummary().then(setUsage).catch(() => {
-        });
-      }
-    }).catch(() => {
-    });
-  }, []);
+    if (authState.isLoggedIn) {
+      getUsageSummary().then(setUsage).catch(() => {
+      });
+    }
+  }, [authState.isLoggedIn]);
   const handleGoogleSignIn = async () => {
     setAuthError("");
-    setAuthLoading(true);
-    const result = await signInWithGoogle();
-    setAuthLoading(false);
-    if (result.error) {
-      setAuthError(result.error);
-    } else {
-      const state = await getAuthState();
-      setAuthState(state);
-      getUsageSummary().then(setUsage);
+    if (onSignIn) {
+      await onSignIn();
     }
   };
   const handleSignOut = async () => {
-    await signOut();
-    setAuthState({ user: null, plan: "free", isLoggedIn: false });
+    if (onSignOut) {
+      await onSignOut();
+    }
     setUsage(null);
   };
   const planLabels = { free: "Free", pro: "Pro", lifetime: "Lifetime" };
@@ -2421,7 +2414,7 @@ function SettingsTab() {
           {
             className: "panel-btn google-signin-btn",
             onClick: handleGoogleSignIn,
-            disabled: authLoading,
+            disabled: parentAuthLoading,
             style: {
               display: "flex",
               alignItems: "center",
@@ -2436,8 +2429,8 @@ function SettingsTab() {
               borderRadius: "6px",
               fontSize: "13px",
               fontWeight: 500,
-              cursor: authLoading ? "wait" : "pointer",
-              opacity: authLoading ? 0.7 : 1
+              cursor: parentAuthLoading ? "wait" : "pointer",
+              opacity: parentAuthLoading ? 0.7 : 1
             },
             children: [
               /* @__PURE__ */ u$1("svg", { width: "18", height: "18", viewBox: "0 0 48 48", children: [
@@ -2446,7 +2439,7 @@ function SettingsTab() {
                 /* @__PURE__ */ u$1("path", { fill: "#FBBC05", d: "M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" }),
                 /* @__PURE__ */ u$1("path", { fill: "#34A853", d: "M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" })
               ] }),
-              authLoading ? "Signing in..." : "Sign in with Google"
+              parentAuthLoading ? "Signing in..." : "Sign in with Google"
             ]
           }
         )
@@ -2519,6 +2512,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = d(false);
   const [authChecked, setAuthChecked] = d(false);
   const [authLoading, setAuthLoading] = d(false);
+  const [authState, setAuthState] = d({ user: null, plan: "free", isLoggedIn: false });
   y(() => {
     ensureContentScript();
   }, []);
@@ -2531,10 +2525,11 @@ function App() {
     });
   }, []);
   y(() => {
-    getAuthState().then(({ plan, isLoggedIn: loggedIn }) => {
-      setIsLoggedIn(loggedIn);
+    getAuthState().then((state) => {
+      setIsLoggedIn(state.isLoggedIn);
+      setAuthState(state);
       setAuthChecked(true);
-      console.log("[DesignGrab] Plan:", plan);
+      console.log("[DesignGrab] Plan:", state.plan);
     }).catch(() => {
       setAuthChecked(true);
     });
@@ -2542,8 +2537,9 @@ function App() {
   y(() => {
     const listener = (changes) => {
       if (changes.userId) {
-        getAuthState().then(({ isLoggedIn: loggedIn }) => {
-          setIsLoggedIn(loggedIn);
+        getAuthState().then((state) => {
+          setIsLoggedIn(state.isLoggedIn);
+          setAuthState(state);
         }).catch(() => {
         });
       }
@@ -2606,6 +2602,14 @@ function App() {
       });
     });
   };
+  const handleSelectPage = () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs[0]) return;
+      chrome.tabs.sendMessage(tabs[0].id, { type: "SELECT_PAGE" }, (res) => {
+        if (chrome.runtime.lastError) return;
+      });
+    });
+  };
   const handleSignIn = async () => {
     setAuthLoading(true);
     const result = await signInWithGoogle();
@@ -2613,9 +2617,20 @@ function App() {
     if (!result.error) {
       const state = await getAuthState();
       setIsLoggedIn(state.isLoggedIn);
+      setAuthState(state);
     }
   };
-  const requiresAuth = !isLoggedIn && activeTab !== "settings";
+  const handleSignOut = async () => {
+    const { signOut } = await __vitePreload(async () => {
+      const { signOut: signOut2 } = await import("./auth-jQZeegj1.js").then((n2) => n2.e);
+      return { signOut: signOut2 };
+    }, true ? __vite__mapDeps([0,1]) : void 0, import.meta.url);
+    await signOut();
+    const clearedState = { user: null, plan: "free", isLoggedIn: false };
+    setIsLoggedIn(false);
+    setAuthState(clearedState);
+  };
+  const requiresAuth = authChecked && !isLoggedIn && activeTab !== "settings";
   return /* @__PURE__ */ u$1("div", { class: "panel", children: [
     /* @__PURE__ */ u$1("div", { class: "panel-header", children: [
       /* @__PURE__ */ u$1("div", { class: "panel-logo", children: [
@@ -2718,7 +2733,8 @@ function App() {
         {
           element: pinnedElement,
           isInspecting,
-          onStartInspect: handleStartInspect
+          onStartInspect: handleStartInspect,
+          onSelectPage: handleSelectPage
         }
       ),
       activeTab === "assets" && /* @__PURE__ */ u$1(
@@ -2742,7 +2758,15 @@ function App() {
         }
       ),
       activeTab === "library" && /* @__PURE__ */ u$1(LibraryTab, {}),
-      activeTab === "settings" && /* @__PURE__ */ u$1(SettingsTab, {})
+      activeTab === "settings" && /* @__PURE__ */ u$1(
+        SettingsTab,
+        {
+          authState,
+          onSignIn: handleSignIn,
+          onSignOut: handleSignOut,
+          authLoading
+        }
+      )
     ] }) })
   ] });
 }

@@ -1,4 +1,4 @@
-import { _ as __vitePreload } from "./assets/preload-helper-CyNIpbXk.js";
+import { G as GEMINI_MODEL$1, a as GEMINI_API_KEY } from "./assets/env-sw2aQK8W.js";
 chrome.sidePanel?.setOptions?.({ enabled: true });
 chrome.action.onClicked?.addListener(async (tab) => {
   try {
@@ -333,21 +333,13 @@ ${layout.ascii.slice(0, 2e3)}`;
 Output ONLY the raw SVG now. No text before or after. Start with <svg, end with </svg>.`;
   return prompt;
 }
-const GEMINI_MODEL = "gemini-3-flash-preview";
+const GEMINI_MODEL = GEMINI_MODEL$1;
 async function getGeminiApiKey() {
   const data = await chrome.storage.local.get(["geminiApiKey"]);
   if (data.geminiApiKey) return data.geminiApiKey;
-  try {
-    const { GEMINI_API_KEY } = await __vitePreload(async () => {
-      const { GEMINI_API_KEY: GEMINI_API_KEY2 } = await import("./assets/env-BLrtva26.js");
-      return { GEMINI_API_KEY: GEMINI_API_KEY2 };
-    }, true ? [] : void 0, import.meta.url);
-    if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_GEMINI_API_KEY") {
-      return GEMINI_API_KEY;
-    }
-  } catch (e) {
+  {
+    return GEMINI_API_KEY;
   }
-  return null;
 }
 async function handleAIExport(payload, isFigma = false) {
   const { context, html, css, layout, framework = "react" } = payload;

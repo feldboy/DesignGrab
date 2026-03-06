@@ -1,5 +1,4 @@
-import { _ as __vitePreload } from "./preload-helper-CyNIpbXk.js";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./env-BLrtva26.js";
+import { S as SUPABASE_URL, b as SUPABASE_ANON_KEY } from "./env-sw2aQK8W.js";
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -37,6 +36,78 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./env-BLrtva26.js";
     fetch(link.href, fetchOpts);
   }
 })();
+const scriptRel = "modulepreload";
+const assetsURL = function(dep, importerUrl) {
+  return new URL(dep, importerUrl).href;
+};
+const seen = {};
+const __vitePreload = function preload(baseModule, deps, importerUrl) {
+  let promise = Promise.resolve();
+  if (deps && deps.length > 0) {
+    const links = document.getElementsByTagName("link");
+    const cspNonceMeta = document.querySelector(
+      "meta[property=csp-nonce]"
+    );
+    const cspNonce = cspNonceMeta?.nonce || cspNonceMeta?.getAttribute("nonce");
+    promise = Promise.allSettled(
+      deps.map((dep) => {
+        dep = assetsURL(dep, importerUrl);
+        if (dep in seen) return;
+        seen[dep] = true;
+        const isCss = dep.endsWith(".css");
+        const cssSelector = isCss ? '[rel="stylesheet"]' : "";
+        const isBaseRelative = !!importerUrl;
+        if (isBaseRelative) {
+          for (let i = links.length - 1; i >= 0; i--) {
+            const link2 = links[i];
+            if (link2.href === dep && (!isCss || link2.rel === "stylesheet")) {
+              return;
+            }
+          }
+        } else if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) {
+          return;
+        }
+        const link = document.createElement("link");
+        link.rel = isCss ? "stylesheet" : scriptRel;
+        if (!isCss) {
+          link.as = "script";
+        }
+        link.crossOrigin = "";
+        link.href = dep;
+        if (cspNonce) {
+          link.setAttribute("nonce", cspNonce);
+        }
+        document.head.appendChild(link);
+        if (isCss) {
+          return new Promise((res, rej) => {
+            link.addEventListener("load", res);
+            link.addEventListener(
+              "error",
+              () => rej(new Error(`Unable to preload CSS for ${dep}`))
+            );
+          });
+        }
+      })
+    );
+  }
+  function handlePreloadError(err) {
+    const e = new Event("vite:preloadError", {
+      cancelable: true
+    });
+    e.payload = err;
+    window.dispatchEvent(e);
+    if (!e.defaultPrevented) {
+      throw err;
+    }
+  }
+  return promise.then((res) => {
+    for (const item of res || []) {
+      if (item.status !== "rejected") continue;
+      handlePreloadError(item.reason);
+    }
+    return baseModule().catch(handlePreloadError);
+  });
+};
 let supabaseClient = null;
 async function getSupabase() {
   if (supabaseClient) return supabaseClient;
@@ -316,8 +387,12 @@ async function getAuthState() {
     return { user: null, plan: state.plan, isLoggedIn: false, cloudEnabled: false };
   }
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.warn("[DesignGrab] Session error:", sessionError.message);
+    }
+    if (session?.user) {
+      const user = session.user;
       const { data: profile } = await supabase.from("profiles").select("plan").eq("id", user.id).single();
       const plan = profile?.plan || state.plan;
       await storage.set({ userId: user.id, plan });
@@ -394,12 +469,19 @@ async function signOut() {
   await storage.set({ userId: null, plan: "free", usage: null });
   return { error: null };
 }
+const auth = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  getAuthState,
+  signInWithGoogle,
+  signOut
+}, Symbol.toStringTag, { value: "Module" }));
 export {
+  __vitePreload as _,
   getAuthState as a,
   getUsageSummary as b,
   checkLimit as c,
-  signOut as d,
-  signInWithGoogle as e,
+  signInWithGoogle as d,
+  auth as e,
   getSupabase as g,
   recordUsage as r,
   storage as s
