@@ -157,6 +157,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 const colorData = analyzeColors();
                 const fontData = analyzeFonts();
                 const twConfig = generateTailwindConfig(colorData, fontData);
+                const rawAssets = extractAssets();
+                const assets = {
+                    images: rawAssets.images.map(({ element, ...rest }) => rest).slice(0, 15), // cap at 15 for prompt size
+                    svgs: rawAssets.svgs.map(({ element, ...rest }) => rest).slice(0, 10)
+                };
 
                 // Extract animations from the element and its descendants
                 const animations = [];
@@ -221,6 +226,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                         },
                         tailwindConfig: twConfig,
                         animations: animations.length > 0 ? { items: animations.slice(0, 10), keyframesCSS } : null,
+                        assets: assets,
                     },
                 });
             } catch (err) {

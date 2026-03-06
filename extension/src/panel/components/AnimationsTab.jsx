@@ -1,6 +1,6 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import { copyToClipboard } from '../../lib/downloadUtils';
+import { copyToClipboard, downloadTextFile } from '../../lib/downloadUtils';
 
 /**
  * Generate animation suggestions based on element properties
@@ -324,7 +324,265 @@ export function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect
         });
     };
 
-    // --- SUGGESTION PANEL (when element is selected) ---
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportedFormat, setExportedFormat] = useState(null);
+
+    // --- Export builders ---
+    const getSourceUrl = () => {
+        try { return window.location?.href || document.referrer || 'Unknown'; }
+        catch { return 'Extracted page'; }
+    };
+
+    const buildCSSExport = () => {
+        const lines = [];
+        const now = new Date().toISOString().slice(0, 16).replace('T', ' ');
+        lines.push(`/* DesignGrab — Extracted Animations`);
+        lines.push(`   Date: ${now} */`);
+        lines.push('');
+
+        if (keyframes.length > 0) {
+            lines.push('/* ═══════════════════════════════════════');
+            lines.push('   CSS Keyframe Animations');
+            lines.push('   ═══════════════════════════════════════ */');
+            lines.push('');
+            keyframes.forEach(a => {
+                if (a.keyframeCSS) {
+                    lines.push(a.keyframeCSS);
+                    lines.push('');
+                    lines.push(`/* Applied on: ${a.element}`);
+                    lines.push(`   Duration: ${a.duration} | Timing: ${a.timingFunction}`);
+                    if (a.iterationCount === 'infinite') lines.push('   Loop: infinite');
+                    if (a.delay && a.delay !== '0s') lines.push(`   Delay: ${a.delay}`);
+                    lines.push('*/');
+                    lines.push('');
+                }
+            });
+        }
+
+        if (transitions.length > 0) {
+            lines.push('/* ═══════════════════════════════════════');
+            lines.push('   CSS Transitions');
+            lines.push('   ═══════════════════════════════════════ */');
+            lines.push('');
+            transitions.forEach(a => {
+                lines.push(`/* On: ${a.element} */`);
+                lines.push(`.element {`);
+                lines.push(`  transition-property: ${a.transitionProperty || 'all'};`);
+                lines.push(`  transition-duration: ${a.transitionDuration || '0s'};`);
+                lines.push(`  transition-timing-function: ${a.transitionTimingFunction || 'ease'};`);
+                lines.push(`  transition-delay: ${a.transitionDelay || '0s'};`);
+                lines.push(`  /* Shorthand: transition: ${a.transition}; */`);
+                lines.push('}');
+                lines.push('');
+            });
+        }
+
+        if (suggestions.length > 0) {
+            lines.push('/* ═══════════════════════════════════════');
+            lines.push('   Suggested Animations');
+            lines.push('   ═══════════════════════════════════════ */');
+            lines.push('');
+            suggestions.forEach(s => {
+                lines.push(`/* ${s.name} (${s.badge}) */`);
+                lines.push(s.css);
+                lines.push('');
+            });
+        }
+
+        if (lotties.length > 0) {
+            lines.push('/* ═══════════════════════════════════════');
+            lines.push('   Lottie / Rive Animation URLs');
+            lines.push('   ═══════════════════════════════════════ */');
+            lines.push('');
+            lotties.forEach(l => {
+                lines.push(`/* ${l.name} — ${l.playerType} */`);
+                lines.push(`/* URL: ${l.src} */`);
+                lines.push('');
+            });
+        }
+
+        return lines.join('\n');
+    };
+
+    const buildJSONExport = () => {
+        const data = {
+            exportedAt: new Date().toISOString(),
+            generator: 'DesignGrab',
+            keyframes: keyframes.map(a => ({
+                name: a.name,
+                css: a.keyframeCSS || null,
+                duration: a.duration,
+                timingFunction: a.timingFunction,
+                iterationCount: a.iterationCount,
+                delay: a.delay,
+                element: a.element,
+                frames: a.frames || []
+            })),
+            transitions: transitions.map(a => ({
+                property: a.transitionProperty || 'all',
+                duration: a.transitionDuration || '0s',
+                timingFunction: a.transitionTimingFunction || 'ease',
+                delay: a.transitionDelay || '0s',
+                shorthand: a.transition,
+                element: a.element
+            })),
+            scrollAnimations: scrollAnims.map(a => ({
+                name: a.name,
+                library: a.library,
+                element: a.element,
+                duration: a.duration || null,
+                delay: a.delay || null
+            })),
+            lotties: lotties.map(l => ({
+                name: l.name,
+                url: l.src,
+                playerType: l.playerType,
+                width: l.width,
+                height: l.height,
+                loop: l.loop,
+                autoplay: l.autoplay
+            })),
+            suggestions: suggestions.map(s => ({
+                name: s.name,
+                type: s.badge,
+                css: s.css,
+                description: s.desc
+            }))
+        };
+        return JSON.stringify(data, null, 2);
+    };
+
+    const buildAIPromptExport = () => {
+        const parts = [];
+        parts.push('I extracted these CSS animations from a website using DesignGrab. Please use them in my project:\n');
+
+        if (keyframes.length > 0) {
+            parts.push('## Keyframe Animations\n');
+            keyframes.forEach(a => {
+                parts.push(`### ${a.name}`);
+                parts.push(`Applied on: \`${a.element}\``);
+                parts.push(`Duration: ${a.duration} | Timing: ${a.timingFunction}${a.iterationCount === 'infinite' ? ' | Loop: infinite' : ''}${a.delay && a.delay !== '0s' ? ` | Delay: ${a.delay}` : ''}\n`);
+                if (a.keyframeCSS) {
+                    parts.push('```css');
+                    parts.push(a.keyframeCSS);
+                    parts.push('```\n');
+                }
+            });
+        }
+
+        if (transitions.length > 0) {
+            parts.push('## CSS Transitions\n');
+            transitions.forEach(a => {
+                parts.push(`- **${a.element}**: \`transition: ${a.transition};\``);
+            });
+            parts.push('');
+        }
+
+        if (scrollAnims.length > 0) {
+            parts.push('## Scroll-Triggered Animations\n');
+            scrollAnims.forEach(a => {
+                parts.push(`- **${a.name}** (${a.library}) on \`${a.element}\``);
+            });
+            parts.push('');
+        }
+
+        if (lotties.length > 0) {
+            parts.push('## Lottie Animations\n');
+            lotties.forEach(l => {
+                parts.push(`- **${l.name}** (${l.playerType}): ${l.src}`);
+            });
+            parts.push('');
+        }
+
+        if (suggestions.length > 0) {
+            parts.push('## Suggested Animations\n');
+            suggestions.forEach(s => {
+                parts.push(`### ${s.name} (${s.badge})`);
+                parts.push('```css');
+                parts.push(s.css);
+                parts.push('```\n');
+            });
+        }
+
+        parts.push('Please integrate these animations into my component. Keep the exact timing values and easing functions.');
+        return parts.join('\n');
+    };
+
+    const handleExportCSS = () => {
+        const css = buildCSSExport();
+        downloadTextFile(css, 'designgrab-animations.css', 'text/css');
+        setExportedFormat('css');
+        setTimeout(() => setExportedFormat(null), 2000);
+    };
+
+    const handleExportJSON = () => {
+        const json = buildJSONExport();
+        downloadTextFile(json, 'designgrab-animations.json', 'application/json');
+        setExportedFormat('json');
+        setTimeout(() => setExportedFormat(null), 2000);
+    };
+
+    const handleExportAIPrompt = () => {
+        const prompt = buildAIPromptExport();
+        copyToClipboard(prompt);
+        setExportedFormat('ai');
+        setTimeout(() => setExportedFormat(null), 2000);
+    };
+
+    const hasExportableContent = total > 0 || suggestions.length > 0;
+
+    // --- EXPORT MODAL ---
+    const renderExportModal = () => {
+        if (!showExportModal) return null;
+        return (
+            <div className="export-modal-overlay" onClick={() => setShowExportModal(false)}>
+                <div className="export-modal" onClick={e => e.stopPropagation()}>
+                    <div className="export-modal-header">
+                        <h3>Export Animations</h3>
+                        <button className="export-modal-close" onClick={() => setShowExportModal(false)}>✕</button>
+                    </div>
+                    <p className="export-modal-desc">
+                        בחר פורמט ייצוא — CSS לעורך קוד, JSON לכלי AI, או Prompt מוכן להדבקה
+                    </p>
+                    <div className="export-format-grid">
+                        {/* CSS File */}
+                        <button className="export-format-card" onClick={handleExportCSS}>
+                            <div className="export-format-icon">📄</div>
+                            <div className="export-format-info">
+                                <span className="export-format-name">CSS File</span>
+                                <span className="export-format-desc">קובץ .css מוכן — VS Code, Cursor, כל עורך קוד</span>
+                            </div>
+                            <span className="export-format-action">
+                                {exportedFormat === 'css' ? '✓ Downloaded' : 'Download'}
+                            </span>
+                        </button>
+                        {/* JSON */}
+                        <button className="export-format-card" onClick={handleExportJSON}>
+                            <div className="export-format-icon">{'{}'}</div>
+                            <div className="export-format-info">
+                                <span className="export-format-name">JSON</span>
+                                <span className="export-format-desc">מבנה נתונים — Base44, Lovable, כלי AI</span>
+                            </div>
+                            <span className="export-format-action">
+                                {exportedFormat === 'json' ? '✓ Downloaded' : 'Download'}
+                            </span>
+                        </button>
+                        {/* AI Prompt */}
+                        <button className="export-format-card" onClick={handleExportAIPrompt}>
+                            <div className="export-format-icon">🤖</div>
+                            <div className="export-format-info">
+                                <span className="export-format-name">AI Prompt</span>
+                                <span className="export-format-desc">פרומפט מוכן — Antigravity, Cursor, ChatGPT</span>
+                            </div>
+                            <span className="export-format-action">
+                                {exportedFormat === 'ai' ? '✓ Copied!' : 'Copy'}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
     const renderSuggestions = () => {
         if (!pinnedElement) {
             return (
@@ -400,9 +658,17 @@ export function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect
     if (!assets) {
         return (
             <div className="animations-tab fade-in">
+                {renderExportModal()}
                 {/* Suggestions always show at top */}
                 <div className="panel-scroll-content">
                     {renderSuggestions()}
+                    {hasExportableContent && (
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+                            <button className="panel-btn primary small" onClick={() => setShowExportModal(true)}>
+                                ↗ Export Animations
+                            </button>
+                        </div>
+                    )}
                     <div className="anim-divider" />
                     <div className="code-empty-state">
                         <div className="empty-icon">
@@ -421,6 +687,7 @@ export function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect
 
     return (
         <div className="animations-tab fade-in">
+            {renderExportModal()}
             {/* Suggestions section */}
             <div className="panel-scroll-content">
                 {renderSuggestions()}
@@ -435,6 +702,9 @@ export function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect
                         <div className="stats-row">
                             <span>{total} animations found</span>
                             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                <button className="panel-btn primary small" onClick={() => setShowExportModal(true)}>
+                                    ↗ Export
+                                </button>
                                 <button className="panel-btn outline small" onClick={handleCopyAll}>
                                     {copiedId === 'copy-all' ? '✓ Copied' : 'Copy All'}
                                 </button>

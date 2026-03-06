@@ -2189,3 +2189,176 @@ body {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* ═══════════════════════════════════════
+   Export Modal
+   ═══════════════════════════════════════ */
+
+.export-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease-out;
+    padding: 16px;
+}
+
+.export-modal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 340px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.2s ease-out;
+}
+
+.export-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.export-modal-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.export-modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.export-modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.export-modal-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+    direction: rtl;
+}
+
+.export-format-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.export-format-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+}
+
+.export-format-card:hover {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.06);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+.export-format-card:active {
+    transform: translateY(0);
+}
+
+.export-format-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.export-format-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.export-format-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.export-format-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    direction: rtl;
+    line-height: 1.4;
+}
+
+.export-format-action {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--accent-light);
+    transition: all 0.15s;
+}
+
+.export-format-card:hover .export-format-action {
+    background: var(--accent);
+    color: white;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

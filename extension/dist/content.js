@@ -2780,6 +2780,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const colorData = analyzeColors();
         const fontData = analyzeFonts();
         const twConfig = generateTailwindConfig(colorData, fontData);
+        const rawAssets = extractAssets();
+        const assets = {
+          images: rawAssets.images.map(({ element, ...rest }) => rest).slice(0, 15),
+          // cap at 15 for prompt size
+          svgs: rawAssets.svgs.map(({ element, ...rest }) => rest).slice(0, 10)
+        };
         const animations = [];
         const animEls = [ctxEl, ...ctxEl.querySelectorAll("*")];
         for (const el of animEls) {
@@ -2840,7 +2846,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               fontScale: fontData.fontScale
             },
             tailwindConfig: twConfig,
-            animations: animations.length > 0 ? { items: animations.slice(0, 10), keyframesCSS } : null
+            animations: animations.length > 0 ? { items: animations.slice(0, 10), keyframesCSS } : null,
+            assets
           }
         });
       } catch (err) {

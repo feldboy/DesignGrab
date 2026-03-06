@@ -524,6 +524,20 @@ async function copyToClipboard(text) {
     }
   }
 }
+function downloadTextFile(content, filename, mimeType = "text/plain") {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a2 = document.createElement("a");
+  a2.href = url;
+  a2.download = filename;
+  a2.style.display = "none";
+  document.body.appendChild(a2);
+  a2.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    a2.remove();
+  }, 100);
+}
 async function pushItem(item) {
   const supabase = await getSupabase();
   if (!supabase) return false;
@@ -1250,6 +1264,97 @@ function FontsTab() {
     ] })
   ] });
 }
+function buildUltraPrompt(context) {
+  let prompt = `I want to recreate this web component/page exactly 1:1. Here is the complete extracted context from the original site:
+
+`;
+  if (context.html) {
+    prompt += `## 1. Structure (HTML)
+\`\`\`html
+${context.html}
+\`\`\`
+
+`;
+  }
+  if (context.css) {
+    prompt += `## 2. Styling (CSS)
+\`\`\`css
+${context.css}
+\`\`\`
+
+`;
+  }
+  if (context.colors || context.fonts) {
+    prompt += `## 3. Design Tokens
+`;
+    if (context.colors) {
+      prompt += `### Colors
+`;
+      if (context.colors.backgrounds?.length) prompt += `- Backgrounds: ${context.colors.backgrounds.join(", ")}
+`;
+      if (context.colors.textColors?.length) prompt += `- Text Colors: ${context.colors.textColors.join(", ")}
+`;
+      if (context.colors.accentColors?.length) prompt += `- Accent Colors: ${context.colors.accentColors.join(", ")}
+`;
+      prompt += `
+`;
+    }
+    if (context.fonts?.fonts?.length) {
+      prompt += `### Typography
+`;
+      context.fonts.fonts.forEach((f2) => {
+        prompt += `- ${f2.family} (Weights: ${f2.weights.join(", ")})
+`;
+      });
+      prompt += `
+`;
+    }
+  }
+  if (context.animations) {
+    prompt += `## 4. Animations
+`;
+    if (context.animations.keyframesCSS) prompt += `\`\`\`css
+${context.animations.keyframesCSS}
+\`\`\`
+`;
+    if (context.animations.items?.length) {
+      context.animations.items.forEach((a2) => {
+        prompt += `- [${a2.type}] on \`${a2.element}\`: ${a2.transition || a2.name}
+`;
+      });
+      prompt += `
+`;
+    }
+  }
+  if (context.assets) {
+    prompt += `## 5. Assets (SVGs & Images)
+`;
+    if (context.assets.svgs?.length) {
+      prompt += `### SVGs
+`;
+      context.assets.svgs.forEach((svg, i2) => {
+        prompt += `SVG ${i2 + 1}:
+\`\`\`html
+${svg.html}
+\`\`\`
+
+`;
+      });
+    }
+    if (context.assets.images?.length) {
+      prompt += `### Images
+`;
+      context.assets.images.forEach((img) => {
+        prompt += `- URL: ${img.url} (Type: ${img.type}, Size: ${img.size || "unknown"})
+`;
+      });
+      prompt += `
+`;
+    }
+  }
+  prompt += `Please perfectly recreate this component. Focus on 1:1 pixel perfection for structure, colors, fonts, SVGs, and animations. Use React and Tailwind CSS (or whichever tool/framework applies).`;
+  return prompt;
+}
 function CodeTab({ pinnedElement, initialMode = "html-css" }) {
   const [data, setData] = d(null);
   const [isLoading, setIsLoading] = d(false);
@@ -1374,6 +1479,19 @@ function CodeTab({ pinnedElement, initialMode = "html-css" }) {
               await recordUsage("ai_export");
             }
           });
+        });
+      });
+    } else if (mode === "ultra") {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, { type: "EXPORT_FULL_CONTEXT" }, async (response) => {
+          setIsLoading(false);
+          if (chrome.runtime.lastError || !response?.success) {
+            setError("Could not connect to page. Try pinning an element first.");
+            return;
+          }
+          const prompt = buildUltraPrompt(response.context);
+          setData({ mode: "ultra", prompt });
+          await recordUsage("code_export");
         });
       });
     } else if (isAIMode) {
@@ -1507,6 +1625,7 @@ function CodeTab({ pinnedElement, initialMode = "html-css" }) {
     }
     if (pinnedElement) return `${isAIMode ? "AI " : ""}Export <${pinnedElement.tagName}>`;
     if (isAIMode) return "AI Export";
+    if (mode === "ultra") return "Generate Mega-Prompt";
     return "Export Code";
   };
   return /* @__PURE__ */ u$1("div", { className: "code-tab fade-in", children: [
@@ -1516,7 +1635,8 @@ function CodeTab({ pinnedElement, initialMode = "html-css" }) {
         /* @__PURE__ */ u$1("button", { className: mode === "html-tailwind" ? "active" : "", onClick: () => switchMode("html-tailwind"), children: "Tailwind" }),
         /* @__PURE__ */ u$1("button", { className: mode === "react" ? "active" : "", onClick: () => switchMode("react"), children: "React" }),
         /* @__PURE__ */ u$1("button", { className: mode === "vue" ? "active" : "", onClick: () => switchMode("vue"), children: "Vue" }),
-        /* @__PURE__ */ u$1("button", { className: mode === "figma" ? "active" : "", onClick: () => switchMode("figma"), children: "Figma" })
+        /* @__PURE__ */ u$1("button", { className: mode === "figma" ? "active" : "", onClick: () => switchMode("figma"), children: "Figma" }),
+        /* @__PURE__ */ u$1("button", { className: mode === "ultra" ? "active" : "", onClick: () => switchMode("ultra"), children: "Ultra ⚡️" })
       ] }) }),
       isFigmaMode && /* @__PURE__ */ u$1("div", { className: "code-actions-row", style: { paddingTop: "4px" }, children: /* @__PURE__ */ u$1("div", { className: "segmented-control figma-sub-control", style: { fontSize: "11px" }, children: [
         /* @__PURE__ */ u$1("button", { className: figmaSubMode === "svg" ? "active" : "", onClick: () => switchFigmaSubMode("svg"), children: "SVG" }),
@@ -1555,7 +1675,7 @@ function CodeTab({ pinnedElement, initialMode = "html-css" }) {
       ] }),
       /* @__PURE__ */ u$1("div", { className: "code-actions-row", children: [
         /* @__PURE__ */ u$1("button", { className: "export-btn", onClick: exportElement, disabled: isLoading, children: getExportLabel() }),
-        !isAIMode && !isFigmaMode && /* @__PURE__ */ u$1("button", { className: "panel-btn outline", onClick: generateTailwindConfig, style: { flexShrink: 0 }, children: "Config" })
+        !isAIMode && !isFigmaMode && mode !== "ultra" && /* @__PURE__ */ u$1("button", { className: "panel-btn outline", onClick: generateTailwindConfig, style: { flexShrink: 0 }, children: "Config" })
       ] }),
       isAIMode && /* @__PURE__ */ u$1("div", { className: `ai-mode-hint ${!isLoggedIn ? "ai-mode-warning" : ""}`, children: isLoggedIn ? `Powered by Gemini — generates a ${mode === "react" ? "React TSX" : "Vue SFC"} component with Tailwind` : "Sign in with Google in Settings to use AI exports" }),
       isAIPromptSubMode && /* @__PURE__ */ u$1("div", { className: `ai-mode-hint ${!isLoggedIn ? "ai-mode-warning" : ""}`, children: isLoggedIn ? "Powered by Gemini — generates a detailed recreation prompt for this component" : "Sign in with Google in Settings to use AI features" }),
@@ -1730,6 +1850,20 @@ function CodeTab({ pinnedElement, initialMode = "html-css" }) {
           /* @__PURE__ */ u$1("button", { onClick: () => handleCopy(data.config), children: copied ? "Copied!" : "Copy" })
         ] }),
         /* @__PURE__ */ u$1("pre", { className: "code-content", children: /* @__PURE__ */ u$1("code", { children: data.config }) })
+      ] }),
+      data?.mode === "ultra" && /* @__PURE__ */ u$1("div", { className: "code-block-wrapper", children: [
+        /* @__PURE__ */ u$1("div", { className: "code-header", children: [
+          /* @__PURE__ */ u$1("span", { children: [
+            "AI Mega-Prompt ⚡️",
+            /* @__PURE__ */ u$1("span", { className: "code-badge", children: "Copy All Ultra" })
+          ] }),
+          /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "8px" }, children: [
+            /* @__PURE__ */ u$1("button", { onClick: () => downloadTextFile(data.prompt, "designgrab-ultra-prompt.md", "text/markdown"), children: "Download .md" }),
+            /* @__PURE__ */ u$1("button", { onClick: () => handleCopy(data.prompt), children: copied ? "Copied!" : "Copy Prompt" })
+          ] })
+        ] }),
+        /* @__PURE__ */ u$1("div", { className: "code-content", style: { padding: "12px 16px", fontSize: "11px", lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-word", maxHeight: "400px", overflowY: "auto" }, children: data.prompt }),
+        /* @__PURE__ */ u$1("div", { style: { padding: "8px 12px", fontSize: "11px", opacity: 0.7, lineHeight: 1.5, borderTop: "1px solid var(--border)" }, children: "Paste this massive prompt into any AI coding assistant (Antigravity, Cursor, Lovable) to reconstruct the entire component 1:1. It includes HTML, CSS, fonts, exact colors, extracted animations, and inline SVG assets." })
       ] })
     ] })
   ] });
@@ -2106,6 +2240,225 @@ function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect }) {
       payload: { url: lottie.src, filename: `${lottie.name || "animation"}.json` }
     });
   };
+  const [showExportModal, setShowExportModal] = d(false);
+  const [exportedFormat, setExportedFormat] = d(null);
+  const buildCSSExport = () => {
+    const lines = [];
+    const now = (/* @__PURE__ */ new Date()).toISOString().slice(0, 16).replace("T", " ");
+    lines.push(`/* DesignGrab — Extracted Animations`);
+    lines.push(`   Date: ${now} */`);
+    lines.push("");
+    if (keyframes.length > 0) {
+      lines.push("/* ═══════════════════════════════════════");
+      lines.push("   CSS Keyframe Animations");
+      lines.push("   ═══════════════════════════════════════ */");
+      lines.push("");
+      keyframes.forEach((a2) => {
+        if (a2.keyframeCSS) {
+          lines.push(a2.keyframeCSS);
+          lines.push("");
+          lines.push(`/* Applied on: ${a2.element}`);
+          lines.push(`   Duration: ${a2.duration} | Timing: ${a2.timingFunction}`);
+          if (a2.iterationCount === "infinite") lines.push("   Loop: infinite");
+          if (a2.delay && a2.delay !== "0s") lines.push(`   Delay: ${a2.delay}`);
+          lines.push("*/");
+          lines.push("");
+        }
+      });
+    }
+    if (transitions.length > 0) {
+      lines.push("/* ═══════════════════════════════════════");
+      lines.push("   CSS Transitions");
+      lines.push("   ═══════════════════════════════════════ */");
+      lines.push("");
+      transitions.forEach((a2) => {
+        lines.push(`/* On: ${a2.element} */`);
+        lines.push(`.element {`);
+        lines.push(`  transition-property: ${a2.transitionProperty || "all"};`);
+        lines.push(`  transition-duration: ${a2.transitionDuration || "0s"};`);
+        lines.push(`  transition-timing-function: ${a2.transitionTimingFunction || "ease"};`);
+        lines.push(`  transition-delay: ${a2.transitionDelay || "0s"};`);
+        lines.push(`  /* Shorthand: transition: ${a2.transition}; */`);
+        lines.push("}");
+        lines.push("");
+      });
+    }
+    if (suggestions.length > 0) {
+      lines.push("/* ═══════════════════════════════════════");
+      lines.push("   Suggested Animations");
+      lines.push("   ═══════════════════════════════════════ */");
+      lines.push("");
+      suggestions.forEach((s2) => {
+        lines.push(`/* ${s2.name} (${s2.badge}) */`);
+        lines.push(s2.css);
+        lines.push("");
+      });
+    }
+    if (lotties.length > 0) {
+      lines.push("/* ═══════════════════════════════════════");
+      lines.push("   Lottie / Rive Animation URLs");
+      lines.push("   ═══════════════════════════════════════ */");
+      lines.push("");
+      lotties.forEach((l2) => {
+        lines.push(`/* ${l2.name} — ${l2.playerType} */`);
+        lines.push(`/* URL: ${l2.src} */`);
+        lines.push("");
+      });
+    }
+    return lines.join("\n");
+  };
+  const buildJSONExport = () => {
+    const data = {
+      exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      generator: "DesignGrab",
+      keyframes: keyframes.map((a2) => ({
+        name: a2.name,
+        css: a2.keyframeCSS || null,
+        duration: a2.duration,
+        timingFunction: a2.timingFunction,
+        iterationCount: a2.iterationCount,
+        delay: a2.delay,
+        element: a2.element,
+        frames: a2.frames || []
+      })),
+      transitions: transitions.map((a2) => ({
+        property: a2.transitionProperty || "all",
+        duration: a2.transitionDuration || "0s",
+        timingFunction: a2.transitionTimingFunction || "ease",
+        delay: a2.transitionDelay || "0s",
+        shorthand: a2.transition,
+        element: a2.element
+      })),
+      scrollAnimations: scrollAnims.map((a2) => ({
+        name: a2.name,
+        library: a2.library,
+        element: a2.element,
+        duration: a2.duration || null,
+        delay: a2.delay || null
+      })),
+      lotties: lotties.map((l2) => ({
+        name: l2.name,
+        url: l2.src,
+        playerType: l2.playerType,
+        width: l2.width,
+        height: l2.height,
+        loop: l2.loop,
+        autoplay: l2.autoplay
+      })),
+      suggestions: suggestions.map((s2) => ({
+        name: s2.name,
+        type: s2.badge,
+        css: s2.css,
+        description: s2.desc
+      }))
+    };
+    return JSON.stringify(data, null, 2);
+  };
+  const buildAIPromptExport = () => {
+    const parts = [];
+    parts.push("I extracted these CSS animations from a website using DesignGrab. Please use them in my project:\n");
+    if (keyframes.length > 0) {
+      parts.push("## Keyframe Animations\n");
+      keyframes.forEach((a2) => {
+        parts.push(`### ${a2.name}`);
+        parts.push(`Applied on: \`${a2.element}\``);
+        parts.push(`Duration: ${a2.duration} | Timing: ${a2.timingFunction}${a2.iterationCount === "infinite" ? " | Loop: infinite" : ""}${a2.delay && a2.delay !== "0s" ? ` | Delay: ${a2.delay}` : ""}
+`);
+        if (a2.keyframeCSS) {
+          parts.push("```css");
+          parts.push(a2.keyframeCSS);
+          parts.push("```\n");
+        }
+      });
+    }
+    if (transitions.length > 0) {
+      parts.push("## CSS Transitions\n");
+      transitions.forEach((a2) => {
+        parts.push(`- **${a2.element}**: \`transition: ${a2.transition};\``);
+      });
+      parts.push("");
+    }
+    if (scrollAnims.length > 0) {
+      parts.push("## Scroll-Triggered Animations\n");
+      scrollAnims.forEach((a2) => {
+        parts.push(`- **${a2.name}** (${a2.library}) on \`${a2.element}\``);
+      });
+      parts.push("");
+    }
+    if (lotties.length > 0) {
+      parts.push("## Lottie Animations\n");
+      lotties.forEach((l2) => {
+        parts.push(`- **${l2.name}** (${l2.playerType}): ${l2.src}`);
+      });
+      parts.push("");
+    }
+    if (suggestions.length > 0) {
+      parts.push("## Suggested Animations\n");
+      suggestions.forEach((s2) => {
+        parts.push(`### ${s2.name} (${s2.badge})`);
+        parts.push("```css");
+        parts.push(s2.css);
+        parts.push("```\n");
+      });
+    }
+    parts.push("Please integrate these animations into my component. Keep the exact timing values and easing functions.");
+    return parts.join("\n");
+  };
+  const handleExportCSS = () => {
+    const css = buildCSSExport();
+    downloadTextFile(css, "designgrab-animations.css", "text/css");
+    setExportedFormat("css");
+    setTimeout(() => setExportedFormat(null), 2e3);
+  };
+  const handleExportJSON = () => {
+    const json = buildJSONExport();
+    downloadTextFile(json, "designgrab-animations.json", "application/json");
+    setExportedFormat("json");
+    setTimeout(() => setExportedFormat(null), 2e3);
+  };
+  const handleExportAIPrompt = () => {
+    const prompt = buildAIPromptExport();
+    copyToClipboard(prompt);
+    setExportedFormat("ai");
+    setTimeout(() => setExportedFormat(null), 2e3);
+  };
+  const hasExportableContent = total > 0 || suggestions.length > 0;
+  const renderExportModal = () => {
+    if (!showExportModal) return null;
+    return /* @__PURE__ */ u$1("div", { className: "export-modal-overlay", onClick: () => setShowExportModal(false), children: /* @__PURE__ */ u$1("div", { className: "export-modal", onClick: (e2) => e2.stopPropagation(), children: [
+      /* @__PURE__ */ u$1("div", { className: "export-modal-header", children: [
+        /* @__PURE__ */ u$1("h3", { children: "Export Animations" }),
+        /* @__PURE__ */ u$1("button", { className: "export-modal-close", onClick: () => setShowExportModal(false), children: "✕" })
+      ] }),
+      /* @__PURE__ */ u$1("p", { className: "export-modal-desc", children: "בחר פורמט ייצוא — CSS לעורך קוד, JSON לכלי AI, או Prompt מוכן להדבקה" }),
+      /* @__PURE__ */ u$1("div", { className: "export-format-grid", children: [
+        /* @__PURE__ */ u$1("button", { className: "export-format-card", onClick: handleExportCSS, children: [
+          /* @__PURE__ */ u$1("div", { className: "export-format-icon", children: "📄" }),
+          /* @__PURE__ */ u$1("div", { className: "export-format-info", children: [
+            /* @__PURE__ */ u$1("span", { className: "export-format-name", children: "CSS File" }),
+            /* @__PURE__ */ u$1("span", { className: "export-format-desc", children: "קובץ .css מוכן — VS Code, Cursor, כל עורך קוד" })
+          ] }),
+          /* @__PURE__ */ u$1("span", { className: "export-format-action", children: exportedFormat === "css" ? "✓ Downloaded" : "Download" })
+        ] }),
+        /* @__PURE__ */ u$1("button", { className: "export-format-card", onClick: handleExportJSON, children: [
+          /* @__PURE__ */ u$1("div", { className: "export-format-icon", children: "{}" }),
+          /* @__PURE__ */ u$1("div", { className: "export-format-info", children: [
+            /* @__PURE__ */ u$1("span", { className: "export-format-name", children: "JSON" }),
+            /* @__PURE__ */ u$1("span", { className: "export-format-desc", children: "מבנה נתונים — Base44, Lovable, כלי AI" })
+          ] }),
+          /* @__PURE__ */ u$1("span", { className: "export-format-action", children: exportedFormat === "json" ? "✓ Downloaded" : "Download" })
+        ] }),
+        /* @__PURE__ */ u$1("button", { className: "export-format-card", onClick: handleExportAIPrompt, children: [
+          /* @__PURE__ */ u$1("div", { className: "export-format-icon", children: "🤖" }),
+          /* @__PURE__ */ u$1("div", { className: "export-format-info", children: [
+            /* @__PURE__ */ u$1("span", { className: "export-format-name", children: "AI Prompt" }),
+            /* @__PURE__ */ u$1("span", { className: "export-format-desc", children: "פרומפט מוכן — Antigravity, Cursor, ChatGPT" })
+          ] }),
+          /* @__PURE__ */ u$1("span", { className: "export-format-action", children: exportedFormat === "ai" ? "✓ Copied!" : "Copy" })
+        ] })
+      ] })
+    ] }) });
+  };
   const renderSuggestions = () => {
     if (!pinnedElement) {
       return /* @__PURE__ */ u$1("div", { className: "suggest-empty", children: [
@@ -2173,20 +2526,25 @@ function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect }) {
     ] });
   };
   if (!assets) {
-    return /* @__PURE__ */ u$1("div", { className: "animations-tab fade-in", children: /* @__PURE__ */ u$1("div", { className: "panel-scroll-content", children: [
-      renderSuggestions(),
-      /* @__PURE__ */ u$1("div", { className: "anim-divider" }),
-      /* @__PURE__ */ u$1("div", { className: "code-empty-state", children: [
-        /* @__PURE__ */ u$1("div", { className: "empty-icon", children: /* @__PURE__ */ u$1("svg", { width: "48", height: "48", viewBox: "0 0 48 48", fill: "none", children: [
-          /* @__PURE__ */ u$1("circle", { cx: "24", cy: "24", r: "18", stroke: "#3f3f46", "stroke-width": "2", "stroke-dasharray": "4 4" }),
-          /* @__PURE__ */ u$1("path", { d: "M18 24l4 4 8-8", stroke: "#6366f1", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round" })
-        ] }) }),
-        /* @__PURE__ */ u$1("p", { className: "empty-text", children: "Extract assets first to detect Lottie animations, CSS keyframes, and scroll-triggered effects." }),
-        /* @__PURE__ */ u$1("button", { className: "empty-btn", onClick: onExtract, children: "Scan Page" })
+    return /* @__PURE__ */ u$1("div", { className: "animations-tab fade-in", children: [
+      renderExportModal(),
+      /* @__PURE__ */ u$1("div", { className: "panel-scroll-content", children: [
+        renderSuggestions(),
+        hasExportableContent && /* @__PURE__ */ u$1("div", { style: { display: "flex", justifyContent: "center", padding: "8px 0" }, children: /* @__PURE__ */ u$1("button", { className: "panel-btn primary small", onClick: () => setShowExportModal(true), children: "↗ Export Animations" }) }),
+        /* @__PURE__ */ u$1("div", { className: "anim-divider" }),
+        /* @__PURE__ */ u$1("div", { className: "code-empty-state", children: [
+          /* @__PURE__ */ u$1("div", { className: "empty-icon", children: /* @__PURE__ */ u$1("svg", { width: "48", height: "48", viewBox: "0 0 48 48", fill: "none", children: [
+            /* @__PURE__ */ u$1("circle", { cx: "24", cy: "24", r: "18", stroke: "#3f3f46", "stroke-width": "2", "stroke-dasharray": "4 4" }),
+            /* @__PURE__ */ u$1("path", { d: "M18 24l4 4 8-8", stroke: "#6366f1", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round" })
+          ] }) }),
+          /* @__PURE__ */ u$1("p", { className: "empty-text", children: "Extract assets first to detect Lottie animations, CSS keyframes, and scroll-triggered effects." }),
+          /* @__PURE__ */ u$1("button", { className: "empty-btn", onClick: onExtract, children: "Scan Page" })
+        ] })
       ] })
-    ] }) });
+    ] });
   }
   return /* @__PURE__ */ u$1("div", { className: "animations-tab fade-in", children: [
+    renderExportModal(),
     /* @__PURE__ */ u$1("div", { className: "panel-scroll-content", children: renderSuggestions() }),
     total > 0 && /* @__PURE__ */ u$1("div", { className: "anim-divider" }),
     total > 0 && /* @__PURE__ */ u$1(k$1, { children: [
@@ -2197,6 +2555,7 @@ function AnimationsTab({ assets, onExtract, pinnedElement, onStartInspect }) {
             " animations found"
           ] }),
           /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "6px", alignItems: "center" }, children: [
+            /* @__PURE__ */ u$1("button", { className: "panel-btn primary small", onClick: () => setShowExportModal(true), children: "↗ Export" }),
             /* @__PURE__ */ u$1("button", { className: "panel-btn outline small", onClick: handleCopyAll, children: copiedId === "copy-all" ? "✓ Copied" : "Copy All" }),
             /* @__PURE__ */ u$1("button", { className: "icon-btn", onClick: onExtract, title: "Re-scan", children: "↻" })
           ] })
