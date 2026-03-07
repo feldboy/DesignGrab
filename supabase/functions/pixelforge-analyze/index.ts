@@ -10,7 +10,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-const GEMINI_MODEL = "gemini-2.0-flash-exp";
+const GEMINI_MODEL = "gemini-3-flash-preview";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,12 +39,15 @@ ELEMENT TYPES:
 - "image": Photos, illustrations, headshots
 - "container": A visible box/card that groups other elements
 
-TEXT BLOCKS (CRITICAL):
-- For long text that spans multiple lines, set "lineCount" to the number of visible lines
+TEXT & COPYWRITING (CRITICAL):
+- Extract ALL visible text EXACTLY as written — every word, punctuation mark, line break
+- For multi-line text, use \\n to preserve line breaks: "Line 1\\nLine 2\\nLine 3"
+- Preserve capitalization, quotes, dashes, special characters exactly
+- Set "lineCount" to the number of visible lines
 - Set "maxWidthPct" to the percentage of canvas width the text occupies
-- Set "hierarchy" to one of: "hero" (largest/most prominent), "heading", "subheading", "body", "caption", "label"
-- Copy text EXACTLY as shown — preserve quotes, dashes, capitalization
-- For text with line breaks, include \\n between lines
+- Set "hierarchy": "hero" (main headline), "heading", "subheading", "body", "caption", "label", "button"
+- For buttons/CTAs, mark hierarchy as "button" and include the exact button text
+- Don't paraphrase or summarize — copy the EXACT words you see
 
 REGIONS:
 - Assign each element a "region" string describing its area: "left-main", "right-sidebar", "top-bar", "bottom-bar", "center", "full-width"

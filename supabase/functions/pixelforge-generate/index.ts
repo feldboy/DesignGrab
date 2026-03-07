@@ -531,7 +531,7 @@ function buildReactElement(tree: DesignTree, el: DesignElement, depth: number, c
   return `${pad}<div style={${styleStr}}>\n${inner}\n${pad}</div>`;
 }
 
-/** Generates an SVG document with foreignObject for text wrapping */
+/** Generates an SVG document with native text/tspan elements (Figma-compatible) */
 function generateSvg(tree: DesignTree): string {
   const { canvas } = tree;
   const isPct = looksLikePercentages(tree);
@@ -575,7 +575,7 @@ function generateSvg(tree: DesignTree): string {
   // Render each element
   for (const el of sorted) {
     const px = isPct ? pctToPx(el.bounds, canvas) : { x: el.bounds.x, y: el.bounds.y, w: el.bounds.w, h: el.bounds.h };
-    const svgLines = buildSvgElement(el, px, canvas);
+    const svgLines = buildSvgElement(el, px, canvas, canvas.background || "#000000");
     if (svgLines) lines.push(svgLines);
   }
 
@@ -583,10 +583,32 @@ function generateSvg(tree: DesignTree): string {
   return lines.join("\n");
 }
 
+/** Check if two hex colors are too similar (low contrast) and return a fixed text color */
+function ensureContrast(textColor: string, bgColor: string): string {
+  const luminance = (hex: string): number => {
+    const h = hex.replace("#", "");
+    const r = parseInt(h.substring(0, 2), 16) / 255;
+    const g = parseInt(h.substring(2, 4), 16) / 255;
+    const b = parseInt(h.substring(4, 6), 16) / 255;
+    return 0.299 * r + 0.587 * g + 0.114 * b;
+  };
+
+  const textL = luminance(textColor);
+  const bgL = luminance(bgColor);
+  const contrast = Math.abs(textL - bgL);
+
+  // If contrast is too low, pick white or black based on background
+  if (contrast < 0.2) {
+    return bgL > 0.5 ? "#000000" : "#ffffff";
+  }
+  return textColor;
+}
+
 function buildSvgElement(
   el: DesignElement,
   px: { x: number; y: number; w: number; h: number },
-  canvas: { width: number; height: number }
+  canvas: { width: number; height: number },
+  bgColor: string
 ): string {
   const { style } = el;
   const fill = style?.fill || "none";
@@ -599,40 +621,82 @@ function buildSvgElement(
       const fontSize = el.text?.fontSize || 16;
       const fontFamily = el.text?.fontFamily || "Inter, sans-serif";
       const fontWeight = el.text?.fontWeight || 400;
-      const textColor = el.text?.color || "#ffffff";
+      const rawColor = el.text?.color || "#ffffff";
+      const textColor = ensureContrast(rawColor, bgColor);
       const textAlign = el.text?.align || "left";
       const textTransform = el.text?.textTransform || "none";
       const lineHeight = el.text?.lineHeight || 1.15;
-      const letterSpacing = el.text?.letterSpacing ? `letter-spacing: ${el.text.letterSpacing}px;` : "";
-      const content = (el.text?.content || "").replace(/\n/g, "<br/>");
+      const letterSpacing = el.text?.letterSpacing ? ` letter-spacing="${el.text.letterSpacing}px"` : "";
+
+      // Determine text-anchor and x position based on alignment
+      let textAnchor = "start";
+      let textX = px.x;
+      if (textAlign === "center") {
+        textAnchor = "middle";
+        textX = px.x + Math.round(px.w / 2);
+      } else if (textAlign === "right") {
+        textAnchor = "end";
+        textX = px.x + px.w;
+      }
 
       // Use maxWidthPct if available, otherwise use element width
       const textWidth = el.text?.maxWidthPct
         ? Math.round((el.text.maxWidthPct / 100) * canvas.width)
         : px.w;
 
-      // Calculate height — if lineCount available, use it; otherwise use element height with padding
-      const estimatedHeight = el.text?.lineCount
-        ? Math.ceil(el.text.lineCount * fontSize * lineHeight) + 16
-        : Math.max(px.h, Math.ceil(fontSize * lineHeight * 2));
+      // Split content on \n or literal \\n
+      const rawContent = el.text?.content || "";
+      let contentParts = rawContent.split(/\\n|\n/).map(s => s.trim()).filter(Boolean);
+
+      // Only word-wrap if the AI didn't already provide line breaks
+      // Use conservative char width (0.45) — condensed fonts like Bebas Neue are narrower
+      const hasExplicitBreaks = contentParts.length > 1;
+      if (!hasExplicitBreaks && contentParts.length === 1) {
+        const avgCharWidth = fontSize * 0.45;
+        const maxCharsPerLine = Math.floor(textWidth / avgCharWidth);
+        if (maxCharsPerLine > 0 && contentParts[0].length > maxCharsPerLine) {
+          const words = contentParts[0].split(" ");
+          const wrapped: string[] = [];
+          let currentLine = "";
+          for (const word of words) {
+            if (currentLine.length === 0) {
+              currentLine = word;
+            } else if (currentLine.length + 1 + word.length <= maxCharsPerLine) {
+              currentLine += " " + word;
+            } else {
+              wrapped.push(currentLine);
+              currentLine = word;
+            }
+          }
+          if (currentLine) wrapped.push(currentLine);
+          contentParts = wrapped;
+        }
+      }
+
+      // Apply textTransform
+      if (textTransform === "uppercase") {
+        contentParts = contentParts.map(p => p.toUpperCase());
+      } else if (textTransform === "lowercase") {
+        contentParts = contentParts.map(p => p.toLowerCase());
+      } else if (textTransform === "capitalize") {
+        contentParts = contentParts.map(p => p.replace(/\b\w/g, c => c.toUpperCase()));
+      }
+
+      // Escape for SVG
+      contentParts = contentParts.map(p => escapeSvg(p));
+
+      // SVG text y = top of box + fontSize (baseline offset)
+      const textY = px.y + fontSize;
+      const dySpacing = Math.round(fontSize * lineHeight);
+
+      const tspans = contentParts.map((part, i) =>
+        `    <tspan x="${textX}" dy="${i === 0 ? 0 : dySpacing}">${part}</tspan>`
+      ).join("\n");
 
       const lines: string[] = [
-        `  <foreignObject x="${px.x}" y="${px.y}" width="${textWidth}" height="${estimatedHeight}"${opacityAttr}>`,
-        `    <div xmlns="http://www.w3.org/1999/xhtml" style="`,
-        `      font-family: '${fontFamily}', sans-serif;`,
-        `      font-size: ${fontSize}px;`,
-        `      font-weight: ${fontWeight};`,
-        `      color: ${textColor};`,
-        `      text-align: ${textAlign};`,
-        `      text-transform: ${textTransform};`,
-        `      line-height: ${lineHeight};`,
-        `      ${letterSpacing}`,
-        `      word-wrap: break-word;`,
-        `      overflow-wrap: break-word;`,
-        `      margin: 0;`,
-        `      padding: 0;`,
-        `    ">${escapeSvg(content)}</div>`,
-        `  </foreignObject>`,
+        `  <text x="${textX}" y="${textY}" font-family="'${fontFamily}', sans-serif" font-size="${fontSize}" font-weight="${fontWeight}" fill="${textColor}" text-anchor="${textAnchor}" dominant-baseline="auto"${letterSpacing}${opacityAttr}>`,
+        tspans,
+        `  </text>`,
       ];
       return lines.join("\n");
     }

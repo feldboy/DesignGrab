@@ -132,6 +132,7 @@ create table if not exists public.plans (
   code_exports_limit integer not null default 5,
   design_systems_limit integer not null default 3,
   ai_exports_limit integer not null default 0,
+  pixelforge_analyses_limit integer not null default 1,
   is_active boolean not null default true,
   display_order integer not null default 0,
   features jsonb default '[]',
@@ -155,13 +156,13 @@ create trigger plans_updated_at
   for each row execute function public.set_updated_at();
 
 -- Seed default plans
-insert into public.plans (id, name, price_cents, billing_period, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit, is_active, display_order, features)
+insert into public.plans (id, name, price_cents, billing_period, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit, pixelforge_analyses_limit, is_active, display_order, features)
 values
-  ('free', 'Free', 0, null, 15, 5, 3, 0, true, 1,
-   '["15 asset downloads/mo", "5 code exports/mo", "3 design system exports/mo", "Basic inspector"]'::jsonb),
-  ('pro', 'Pro', 1200, 'monthly', 2000, -1, -1, 50, true, 2,
-   '["2,000 asset downloads/mo", "Unlimited code exports", "Unlimited design systems", "50 AI exports/mo", "Priority support"]'::jsonb),
-  ('lifetime', 'Lifetime', 9900, 'one_time', 2000, -1, -1, 50, true, 3,
+  ('free', 'Free', 0, null, 15, 5, 3, 0, 1, true, 1,
+   '["15 asset downloads/mo", "5 code exports/mo", "3 design system exports/mo", "1 PixelForge analysis/mo", "Basic inspector"]'::jsonb),
+  ('pro', 'Pro', 1200, 'monthly', 2000, -1, -1, 50, -1, true, 2,
+   '["2,000 asset downloads/mo", "Unlimited code exports", "Unlimited design systems", "50 AI exports/mo", "Unlimited PixelForge", "Priority support"]'::jsonb),
+  ('lifetime', 'Lifetime', 9900, 'one_time', 2000, -1, -1, 50, -1, true, 3,
    '["Everything in Pro", "One-time payment", "Founder badge", "Lifetime updates"]'::jsonb)
 on conflict (id) do nothing;
 
