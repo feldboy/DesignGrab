@@ -10,9 +10,9 @@ import { getSupabase } from './supabase.js';
 
 // Fallback limits (used when Supabase is unavailable)
 const DEFAULT_LIMITS = {
-    free:     { downloads: 15, codeExports: 5,  designSystems: 3,  aiExports: 0 },
-    pro:      { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50 },
-    lifetime: { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50 },
+    free:     { downloads: 15, codeExports: 5,  designSystems: 3,  aiExports: 0, pixelforgeAnalyses: 1 },
+    pro:      { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: 10 },
+    lifetime: { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: 10 },
 };
 
 /**
@@ -22,7 +22,8 @@ const DEFAULT_LIMITS = {
 async function getLimitsForPlan(plan) {
     const cached = await storage.get(['planLimits']);
     if (cached.planLimits && cached.planLimits[plan]) {
-        return cached.planLimits[plan];
+        // Merge with defaults to cover newly added fields (e.g. pixelforgeAnalyses)
+        return { ...(DEFAULT_LIMITS[plan] || DEFAULT_LIMITS.free), ...cached.planLimits[plan] };
     }
     return DEFAULT_LIMITS[plan] || DEFAULT_LIMITS.free;
 }
@@ -35,7 +36,7 @@ async function syncPlanLimits(supabase) {
     try {
         const { data: plans, error } = await supabase
             .from('plans')
-            .select('id, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit')
+            .select('id, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit, pixelforge_analyses_limit')
             .eq('is_active', true);
 
         if (error || !plans) return;
@@ -47,6 +48,7 @@ async function syncPlanLimits(supabase) {
                 codeExports: p.code_exports_limit,
                 designSystems: p.design_systems_limit,
                 aiExports: p.ai_exports_limit,
+                pixelforgeAnalyses: p.pixelforge_analyses_limit ?? 0,
             };
         }
         await storage.set({ planLimits: limitsMap });
@@ -61,6 +63,7 @@ const ACTION_MAP = {
     code_export: 'codeExports',
     design_system: 'designSystems',
     ai_export: 'aiExports',
+    pixelforge_analysis: 'pixelforgeAnalyses',
 };
 
 /**
@@ -96,6 +99,7 @@ async function getUsageFromSupabase() {
             codeExports: 0,
             designSystems: 0,
             aiExports: 0,
+            pixelforgeAnalyses: 0,
         };
 
         for (const row of data) {
@@ -137,6 +141,7 @@ async function getUsage() {
             codeExports: 0,
             designSystems: 0,
             aiExports: 0,
+            pixelforgeAnalyses: 0,
         };
         await storage.set({ usage: fresh });
         return { usage: fresh, plan: state.plan };

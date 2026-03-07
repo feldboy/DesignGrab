@@ -103,14 +103,23 @@ function onElementClick(e) {
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    // Pin the element (use currentTarget which may have been navigated via scroll/arrows)
+    // Pin the element and send data
+    pinElement(target);
+
+    // Stop inspecting after pin
+    stopInspecting();
+}
+
+/**
+ * Pin an element — extract data and notify panel
+ * Reusable for both click-pin and programmatic select (e.g. Select Page)
+ */
+export function pinElement(target) {
     pinnedElement = target;
 
     // Collect element data
     const data = getElementData(target);
     data.rawCSS = getRawCSS(target);
-
-    // Add selector path
     data.selectorPath = getSelectorPath(target);
 
     // Send data to panel
@@ -119,11 +128,10 @@ function onElementClick(e) {
         payload: data
     });
 
-    // Stop inspecting after pin
-    stopInspecting();
-
-    // Keep overlay visible on pinned element
+    // Show overlay on pinned element
     showOverlay(target);
+
+    return data;
 }
 
 /**
@@ -204,7 +212,7 @@ function isDesignGrabElement(el) {
 /**
  * Generate a CSS selector path for an element
  */
-function getSelectorPath(el) {
+export function getSelectorPath(el) {
     const parts = [];
     let current = el;
 

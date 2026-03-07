@@ -8,7 +8,9 @@ import { getSupabase, isSupabaseConfigured } from './supabase.js';
 import storage from './storage.js';
 import { syncPlanLimits } from './usageTracker.js';
 
-const GOOGLE_CLIENT_ID = '783180663354-idjnv92nubl3e1dbe5ufm7jq8ll6m1pd.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '783180663354-1fq4t4fsfhj6r9eatecr98172e5v6sio.apps.googleusercontent.com';
+const PROD_EXTENSION_ID = 'higkjddpoecdlhmecmadknihbnahjmib';
+const IS_LOCAL_DEV = chrome.runtime.id !== PROD_EXTENSION_ID;
 
 /**
  * Get current auth state
@@ -16,6 +18,11 @@ const GOOGLE_CLIENT_ID = '783180663354-idjnv92nubl3e1dbe5ufm7jq8ll6m1pd.apps.goo
  */
 export async function getAuthState() {
     const state = await storage.getState();
+
+    if (IS_LOCAL_DEV) {
+        await storage.set({ userId: 'local-dev-user', plan: 'lifetime' });
+        return { user: { id: 'local-dev-user', email: 'local@dev.com', user_metadata: { full_name: 'Local Developer' } }, plan: 'lifetime', isLoggedIn: true, cloudEnabled: true };
+    }
 
     if (!isSupabaseConfigured()) {
         return { user: null, plan: state.plan, isLoggedIn: false, cloudEnabled: false };
@@ -27,13 +34,24 @@ export async function getAuthState() {
     }
 
     try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
+        // Use getSession() for fast, local-first auth checks.
+        // It reads from storage and auto-refreshes expired tokens.
+        // IMPORTANT: Do NOT call setSession() here — it triggers SIGNED_IN events
+        // that cause storage listeners to fire and re-check auth, creating a
+        // flash of "logged in" then "logged out" on the Settings page.
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError) {
+            console.warn('[DesignGrab] Session error:', sessionError.message);
+        }
+
+        if (session?.user) {
+            const user = session.user;
             const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
             const plan = profile?.plan || state.plan;
             await storage.set({ userId: user.id, plan });
             // Sync plan limits from Supabase (picks up Dashboard changes)
-            syncPlanLimits(supabase).catch(() => {});
+            syncPlanLimits(supabase).catch(() => { });
             return { user, plan, isLoggedIn: true, cloudEnabled: true };
         }
     } catch (err) {
@@ -49,6 +67,11 @@ export async function getAuthState() {
  * which we use to authenticate with Supabase.
  */
 export async function signInWithGoogle() {
+    if (IS_LOCAL_DEV) {
+        await storage.set({ userId: 'local-dev-user', plan: 'lifetime' });
+        return { user: { id: 'local-dev-user', email: 'local@dev.com', user_metadata: { full_name: 'Local Developer' } }, error: null };
+    }
+
     const supabase = await getSupabase();
     if (!supabase) return { error: 'Cloud features not configured' };
 
@@ -112,7 +135,7 @@ export async function signInWithGoogle() {
             const { data: profile } = await supabase.from('profiles').select('plan').eq('id', data.user.id).single();
             if (profile?.plan) await storage.set({ plan: profile.plan });
             // Sync plan limits from Supabase on fresh login
-            syncPlanLimits(supabase).catch(() => {});
+            syncPlanLimits(supabase).catch(() => { });
         }
 
         return { user: data?.user, error: null };
@@ -125,6 +148,11 @@ export async function signInWithGoogle() {
  * Sign out — clears Supabase session
  */
 export async function signOut() {
+    if (IS_LOCAL_DEV) {
+        await storage.set({ userId: null, plan: 'free', usage: null });
+        return { error: null };
+    }
+
     const supabase = await getSupabase();
     if (supabase) {
         await supabase.auth.signOut();

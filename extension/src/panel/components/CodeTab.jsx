@@ -1,9 +1,66 @@
 import { h } from 'preact';
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { copyToClipboard } from '../../lib/downloadUtils';
+import { copyToClipboard, downloadTextFile } from '../../lib/downloadUtils';
 import { checkLimit, recordUsage } from '../../lib/usageTracker.js';
 import { startUpgrade } from '../../lib/billing.js';
 import { getAuthState } from '../../lib/auth.js';
+
+function buildUltraPrompt(context) {
+    let prompt = `I want to recreate this web component/page exactly 1:1. Here is the complete extracted context from the original site:\n\n`;
+
+    if (context.html) {
+        prompt += `## 1. Structure (HTML)\n\`\`\`html\n${context.html}\n\`\`\`\n\n`;
+    }
+    if (context.css) {
+        prompt += `## 2. Styling (CSS)\n\`\`\`css\n${context.css}\n\`\`\`\n\n`;
+    }
+    if (context.colors || context.fonts) {
+        prompt += `## 3. Design Tokens\n`;
+        if (context.colors) {
+            prompt += `### Colors\n`;
+            if (context.colors.backgrounds?.length) prompt += `- Backgrounds: ${context.colors.backgrounds.join(', ')}\n`;
+            if (context.colors.textColors?.length) prompt += `- Text Colors: ${context.colors.textColors.join(', ')}\n`;
+            if (context.colors.accentColors?.length) prompt += `- Accent Colors: ${context.colors.accentColors.join(', ')}\n`;
+            prompt += `\n`;
+        }
+        if (context.fonts?.fonts?.length) {
+            prompt += `### Typography\n`;
+            context.fonts.fonts.forEach(f => {
+                prompt += `- ${f.family} (Weights: ${f.weights.join(', ')})\n`;
+            });
+            prompt += `\n`;
+        }
+    }
+    if (context.animations) {
+        prompt += `## 4. Animations\n`;
+        if (context.animations.keyframesCSS) prompt += `\`\`\`css\n${context.animations.keyframesCSS}\n\`\`\`\n`;
+        if (context.animations.items?.length) {
+            context.animations.items.forEach(a => {
+                prompt += `- [${a.type}] on \`${a.element}\`: ${a.transition || a.name}\n`;
+            });
+            prompt += `\n`;
+        }
+    }
+    if (context.assets) {
+        prompt += `## 5. Assets (SVGs & Images)\n`;
+        if (context.assets.svgs?.length) {
+            prompt += `### SVGs\n`;
+            context.assets.svgs.forEach((svg, i) => {
+                prompt += `SVG ${i + 1}:\n\`\`\`html\n${svg.html}\n\`\`\`\n\n`;
+            });
+        }
+        if (context.assets.images?.length) {
+            prompt += `### Images\n`;
+            context.assets.images.forEach(img => {
+                prompt += `- URL: ${img.url} (Type: ${img.type}, Size: ${img.size || 'unknown'})\n`;
+            });
+            prompt += `\n`;
+        }
+    }
+
+    prompt += `Please perfectly recreate this component. Focus on 1:1 pixel perfection for structure, colors, fonts, SVGs, and animations. Use React and Tailwind CSS (or whichever tool/framework applies).`;
+    return prompt;
+}
 
 export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
     const [data, setData] = useState(null);
@@ -24,7 +81,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
 
     // Check auth state
     useEffect(() => {
-        getAuthState().then((state) => setIsLoggedIn(state.isLoggedIn)).catch(() => {});
+        getAuthState().then((state) => setIsLoggedIn(state.isLoggedIn)).catch(() => { });
     }, []);
 
     // Fetch child divs when entering Figma mode
@@ -140,6 +197,19 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                             await recordUsage('ai_export');
                         }
                     });
+                });
+            });
+        } else if (mode === 'ultra') {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                chrome.tabs.sendMessage(tabs[0].id, { type: 'EXPORT_FULL_CONTEXT' }, async (response) => {
+                    setIsLoading(false);
+                    if (chrome.runtime.lastError || !response?.success) {
+                        setError('Could not connect to page. Try pinning an element first.');
+                        return;
+                    }
+                    const prompt = buildUltraPrompt(response.context);
+                    setData({ mode: 'ultra', prompt });
+                    await recordUsage('code_export');
                 });
             });
         } else if (isAIMode) {
@@ -280,6 +350,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
         }
         if (pinnedElement) return `${isAIMode ? 'AI ' : ''}Export <${pinnedElement.tagName}>`;
         if (isAIMode) return 'AI Export';
+        if (mode === 'ultra') return 'Generate Mega-Prompt';
         return 'Export Code';
     };
 
@@ -293,6 +364,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                         <button className={mode === 'react' ? 'active' : ''} onClick={() => switchMode('react')}>React</button>
                         <button className={mode === 'vue' ? 'active' : ''} onClick={() => switchMode('vue')}>Vue</button>
                         <button className={mode === 'figma' ? 'active' : ''} onClick={() => switchMode('figma')}>Figma</button>
+                        <button className={mode === 'ultra' ? 'active' : ''} onClick={() => switchMode('ultra')}>Ultra ⚡️</button>
                     </div>
                 </div>
 
@@ -335,7 +407,7 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                     <button className="export-btn" onClick={exportElement} disabled={isLoading}>
                         {getExportLabel()}
                     </button>
-                    {!isAIMode && !isFigmaMode && (
+                    {!isAIMode && !isFigmaMode && mode !== 'ultra' && (
                         <button className="panel-btn outline" onClick={generateTailwindConfig} style={{ flexShrink: 0 }}>Config</button>
                     )}
                 </div>
@@ -464,53 +536,53 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                 {data?.mode === 'figma-svg' && data.interactions && (
                     data.interactions.states.length > 0 || data.interactions.transitions.length > 0
                 ) && (
-                    <div className="code-block-wrapper" style={{ marginTop: '10px' }}>
-                        <div className="code-header">
-                            <span>
-                                Interactions
-                                <span className="code-badge">
-                                    {data.interactions.states.length} state{data.interactions.states.length !== 1 ? 's' : ''}
+                        <div className="code-block-wrapper" style={{ marginTop: '10px' }}>
+                            <div className="code-header">
+                                <span>
+                                    Interactions
+                                    <span className="code-badge">
+                                        {data.interactions.states.length} state{data.interactions.states.length !== 1 ? 's' : ''}
+                                    </span>
                                 </span>
-                            </span>
-                        </div>
-                        <div style={{ padding: '8px 12px', fontSize: '11px', lineHeight: 1.6 }}>
-                            {data.interactions.transitions.length > 0 && (
-                                <div style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid var(--border)' }}>
-                                    <div style={{ fontWeight: 600, opacity: 0.6, marginBottom: '3px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em' }}>Transitions</div>
-                                    {data.interactions.transitions.map((t, i) => (
-                                        <div key={i} style={{ fontFamily: 'monospace', opacity: 0.85, marginBottom: '2px' }}>{t}</div>
-                                    ))}
-                                </div>
-                            )}
-                            {data.interactions.states.map((item, i) => (
-                                <div key={i} style={{ marginBottom: '10px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                                        <span style={{
-                                            background: item.state === 'Hover' ? '#3b82f6' : item.state === 'Active' ? '#ef4444' : '#8b5cf6',
-                                            color: '#fff', borderRadius: '3px', padding: '1px 6px', fontSize: '10px', fontWeight: 600
-                                        }}>{item.state}</span>
-                                        <span style={{ opacity: 0.5, fontFamily: 'monospace', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.selector}</span>
+                            </div>
+                            <div style={{ padding: '8px 12px', fontSize: '11px', lineHeight: 1.6 }}>
+                                {data.interactions.transitions.length > 0 && (
+                                    <div style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid var(--border)' }}>
+                                        <div style={{ fontWeight: 600, opacity: 0.6, marginBottom: '3px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.05em' }}>Transitions</div>
+                                        {data.interactions.transitions.map((t, i) => (
+                                            <div key={i} style={{ fontFamily: 'monospace', opacity: 0.85, marginBottom: '2px' }}>{t}</div>
+                                        ))}
                                     </div>
-                                    {Object.entries(item.properties).map(([prop, val]) => (
-                                        <div key={prop} style={{ display: 'flex', gap: '8px', paddingLeft: '8px', marginBottom: '2px' }}>
-                                            <span style={{ opacity: 0.55, minWidth: '120px', fontFamily: 'monospace' }}>{prop}</span>
-                                            <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>
-                                                {(prop.includes('color') || prop === 'box-shadow') && (
-                                                    <span style={{
-                                                        display: 'inline-block', width: '10px', height: '10px',
-                                                        background: val, borderRadius: '2px', border: '1px solid rgba(128,128,128,0.3)',
-                                                        marginRight: '4px', verticalAlign: 'middle'
-                                                    }} />
-                                                )}
-                                                {val}
-                                            </span>
+                                )}
+                                {data.interactions.states.map((item, i) => (
+                                    <div key={i} style={{ marginBottom: '10px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                            <span style={{
+                                                background: item.state === 'Hover' ? '#3b82f6' : item.state === 'Active' ? '#ef4444' : '#8b5cf6',
+                                                color: '#fff', borderRadius: '3px', padding: '1px 6px', fontSize: '10px', fontWeight: 600
+                                            }}>{item.state}</span>
+                                            <span style={{ opacity: 0.5, fontFamily: 'monospace', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.selector}</span>
                                         </div>
-                                    ))}
-                                </div>
-                            ))}
+                                        {Object.entries(item.properties).map(([prop, val]) => (
+                                            <div key={prop} style={{ display: 'flex', gap: '8px', paddingLeft: '8px', marginBottom: '2px' }}>
+                                                <span style={{ opacity: 0.55, minWidth: '120px', fontFamily: 'monospace' }}>{prop}</span>
+                                                <span style={{ fontFamily: 'monospace', opacity: 0.9 }}>
+                                                    {(prop.includes('color') || prop === 'box-shadow') && (
+                                                        <span style={{
+                                                            display: 'inline-block', width: '10px', height: '10px',
+                                                            background: val, borderRadius: '2px', border: '1px solid rgba(128,128,128,0.3)',
+                                                            marginRight: '4px', verticalAlign: 'middle'
+                                                        }} />
+                                                    )}
+                                                    {val}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
                 {/* Responsive HTML+CSS */}
                 {data?.mode === 'responsive-html' && (
@@ -573,6 +645,28 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
                             <button onClick={() => handleCopy(data.config)}>{copied ? 'Copied!' : 'Copy'}</button>
                         </div>
                         <pre className="code-content"><code>{data.config}</code></pre>
+                    </div>
+                )}
+
+                {/* Ultra Mode Prompt display */}
+                {data?.mode === 'ultra' && (
+                    <div className="code-block-wrapper">
+                        <div className="code-header">
+                            <span>
+                                AI Mega-Prompt ⚡️
+                                <span className="code-badge">Copy All Ultra</span>
+                            </span>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button onClick={() => downloadTextFile(data.prompt, 'designgrab-ultra-prompt.md', 'text/markdown')}>Download .md</button>
+                                <button onClick={() => handleCopy(data.prompt)}>{copied ? 'Copied!' : 'Copy Prompt'}</button>
+                            </div>
+                        </div>
+                        <div className="code-content" style={{ padding: '12px 16px', fontSize: '11px', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: '400px', overflowY: 'auto' }}>
+                            {data.prompt}
+                        </div>
+                        <div style={{ padding: '8px 12px', fontSize: '11px', opacity: 0.7, lineHeight: 1.5, borderTop: '1px solid var(--border)' }}>
+                            Paste this massive prompt into any AI coding assistant (Antigravity, Cursor, Lovable) to reconstruct the entire component 1:1. It includes HTML, CSS, fonts, exact colors, extracted animations, and inline SVG assets.
+                        </div>
                     </div>
                 )}
             </div>

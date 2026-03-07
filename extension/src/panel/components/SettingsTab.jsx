@@ -1,16 +1,14 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
-import { getAuthState, signInWithGoogle, signOut } from '../../lib/auth.js';
 import { getUsageSummary } from '../../lib/usageTracker.js';
 import { startUpgrade } from '../../lib/billing.js';
 
-export function SettingsTab() {
+export function SettingsTab({ authState: parentAuthState, onSignIn, onSignOut, authLoading: parentAuthLoading }) {
     const [loaded, setLoaded] = useState(false);
 
-    // Auth state
-    const [authState, setAuthState] = useState({ user: null, plan: 'free', isLoggedIn: false });
+    // Use auth state from parent — no independent getAuthState() call
+    const authState = parentAuthState || { user: null, plan: 'free', isLoggedIn: false };
     const [authError, setAuthError] = useState('');
-    const [authLoading, setAuthLoading] = useState(false);
 
     // Usage
     const [usage, setUsage] = useState(null);
@@ -18,33 +16,24 @@ export function SettingsTab() {
     useEffect(() => {
         setLoaded(true);
 
-        // Load auth state, then load usage only if logged in
-        getAuthState().then((state) => {
-            setAuthState(state);
-            if (state.isLoggedIn) {
-                getUsageSummary().then(setUsage).catch(() => {});
-            }
-        }).catch(() => {});
-    }, []);
+        // Load usage only if already logged in
+        if (authState.isLoggedIn) {
+            getUsageSummary().then(setUsage).catch(() => { });
+        }
+    }, [authState.isLoggedIn]);
 
     const handleGoogleSignIn = async () => {
         setAuthError('');
-        setAuthLoading(true);
-        const result = await signInWithGoogle();
-        setAuthLoading(false);
-
-        if (result.error) {
-            setAuthError(result.error);
-        } else {
-            const state = await getAuthState();
-            setAuthState(state);
-            getUsageSummary().then(setUsage);
+        if (onSignIn) {
+            await onSignIn();
+            // Usage will reload on next render when authState changes
         }
     };
 
     const handleSignOut = async () => {
-        await signOut();
-        setAuthState({ user: null, plan: 'free', isLoggedIn: false });
+        if (onSignOut) {
+            await onSignOut();
+        }
         setUsage(null);
     };
 
@@ -79,7 +68,7 @@ export function SettingsTab() {
                         <button
                             className="panel-btn google-signin-btn"
                             onClick={handleGoogleSignIn}
-                            disabled={authLoading}
+                            disabled={parentAuthLoading}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -94,17 +83,17 @@ export function SettingsTab() {
                                 borderRadius: '6px',
                                 fontSize: '13px',
                                 fontWeight: 500,
-                                cursor: authLoading ? 'wait' : 'pointer',
-                                opacity: authLoading ? 0.7 : 1,
+                                cursor: parentAuthLoading ? 'wait' : 'pointer',
+                                opacity: parentAuthLoading ? 0.7 : 1,
                             }}
                         >
                             <svg width="18" height="18" viewBox="0 0 48 48">
-                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
                             </svg>
-                            {authLoading ? 'Signing in...' : 'Sign in with Google'}
+                            {parentAuthLoading ? 'Signing in...' : 'Sign in with Google'}
                         </button>
                     </div>
                 )}
@@ -148,7 +137,7 @@ export function SettingsTab() {
                     DesignGrab v1.0.0 — Inspect, extract, and export design tokens from any website.
                 </p>
                 <div className="settings-about-links">
-                    <a href="https://designgrab.app" target="_blank" rel="noopener noreferrer" className="settings-link">Website</a>
+                    <a href="https://landing-nine-vert.vercel.app/" target="_blank" rel="noopener noreferrer" className="settings-link">Website</a>
                     <a href="https://designgrab.app/privacy" target="_blank" rel="noopener noreferrer" className="settings-link">Privacy Policy</a>
                 </div>
             </div>

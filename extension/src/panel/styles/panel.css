@@ -51,7 +51,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border);
     background: var(--bg-secondary);
     gap: 8px;
@@ -65,7 +65,7 @@ body {
 }
 
 .panel-title {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 0.02em;
     background: linear-gradient(135deg, #818cf8, #a78bfa);
@@ -75,12 +75,12 @@ body {
 }
 
 .panel-inspect-btn {
-    padding: 5px 12px;
+    padding: 6px 14px;
     border-radius: 6px;
     border: 1px solid var(--border-strong);
     background: var(--accent-light);
     color: var(--accent);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -103,18 +103,14 @@ body {
 /* Tabs */
 .panel-tabs {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 1px;
-    padding: 4px 6px;
+    gap: 2px;
+    padding: 6px 8px;
     border-bottom: 1px solid var(--border);
     background: var(--bg-secondary);
-    overflow-x: auto;
-    scrollbar-width: none;
+    overflow-x: hidden;
     flex-shrink: 0;
-}
-
-.panel-tabs::-webkit-scrollbar {
-    display: none;
 }
 
 .panel-tab {
@@ -122,20 +118,20 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    padding: 6px 0;
-    min-width: 40px;
+    gap: 3px;
+    padding: 8px 2px;
+    min-width: 44px;
     border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
     white-space: nowrap;
     font-family: inherit;
-    flex: 1 0 0;
+    flex: 0 0 calc(20% - 2px);
     position: relative;
 }
 
@@ -187,14 +183,14 @@ body {
 }
 
 .tab-icon {
-    font-size: 16px;
+    font-size: 20px;
     line-height: 1;
 }
 
 .tab-label {
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
     opacity: 0.7;
     transition: opacity 0.15s ease;
@@ -202,7 +198,7 @@ body {
 
 .panel-tab.active .tab-label {
     opacity: 1;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .panel-tab:hover .tab-label {
@@ -276,6 +272,47 @@ body {
 .empty-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.empty-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 200px;
+}
+
+.empty-btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+}
+
+.empty-btn.secondary:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    box-shadow: none;
+    transform: none;
+}
+
+.select-page-btn {
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    flex-shrink: 0;
+}
+
+.select-page-btn:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: rgba(99, 102, 241, 0.2);
 }
 
 .coming-soon-icon {
@@ -804,9 +841,9 @@ body {
     background: transparent;
     border: none;
     color: var(--text-muted);
-    padding: 5px 10px;
+    padding: 7px 12px;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -842,13 +879,13 @@ body {
 
 .export-btn {
     width: 100%;
-    padding: 9px 12px;
+    padding: 11px 14px;
     border-radius: var(--radius);
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: white;
     border: none;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
     font-family: inherit;
@@ -871,7 +908,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 32px 16px;
+    padding: 40px 20px;
     text-align: center;
     color: var(--text-muted);
 }
@@ -2149,6 +2186,434 @@ body {
 }
 
 .panel-btn.primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════
+   Export Modal
+   ═══════════════════════════════════════ */
+
+.export-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease-out;
+    padding: 16px;
+}
+
+.export-modal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 340px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.2s ease-out;
+}
+
+.export-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.export-modal-header h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.export-modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.export-modal-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.export-modal-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+    direction: rtl;
+}
+
+.export-format-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.export-format-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+}
+
+.export-format-card:hover {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.06);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+.export-format-card:active {
+    transform: translateY(0);
+}
+
+.export-format-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.export-format-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.export-format-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.export-format-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    direction: rtl;
+    line-height: 1.4;
+}
+
+.export-format-action {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--accent-light);
+    transition: all 0.15s;
+}
+
+.export-format-card:hover .export-format-action {
+    background: var(--accent);
+    color: white;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ============================================================
+   PixelForge Tab Styles
+   ============================================================ */
+
+.pf-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.pf-dropzone {
+    border: 2px dashed var(--border-strong);
+    border-radius: 12px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.pf-dropzone:hover,
+.pf-dropzone-active {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.pf-dropzone-icon {
+    font-size: 32px;
+    opacity: 0.6;
+}
+
+.pf-dropzone-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.pf-dropzone-formats {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.pf-file-input {
+    display: none;
+}
+
+.pf-step-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    animation: pf-pulse 2s ease-in-out infinite;
+}
+
+.pf-slow-warning {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+.pf-cancel-btn {
+    margin-top: 16px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pf-cancel-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+@keyframes pf-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.pf-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.pf-color-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 16px;
+}
+
+.pf-color-swatch-wrapper {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.pf-color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.pf-color-swatch:hover {
+    transform: scale(1.2);
+}
+
+.pf-font-list {
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pf-font-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.pf-font-item-name {
+    font-weight: 500;
+}
+
+.pf-font-item-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pf-font-item-match {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.pf-save-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-muted);
+    padding: 2px 4px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.pf-save-btn:hover {
+    color: #f472b6;
+    transform: scale(1.15);
+}
+
+.pf-save-btn.saved {
+    color: #f472b6;
+}
+
+.pf-error {
+    padding: 12px 16px;
+    margin: 12px 16px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    font-size: 12px;
+    text-align: center;
+}
+
+.pf-new-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    font-family: inherit;
+}
+
+.pf-new-btn:hover {
+    background: var(--bg-hover);
+}
+
+.pf-generate-btn {
+    margin: 8px 16px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    width: calc(100% - 32px);
+}
+
+.pf-generate-btn:hover {
+    opacity: 0.9;
+}
+
+.pf-generate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pf-save-all-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.pf-save-all-btn:hover {
+    background: rgba(244, 114, 182, 0.1);
+    border-color: rgba(244, 114, 182, 0.3);
+    color: #f472b6;
+}
+
+.pf-save-all-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }

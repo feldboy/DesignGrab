@@ -4,6 +4,7 @@ node_modules/
 *.local
 .DS_Store
 .vite/
+extension/dist/
 
 # Sensitive config files
 extension/src/config/env.js

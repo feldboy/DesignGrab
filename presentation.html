@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignGrab — Product Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #08080f;
+    --bg-card: #0e0e1a;
+    --text: #e8e8f0;
+    --text-dim: #6b6b8a;
+    --accent: #6366f1;
+    --accent-glow: rgba(99, 102, 241, 0.25);
+    --green: #4ade80;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  html, body {
+    height: 100%; width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Slide Container ── */
+  .deck {
+    position: relative;
+    width: 100vw; height: 100vh;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 80px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(30px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .slide.exit-up {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  /* ── Navigation ── */
+  .nav-bar {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    background: rgba(14, 14, 26, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 100px;
+    padding: 8px 16px;
+  }
+
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    padding: 0;
+  }
+
+  .nav-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  .slide-counter {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Global Background ── */
+  .bg-grain {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  .bg-orb {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bg-orb-1 { top: -200px; left: -100px; background: var(--accent); }
+  .bg-orb-2 { bottom: -300px; right: -150px; background: #7c3aed; opacity: 0.08; }
+
+  /* ── Typography ── */
+  .heading-xl {
+    font-family: var(--serif);
+    font-size: clamp(56px, 8vw, 120px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+  }
+
+  .heading-lg {
+    font-family: var(--serif);
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+
+  .heading-md {
+    font-family: var(--serif);
+    font-size: clamp(28px, 3.5vw, 48px);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .body-lg {
+    font-size: clamp(16px, 1.6vw, 22px);
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 640px;
+  }
+
+  .body-md {
+    font-size: clamp(14px, 1.2vw, 18px);
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .italic { font-style: italic; }
+  .accent { color: var(--accent); }
+  .green { color: var(--green); }
+  .orange { color: var(--orange); }
+  .pink { color: var(--pink); }
+  .white { color: #fff; }
+
+  .text-center { text-align: center; }
+  .gap-16 { gap: 16px; }
+  .gap-24 { gap: 24px; }
+  .gap-32 { gap: 32px; }
+  .gap-40 { gap: 40px; }
+  .gap-48 { gap: 48px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+
+  .flex-col { display: flex; flex-direction: column; }
+  .flex-row { display: flex; flex-direction: row; }
+  .items-center { align-items: center; }
+  .justify-center { justify-content: center; }
+
+  /* ── Stagger Animations ── */
+  .slide.active .stagger { animation: stagger-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .slide.active .stagger:nth-child(1) { animation-delay: 0.08s; }
+  .slide.active .stagger:nth-child(2) { animation-delay: 0.18s; }
+  .slide.active .stagger:nth-child(3) { animation-delay: 0.28s; }
+  .slide.active .stagger:nth-child(4) { animation-delay: 0.38s; }
+  .slide.active .stagger:nth-child(5) { animation-delay: 0.48s; }
+  .slide.active .stagger:nth-child(6) { animation-delay: 0.58s; }
+  .slide.active .stagger:nth-child(7) { animation-delay: 0.68s; }
+
+  @keyframes stagger-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Slide-Specific ── */
+
+  /* Title slide */
+  .title-wordmark {
+    font-family: var(--serif);
+    font-size: clamp(80px, 12vw, 180px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .title-tagline {
+    font-size: clamp(16px, 1.8vw, 24px);
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+
+  .title-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    border: 1px solid rgba(99,102,241,0.25);
+    background: rgba(99,102,241,0.08);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+
+  .title-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.5); }
+  }
+
+  /* Problem slide */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .problem-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+
+  .problem-card:hover {
+    border-color: rgba(244, 114, 182, 0.3);
+  }
+
+  .problem-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .problem-card h3 {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .problem-card p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  /* Features slide */
+  .feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    width: 100%;
+    max-width: 1000px;
+    align-items: center;
+  }
+
+  .feature-visual {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, var(--accent-glow), transparent 70%);
+    opacity: 0.3;
+  }
+
+  .feature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .feature-bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .feature-bullet .check {
+    color: var(--green);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* Inspector mock */
+  .mock-inspector {
+    position: relative;
+    z-index: 1;
+  }
+
+  .mock-element {
+    height: 80px;
+    border-radius: 10px;
+    border: 2px solid rgba(99,102,241,0.3);
+    background: rgba(99,102,241,0.06);
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .mock-element::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border: 2px dashed rgba(251,146,60,0.4);
+    border-radius: 14px;
+  }
+
+  .mock-element::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    background: rgba(96,165,250,0.08);
+    border-radius: 6px;
+  }
+
+  .mock-tooltip {
+    position: absolute;
+    top: -8px; right: 12px;
+    background: #16162a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    z-index: 2;
+  }
+
+  .mock-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 3px 0;
+  }
+
+  .mock-tooltip-row span:first-child { color: var(--text-dim); }
+  .mock-tooltip-row span:last-child { color: var(--text); }
+
+  /* Color palette mock */
+  .mock-palette {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mock-swatch-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .mock-swatch {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .mock-swatch-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mock-swatch-hex {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mock-swatch-role {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* AI Code mock */
+  .mock-code {
+    position: relative;
+    z-index: 1;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .mock-code .kw { color: #c084fc; }
+  .mock-code .fn { color: #60a5fa; }
+  .mock-code .nm { color: #fbbf24; }
+  .mock-code .tg { color: #f87171; }
+  .mock-code .at { color: #a5b4fc; }
+  .mock-code .st { color: #4ade80; }
+  .mock-code .p { color: var(--text-dim); }
+  .mock-code .indent { padding-left: 20px; }
+  .mock-code .indent2 { padding-left: 40px; }
+
+  .mock-code-cursor {
+    display: inline-block;
+    width: 2px; height: 14px;
+    background: var(--accent);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Differentiators */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .diff-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 28px 24px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .diff-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .diff-card:hover::before { opacity: 1; }
+  .diff-card:hover { border-color: rgba(99,102,241,0.2); }
+
+  .diff-card h3 {
+    font-family: var(--sans);
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .diff-card h3 .diff-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .diff-card p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    padding-left: 38px;
+  }
+
+  /* Pricing slide */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .price-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: all 0.3s;
+  }
+
+  .price-card.featured {
+    border-color: rgba(99,102,241,0.4);
+    background: rgba(99,102,241,0.05);
+    box-shadow: 0 0 60px rgba(99,102,241,0.1);
+    transform: scale(1.04);
+  }
+
+  .price-card:hover { border-color: rgba(255,255,255,0.15); }
+
+  .price-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .price-amount {
+    font-family: var(--serif);
+    font-size: 48px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .price-period {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+  }
+
+  .price-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex: 1;
+  }
+
+  .price-features li {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .price-features li .pf-check {
+    color: var(--green);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .price-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--sans);
+    text-align: center;
+  }
+
+  .price-btn:hover {
+    background: rgba(255,255,255,0.08);
+  }
+
+  .price-btn.primary {
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    border-color: transparent;
+    box-shadow: 0 4px 16px var(--accent-glow);
+  }
+
+  .price-btn.primary:hover {
+    box-shadow: 0 4px 24px rgba(99,102,241,0.4);
+  }
+
+  .featured-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(99,102,241,0.12);
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+
+  /* Users slide */
+  .users-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 800px;
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    transition: all 0.3s;
+  }
+
+  .user-chip:hover {
+    border-color: rgba(99,102,241,0.3);
+    background: rgba(99,102,241,0.06);
+  }
+
+  .user-chip .user-emoji {
+    font-size: 20px;
+  }
+
+  /* CTA slide */
+  .cta-box {
+    position: relative;
+    padding: 64px 80px;
+    border-radius: 28px;
+    border: 1px solid rgba(99,102,241,0.2);
+    background: rgba(99,102,241,0.04);
+    text-align: center;
+    max-width: 700px;
+    overflow: hidden;
+  }
+
+  .cta-box::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 200px;
+    background: radial-gradient(ellipse, var(--accent-glow), transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    box-shadow: 0 8px 32px var(--accent-glow);
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(99,102,241,0.4);
+  }
+
+  /* How it works */
+  .steps-row {
+    display: flex;
+    gap: 32px;
+    max-width: 900px;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .step-card {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+
+  .step-number {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 22px;
+    color: #fff;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+
+  .step-number::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .step-card:nth-child(1) .step-number { background: rgba(99,102,241,0.2); }
+  .step-card:nth-child(2) .step-number { background: rgba(251,146,60,0.2); }
+  .step-card:nth-child(3) .step-number { background: rgba(74,222,128,0.2); }
+
+  .step-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .step-card p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .step-arrow {
+    color: rgba(255,255,255,0.1);
+    font-size: 28px;
+    margin-top: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Keyboard hint */
+  .key-hint {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.5;
+  }
+
+  .key-hint kbd {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .slide { padding: 40px 24px; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .feature-row { grid-template-columns: 1fr; gap: 24px; }
+    .diff-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; max-width: 360px; }
+    .steps-row { flex-direction: column; align-items: center; }
+    .step-arrow { transform: rotate(90deg); }
+    .price-card.featured { transform: none; }
+    .cta-box { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grain"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<div class="key-hint"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate</div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════ SLIDE 1: TITLE ═══════════════════ -->
+  <div class="slide active" data-slide="0">
+    <div class="flex-col items-center gap-32 text-center">
+      <div class="stagger title-badge"><span class="dot"></span> Chrome Extension</div>
+      <div class="stagger title-wordmark">DesignGrab</div>
+      <p class="stagger title-tagline">Extract any website's design in seconds.</p>
+      <p class="stagger body-md" style="max-width: 480px;">Inspect, extract, and export colors, fonts, assets, layouts, and production-ready code from any website. Powered by AI.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 2: PROBLEM ═══════════════════ -->
+  <div class="slide" data-slide="1">
+    <div class="flex-col items-center gap-40 text-center">
+      <div class="flex-col items-center gap-16">
+        <span class="stagger label">The Problem</span>
+        <h2 class="stagger heading-lg">Reverse-engineering designs<br>is <span class="italic pink">painful.</span></h2>
+      </div>
+      <div class="problem-grid">
+        <div class="stagger problem-card">
+          <span class="problem-icon">&#128269;</span>
+          <h3>DevTools are clunky</h3>
+          <p>Digging through the Elements panel to find a single color or font takes forever.</p>
+        </div>
+        <div class="stagger problem-card">
+          <span class="problem-icon">&#128247;</span>
+          <h3>Screenshots lose context</h3>
+          <p>You can't extract colors, fonts, or spacing from a PNG. The data is lost.</p>
+        </div>
+        <div class="stagger problem-card">
+          <span class="problem-icon">&#9997;&#65039;</span>
+          <h3>Manual recreation is slow</h3>
+          <p>Rebuilding a section you love means hours of pixel-pushing and guesswork.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 3: SOLUTION ═══════════════════ -->
+  <div class="slide" data-slide="2">
+    <div class="flex-col items-center gap-40 text-center">
+      <div class="flex-col items-center gap-16">
+        <span class="stagger label">The Solution</span>
+        <h2 class="stagger heading-lg">One extension.<br><span class="italic accent">Everything</span> you need.</h2>
+        <p class="stagger body-lg text-center">DesignGrab sits in your Chrome toolbar. Click it on any website to instantly inspect elements, extract palettes, download assets, and export production-ready code.</p>
+      </div>
+      <div class="stagger steps-row">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>Browse any site</h3>
+          <p>Visit the website whose design you want to capture.</p>
+        </div>
+        <span class="step-arrow">&rarr;</span>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>Open DesignGrab</h3>
+          <p>Click the extension icon. The side panel opens with 9 powerful tabs.</p>
+        </div>
+        <span class="step-arrow">&rarr;</span>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>Extract & export</h3>
+          <p>Copy colors, fonts, assets, layouts, or full React/Vue components instantly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 4: FEATURE — INSPECTOR ═══════════════════ -->
+  <div class="slide" data-slide="3">
+    <div class="flex-col items-center gap-32">
+      <div class="flex-col items-center gap-8 text-center">
+        <span class="stagger label">Core Feature</span>
+        <h2 class="stagger heading-md">Inspect any element <span class="italic">instantly</span></h2>
+      </div>
+      <div class="stagger feature-row">
+        <div class="feature-visual">
+          <div class="mock-inspector">
+            <div style="height:24px; background: rgba(255,255,255,0.04); border-radius:6px; margin-bottom:10px;"></div>
+            <div class="mock-element">
+              <div class="mock-tooltip">
+                <div class="mock-tooltip-row"><span>width</span><span>420px</span></div>
+                <div class="mock-tooltip-row"><span>padding</span><span>24px</span></div>
+                <div class="mock-tooltip-row"><span>radius</span><span>12px</span></div>
+                <div class="mock-tooltip-row"><span>font</span><span>Inter</span></div>
+              </div>
+            </div>
+            <div style="height:32px; background: rgba(255,255,255,0.04); border-radius:6px;"></div>
+          </div>
+        </div>
+        <div class="feature-text">
+          <div class="feature-bullet"><span class="check">&#10003;</span> Box model visualization with margin, padding, border</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Click-to-copy any CSS value</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Pin elements for deeper analysis</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Works on any website, any framework</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 5: FEATURE — COLORS ═══════════════════ -->
+  <div class="slide" data-slide="4">
+    <div class="flex-col items-center gap-32">
+      <div class="flex-col items-center gap-8 text-center">
+        <span class="stagger label">Design Tokens</span>
+        <h2 class="stagger heading-md">Colors & fonts, <span class="italic orange">automatically</span></h2>
+      </div>
+      <div class="stagger feature-row">
+        <div class="feature-text">
+          <div class="feature-bullet"><span class="check">&#10003;</span> Colors grouped by role: primary, text, background, accent</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> WCAG contrast accessibility audit</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Font weights, sources, and load URLs</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> One-click copy as HEX, RGB, HSL, or Tailwind config</div>
+        </div>
+        <div class="feature-visual">
+          <div class="mock-palette">
+            <div class="mock-swatch-row">
+              <div class="mock-swatch" style="background:#6366f1;"></div>
+              <div class="mock-swatch-info">
+                <span class="mock-swatch-hex">#6366f1</span>
+                <span class="mock-swatch-role">Primary</span>
+              </div>
+            </div>
+            <div class="mock-swatch-row">
+              <div class="mock-swatch" style="background:#1a1a2e;"></div>
+              <div class="mock-swatch-info">
+                <span class="mock-swatch-hex">#1a1a2e</span>
+                <span class="mock-swatch-role">Text</span>
+              </div>
+            </div>
+            <div class="mock-swatch-row">
+              <div class="mock-swatch" style="background:#f8f9fa;"></div>
+              <div class="mock-swatch-info">
+                <span class="mock-swatch-hex">#f8f9fa</span>
+                <span class="mock-swatch-role">Background</span>
+              </div>
+            </div>
+            <div class="mock-swatch-row">
+              <div class="mock-swatch" style="background:#4ade80;"></div>
+              <div class="mock-swatch-info">
+                <span class="mock-swatch-hex">#4ade80</span>
+                <span class="mock-swatch-role">Accent</span>
+              </div>
+            </div>
+            <div class="mock-swatch-row">
+              <div class="mock-swatch" style="background:#e94560;"></div>
+              <div class="mock-swatch-info">
+                <span class="mock-swatch-hex">#e94560</span>
+                <span class="mock-swatch-role">CTA</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 6: FEATURE — AI CODE ═══════════════════ -->
+  <div class="slide" data-slide="5">
+    <div class="flex-col items-center gap-32">
+      <div class="flex-col items-center gap-8 text-center">
+        <span class="stagger label">AI-Powered</span>
+        <h2 class="stagger heading-md">Production-ready code, <span class="italic green">in seconds</span></h2>
+      </div>
+      <div class="stagger feature-row">
+        <div class="feature-visual">
+          <div class="mock-code">
+            <div><span class="kw">export default</span> <span class="fn">function</span> <span class="nm">HeroCard</span><span class="p">({ title }) {</span></div>
+            <div class="indent"><span class="kw">return</span> <span class="p">(</span></div>
+            <div class="indent2"><span class="tg">&lt;section</span> <span class="at">className</span><span class="p">=</span><span class="st">"flex flex-col py-20"</span><span class="tg">&gt;</span></div>
+            <div class="indent2"><span class="tg">&nbsp;&nbsp;&lt;h1</span> <span class="at">className</span><span class="p">=</span><span class="st">"text-5xl font-bold"</span><span class="tg">&gt;</span></div>
+            <div class="indent2"><span class="p">&nbsp;&nbsp;&nbsp;&nbsp;{title}</span><span class="mock-code-cursor"></span></div>
+            <div class="indent2"><span class="tg">&nbsp;&nbsp;&lt;/h1&gt;</span></div>
+            <div class="indent2"><span class="tg">&lt;/section&gt;</span></div>
+            <div class="indent"><span class="p">)</span></div>
+            <div><span class="p">}</span></div>
+          </div>
+        </div>
+        <div class="feature-text">
+          <div class="feature-bullet"><span class="check">&#10003;</span> React TSX with TypeScript props</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Vue 3 SFC with Composition API</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Tailwind CSS &mdash; no inline styles</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Claude AI generates clean, accessible code</div>
+          <div class="feature-bullet"><span class="check">&#10003;</span> Copy and paste into your project instantly</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 7: DIFFERENTIATORS ═══════════════════ -->
+  <div class="slide" data-slide="6">
+    <div class="flex-col items-center gap-40 text-center">
+      <div class="flex-col items-center gap-16">
+        <span class="stagger label">What sets us apart</span>
+        <h2 class="stagger heading-md">Not just another inspector.</h2>
+      </div>
+      <div class="diff-grid">
+        <div class="stagger diff-card">
+          <h3><span class="diff-icon" style="background: rgba(99,102,241,0.15); color: var(--accent);">&#9783;</span> Layout DNA</h3>
+          <p>See Flexbox directions, Grid templates, alignment, and gaps. Understand <em>how</em> layouts work, not just what they look like.</p>
+        </div>
+        <div class="stagger diff-card">
+          <h3><span class="diff-icon" style="background: rgba(74,222,128,0.15); color: var(--green);">&#9889;</span> AI Code Export</h3>
+          <p>Claude AI turns any selected section into a production-ready React or Vue component with Tailwind CSS.</p>
+        </div>
+        <div class="stagger diff-card">
+          <h3><span class="diff-icon" style="background: rgba(251,146,60,0.15); color: var(--orange);">&#128230;</span> Asset Extraction</h3>
+          <p>Find every image, SVG, video, and Lottie animation. Download as ZIP or copy raw SVG code.</p>
+        </div>
+        <div class="stagger diff-card">
+          <h3><span class="diff-icon" style="background: rgba(244,114,182,0.15); color: var(--pink);">&#128218;</span> Design Library</h3>
+          <p>Save design tokens to a personal library. Sync across devices with cloud storage. Build your design system.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 8: TARGET USERS ═══════════════════ -->
+  <div class="slide" data-slide="7">
+    <div class="flex-col items-center gap-40 text-center">
+      <div class="flex-col items-center gap-16">
+        <span class="stagger label">Who it's for</span>
+        <h2 class="stagger heading-lg">Built for <span class="italic accent">builders.</span></h2>
+        <p class="stagger body-lg">Anyone who works with web design and wants to move faster.</p>
+      </div>
+      <div class="stagger users-row">
+        <div class="user-chip"><span class="user-emoji">&#128187;</span> Frontend Developers</div>
+        <div class="user-chip"><span class="user-emoji">&#127912;</span> UI/UX Designers</div>
+        <div class="user-chip"><span class="user-emoji">&#128640;</span> No-code Builders</div>
+        <div class="user-chip"><span class="user-emoji">&#128188;</span> Freelancers</div>
+        <div class="user-chip"><span class="user-emoji">&#127970;</span> Agencies</div>
+        <div class="user-chip"><span class="user-emoji">&#127891;</span> Students</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 9: PRICING ═══════════════════ -->
+  <div class="slide" data-slide="8">
+    <div class="flex-col items-center gap-32 text-center">
+      <div class="flex-col items-center gap-16">
+        <span class="stagger label">Pricing</span>
+        <h2 class="stagger heading-md">Simple, transparent pricing.</h2>
+      </div>
+      <div class="stagger pricing-grid">
+        <div class="price-card">
+          <div class="price-name">Free</div>
+          <div class="price-amount">$0</div>
+          <div class="price-period">forever</div>
+          <ul class="price-features">
+            <li><span class="pf-check">&#10003;</span> Basic inspector</li>
+            <li><span class="pf-check">&#10003;</span> 15 asset downloads / mo</li>
+            <li><span class="pf-check">&#10003;</span> 5 code exports / mo</li>
+            <li><span class="pf-check">&#10003;</span> Local library</li>
+          </ul>
+          <button class="price-btn">Get Started</button>
+        </div>
+        <div class="price-card featured">
+          <div class="featured-badge">Most Popular</div>
+          <div class="price-name">Pro</div>
+          <div class="price-amount">$12</div>
+          <div class="price-period">per month</div>
+          <ul class="price-features">
+            <li><span class="pf-check">&#10003;</span> Everything in Free</li>
+            <li><span class="pf-check">&#10003;</span> 2,000 downloads / mo</li>
+            <li><span class="pf-check">&#10003;</span> Unlimited code exports</li>
+            <li><span class="pf-check">&#10003;</span> 50 AI exports / mo</li>
+            <li><span class="pf-check">&#10003;</span> Figma export</li>
+          </ul>
+          <button class="price-btn primary">Upgrade to Pro</button>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Lifetime</div>
+          <div class="price-amount">$99</div>
+          <div class="price-period">one-time</div>
+          <ul class="price-features">
+            <li><span class="pf-check">&#10003;</span> Everything in Pro</li>
+            <li><span class="pf-check">&#10003;</span> Free future updates</li>
+            <li><span class="pf-check">&#10003;</span> Early access</li>
+            <li><span class="pf-check">&#10003;</span> Priority support</li>
+          </ul>
+          <button class="price-btn">Get Lifetime</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SLIDE 10: CTA ═══════════════════ -->
+  <div class="slide" data-slide="9">
+    <div class="stagger cta-box">
+      <div class="flex-col items-center gap-24" style="position: relative; z-index: 1;">
+        <h2 class="heading-lg white">Ready to <span class="italic">grab?</span></h2>
+        <p class="body-lg text-center" style="max-width: 420px;">Install the Chrome extension and start extracting designs for free. No credit card required.</p>
+        <a class="cta-button" href="#">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Install DesignGrab
+        </a>
+        <p class="body-md" style="font-size: 13px;">Free forever. Upgrade anytime.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<nav class="nav-bar" id="navBar"></nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const navBar = document.getElementById('navBar');
+  let current = 0;
+
+  // Build nav dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    navBar.appendChild(dot);
+  });
+
+  const counter = document.createElement('span');
+  counter.className = 'slide-counter';
+  counter.textContent = `1 / ${slides.length}`;
+  navBar.appendChild(counter);
+
+  function goTo(index) {
+    if (index < 0 || index >= slides.length || index === current) return;
+
+    const prev = slides[current];
+    const next = slides[index];
+
+    // Direction
+    if (index > current) {
+      prev.classList.remove('active');
+      prev.classList.add('exit-up');
+      setTimeout(() => prev.classList.remove('exit-up'), 600);
+    } else {
+      prev.classList.remove('active');
+    }
+
+    next.style.transform = index > current ? 'translateY(30px)' : 'translateY(-30px)';
+    next.offsetHeight; // force reflow
+    next.classList.add('active');
+    next.style.transform = '';
+
+    // Update nav
+    navBar.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === index);
+    });
+
+    counter.textContent = `${index + 1} / ${slides.length}`;
+    current = index;
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      goTo(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      goTo(current - 1);
+    }
+  });
+
+  // Touch swipe
+  let touchStart = 0;
+  document.addEventListener('touchstart', (e) => { touchStart = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -4,7 +4,7 @@
  */
 
 import { initOverlay, hideOverlay } from './overlay.js';
-import { initInspector, startInspecting, stopInspecting, toggleInspecting, getPinnedElement } from './inspector.js';
+import { initInspector, startInspecting, stopInspecting, toggleInspecting, getPinnedElement, pinElement } from './inspector.js';
 import { extractAssets } from './extractor.js';
 import { analyzeColors } from './colorAnalyzer.js';
 import { analyzeFonts } from './fontAnalyzer.js';
@@ -73,6 +73,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case 'STOP_INSPECT':
             stopInspecting();
             sendResponse({ active: false });
+            break;
+
+        case 'SELECT_PAGE':
+            initDesignGrab();
+            try {
+                const pageData = pinElement(document.body);
+                sendResponse({ success: true, data: pageData });
+            } catch (err) {
+                sendResponse({ success: false, error: err.message });
+            }
             break;
 
         case 'EXTRACT_ASSETS':
@@ -147,6 +157,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 const colorData = analyzeColors();
                 const fontData = analyzeFonts();
                 const twConfig = generateTailwindConfig(colorData, fontData);
+                const rawAssets = extractAssets();
+                const assets = {
+                    images: rawAssets.images.map(({ element, ...rest }) => rest).slice(0, 15), // cap at 15 for prompt size
+                    svgs: rawAssets.svgs.map(({ element, ...rest }) => rest).slice(0, 10)
+                };
 
                 // Extract animations from the element and its descendants
                 const animations = [];
@@ -211,6 +226,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                         },
                         tailwindConfig: twConfig,
                         animations: animations.length > 0 ? { items: animations.slice(0, 10), keyframesCSS } : null,
+                        assets: assets,
                     },
                 });
             } catch (err) {
@@ -309,14 +325,14 @@ document.addEventListener('keydown', (e) => {
         initDesignGrab();
         const isActive = toggleInspecting();
         // Notify panel
-        chrome.runtime.sendMessage({ type: 'INSPECT_MODE_CHANGED', payload: { active: isActive } }).catch(() => {});
+        chrome.runtime.sendMessage({ type: 'INSPECT_MODE_CHANGED', payload: { active: isActive } }).catch(() => { });
     }
 
     // ESC — stop inspecting
     if (e.key === 'Escape' && isInitialized) {
         stopInspecting();
         hideOverlay();
-        chrome.runtime.sendMessage({ type: 'INSPECT_MODE_CHANGED', payload: { active: false } }).catch(() => {});
+        chrome.runtime.sendMessage({ type: 'INSPECT_MODE_CHANGED', payload: { active: false } }).catch(() => { });
     }
 });
 

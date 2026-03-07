@@ -3,7 +3,7 @@ import { useState } from 'preact/hooks';
 /**
  * Inspector Tab — displays pinned element's CSS properties
  */
-export function InspectorTab({ element, isInspecting, onStartInspect }) {
+export function InspectorTab({ element, isInspecting, onStartInspect, onSelectPage }) {
     const [copiedKey, setCopiedKey] = useState(null);
 
     if (!element && !isInspecting) {
@@ -18,9 +18,14 @@ export function InspectorTab({ element, isInspecting, onStartInspect }) {
                 </div>
                 <h3 class="empty-title">No element selected</h3>
                 <p class="empty-text">Click "Inspect" and hover over any element on the page, then click to pin it.</p>
-                <button class="empty-btn" onClick={onStartInspect}>
-                    🔍 Start Inspecting
-                </button>
+                <div class="empty-actions">
+                    <button class="empty-btn" onClick={onStartInspect}>
+                        🔍 Start Inspecting
+                    </button>
+                    <button class="empty-btn secondary" onClick={onSelectPage}>
+                        📄 Select Page
+                    </button>
+                </div>
             </div>
         );
     }
@@ -88,6 +93,9 @@ export function InspectorTab({ element, isInspecting, onStartInspect }) {
                     {'>'}
                 </code>
                 <span class="element-dims">{element.dimensions?.width} × {element.dimensions?.height}</span>
+                <button class="select-page-btn" onClick={onSelectPage} title="Select entire page">
+                    📄 Page
+                </button>
             </div>
 
             {/* Selector path */}
