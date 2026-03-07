@@ -11,8 +11,8 @@ import { getSupabase } from './supabase.js';
 // Fallback limits (used when Supabase is unavailable)
 const DEFAULT_LIMITS = {
     free:     { downloads: 15, codeExports: 5,  designSystems: 3,  aiExports: 0, pixelforgeAnalyses: 1 },
-    pro:      { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: 10 },
-    lifetime: { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: 10 },
+    pro:      { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: -1 },
+    lifetime: { downloads: 2000, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: -1 },
 };
 
 /**

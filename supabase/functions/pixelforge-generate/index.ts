@@ -30,6 +30,7 @@ interface Bounds {
 interface ElementStyle {
   fill?: string;
   stroke?: string;
+  strokeWidth?: number;
   borderRadius?: number;
   opacity?: number;
 }
@@ -41,12 +42,19 @@ interface TextProps {
   fontWeight?: number;
   color?: string;
   align?: "left" | "center" | "right";
+  textTransform?: "none" | "uppercase" | "lowercase";
+  lineHeight?: number;
+  letterSpacing?: number;
+  maxWidthPct?: number;
+  lineCount?: number;
+  hierarchy?: "hero" | "heading" | "subheading" | "body" | "caption" | "label";
 }
 
 interface DesignElement {
   id: string;
   type: "text" | "image" | "shape" | "icon" | "group" | "container";
   bounds: Bounds;
+  region?: string;
   zIndex?: number;
   style?: ElementStyle;
   text?: TextProps;
@@ -74,6 +82,25 @@ interface DesignTree {
 }
 
 // --- Helpers ---
+
+/** Check if bounds appear to be percentages (0-100 range, small values) */
+function looksLikePercentages(tree: DesignTree): boolean {
+  if (!tree.elements.length) return false;
+  const maxX = Math.max(...tree.elements.map(e => e.bounds.x));
+  const maxY = Math.max(...tree.elements.map(e => e.bounds.y));
+  // If max positions are <= 100, likely percentages
+  return maxX <= 100 && maxY <= 100;
+}
+
+/** Convert percentage bounds to pixel bounds */
+function pctToPx(bounds: Bounds, canvas: { width: number; height: number }): { x: number; y: number; w: number; h: number } {
+  return {
+    x: Math.round((bounds.x / 100) * canvas.width),
+    y: Math.round((bounds.y / 100) * canvas.height),
+    w: Math.round((bounds.w / 100) * canvas.width),
+    h: Math.round((bounds.h / 100) * canvas.height),
+  };
+}
 
 /** Converts "#ff0000" → { r: 1, g: 0, b: 0 } for Figma API */
 function hexToRgb01(hex: string): { r: number; g: number; b: number } {
@@ -318,6 +345,7 @@ function generateCanva(tree: DesignTree): string {
 function generateHtml(tree: DesignTree): string {
   const { canvas, fonts = [], colors = [] } = tree;
   const fontUrl = buildFontImport(fonts);
+  const isPct = looksLikePercentages(tree);
 
   const cssVars = colors
     .map((c, i) => `  --color-${c.name?.replace(/\s+/g, "-").toLowerCase() || i}: ${c.hex};`)
@@ -329,7 +357,7 @@ function generateHtml(tree: DesignTree): string {
   for (const el of tree.elements) {
     const isChild = tree.elements.some((p) => p.children?.includes(el.id));
     if (isChild) continue;
-    elementStyles.push(buildCssRule(el));
+    elementStyles.push(buildCssRule(el, canvas, isPct));
     elementHtml.push(buildHtmlElement(tree, el, 2));
   }
 
@@ -360,25 +388,36 @@ function generateHtml(tree: DesignTree): string {
     .join("\n");
 }
 
-function buildCssRule(el: DesignElement): string {
-  const { bounds, style, text } = el;
+function buildCssRule(el: DesignElement, canvas: { width: number; height: number }, isPct: boolean): string {
+  const px = isPct ? pctToPx(el.bounds, canvas) : { x: el.bounds.x, y: el.bounds.y, w: el.bounds.w, h: el.bounds.h };
+  const { style, text } = el;
   const props: string[] = [
     "position: absolute",
-    `left: ${bounds.x}px`,
-    `top: ${bounds.y}px`,
-    `width: ${bounds.w}px`,
-    `height: ${bounds.h}px`,
+    `left: ${px.x}px`,
+    `top: ${px.y}px`,
+    `width: ${px.w}px`,
   ];
+  // For text, use auto height with max-height to allow wrapping
+  if (el.type === "text") {
+    props.push(`max-height: ${px.h}px`);
+  } else {
+    props.push(`height: ${px.h}px`);
+  }
   if (style?.fill) props.push(`background-color: ${style.fill}`);
   if (style?.borderRadius) props.push(`border-radius: ${style.borderRadius}px`);
   if (style?.opacity !== undefined && style.opacity < 1) props.push(`opacity: ${style.opacity}`);
-  if (style?.stroke) props.push(`border: 1px solid ${style.stroke}`);
+  if (style?.stroke) props.push(`border: ${style?.strokeWidth || 1}px solid ${style.stroke}`);
   if (text) {
     if (text.fontFamily) props.push(`font-family: '${text.fontFamily}', sans-serif`);
     if (text.fontSize) props.push(`font-size: ${text.fontSize}px`);
     if (text.fontWeight) props.push(`font-weight: ${text.fontWeight}`);
     if (text.color) props.push(`color: ${text.color}`);
     if (text.align) props.push(`text-align: ${text.align}`);
+    if (text.textTransform && text.textTransform !== "none") props.push(`text-transform: ${text.textTransform}`);
+    if (text.lineHeight) props.push(`line-height: ${text.lineHeight}`);
+    if (text.letterSpacing) props.push(`letter-spacing: ${text.letterSpacing}px`);
+    props.push("word-wrap: break-word");
+    props.push("overflow-wrap: break-word");
   }
   return `.el-${el.id.replace(/[^a-zA-Z0-9]/g, "-")} { ${props.join("; ")}; }`;
 }
@@ -401,10 +440,11 @@ function buildHtmlElement(tree: DesignTree, el: DesignElement, depth: number): s
 }
 
 
-/** Generates a React functional component with Tailwind classes */
+/** Generates a React functional component */
 function generateReact(tree: DesignTree): string {
   const { canvas, fonts = [] } = tree;
   const fontUrl = buildFontImport(fonts);
+  const isPct = looksLikePercentages(tree);
 
   const lines: string[] = [
     'import React from "react";',
@@ -441,7 +481,7 @@ function generateReact(tree: DesignTree): string {
   for (const el of tree.elements) {
     const isChild = tree.elements.some((p) => p.children?.includes(el.id));
     if (isChild) continue;
-    lines.push(buildReactElement(tree, el, 3));
+    lines.push(buildReactElement(tree, el, 3, canvas, isPct));
   }
 
   lines.push(`    </div>`);
@@ -451,14 +491,15 @@ function generateReact(tree: DesignTree): string {
   return lines.filter(Boolean).join("\n");
 }
 
-function buildReactElement(tree: DesignTree, el: DesignElement, depth: number): string {
+function buildReactElement(tree: DesignTree, el: DesignElement, depth: number, canvas: { width: number; height: number }, isPct: boolean): string {
   const pad = "  ".repeat(depth);
+  const px = isPct ? pctToPx(el.bounds, canvas) : { x: el.bounds.x, y: el.bounds.y, w: el.bounds.w, h: el.bounds.h };
   const style: Record<string, string | number> = {
     position: "absolute",
-    left: el.bounds.x,
-    top: el.bounds.y,
-    width: el.bounds.w,
-    height: el.bounds.h,
+    left: px.x,
+    top: px.y,
+    width: px.w,
+    height: px.h,
   };
 
   if (el.style?.fill) style.backgroundColor = el.style.fill;
@@ -486,64 +527,197 @@ function buildReactElement(tree: DesignTree, el: DesignElement, depth: number): 
     return `${pad}<div style={${styleStr}} />`;
   }
 
-  const inner = children.map((c) => buildReactElement(tree, c, depth + 1)).join("\n");
+  const inner = children.map((c) => buildReactElement(tree, c, depth + 1, canvas, isPct)).join("\n");
   return `${pad}<div style={${styleStr}}>\n${inner}\n${pad}</div>`;
 }
 
-/** Generates an SVG document */
+/** Generates an SVG document with native text/tspan elements (Figma-compatible) */
 function generateSvg(tree: DesignTree): string {
   const { canvas } = tree;
+  const isPct = looksLikePercentages(tree);
+
+  // Collect Google Font families for import
+  const fontFamilies = new Set<string>();
+  for (const el of tree.elements) {
+    if (el.text?.fontFamily) fontFamilies.add(el.text.fontFamily);
+  }
+  for (const f of tree.fonts || []) {
+    fontFamilies.add(f.googleFont || f.name);
+  }
+
   const lines: string[] = [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvas.width} ${canvas.height}" width="${canvas.width}" height="${canvas.height}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${canvas.width} ${canvas.height}" width="${canvas.width}" height="${canvas.height}">`,
+    `  <defs>`,
+    `    <pattern id="img-placeholder" patternUnits="userSpaceOnUse" width="16" height="16">`,
+    `      <rect width="16" height="16" fill="#1a1a2e"/>`,
+    `      <line x1="0" y1="0" x2="16" y2="16" stroke="#2a2a3e" stroke-width="1"/>`,
+    `      <line x1="16" y1="0" x2="0" y2="16" stroke="#2a2a3e" stroke-width="1"/>`,
+    `    </pattern>`,
+    `  </defs>`,
   ];
+
+  // Google Fonts CSS import via foreignObject
+  if (fontFamilies.size > 0) {
+    const familyStr = [...fontFamilies].map(f => f.replace(/\s+/g, "+")).join("&family=");
+    lines.push(`  <defs>`);
+    lines.push(`    <style>@import url('https://fonts.googleapis.com/css2?family=${familyStr}&amp;display=swap');</style>`);
+    lines.push(`  </defs>`);
+  }
 
   // Canvas background
   if (canvas.background) {
     lines.push(`  <rect width="${canvas.width}" height="${canvas.height}" fill="${canvas.background}" />`);
   }
 
-  for (const el of tree.elements) {
-    const isChild = tree.elements.some((p) => p.children?.includes(el.id));
-    if (isChild) continue;
-    lines.push(buildSvgElement(tree, el, 1));
+  // Sort all elements by zIndex, flatten hierarchy for SVG
+  const sorted = [...tree.elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+
+  // Render each element
+  for (const el of sorted) {
+    const px = isPct ? pctToPx(el.bounds, canvas) : { x: el.bounds.x, y: el.bounds.y, w: el.bounds.w, h: el.bounds.h };
+    const svgLines = buildSvgElement(el, px, canvas, canvas.background || "#000000");
+    if (svgLines) lines.push(svgLines);
   }
 
   lines.push("</svg>");
   return lines.join("\n");
 }
 
-function buildSvgElement(tree: DesignTree, el: DesignElement, depth: number): string {
-  const pad = "  ".repeat(depth);
-  const { bounds, style } = el;
+/** Check if two hex colors are too similar (low contrast) and return a fixed text color */
+function ensureContrast(textColor: string, bgColor: string): string {
+  const luminance = (hex: string): number => {
+    const h = hex.replace("#", "");
+    const r = parseInt(h.substring(0, 2), 16) / 255;
+    const g = parseInt(h.substring(2, 4), 16) / 255;
+    const b = parseInt(h.substring(4, 6), 16) / 255;
+    return 0.299 * r + 0.587 * g + 0.114 * b;
+  };
+
+  const textL = luminance(textColor);
+  const bgL = luminance(bgColor);
+  const contrast = Math.abs(textL - bgL);
+
+  // If contrast is too low, pick white or black based on background
+  if (contrast < 0.2) {
+    return bgL > 0.5 ? "#000000" : "#ffffff";
+  }
+  return textColor;
+}
+
+function buildSvgElement(
+  el: DesignElement,
+  px: { x: number; y: number; w: number; h: number },
+  canvas: { width: number; height: number },
+  bgColor: string
+): string {
+  const { style } = el;
   const fill = style?.fill || "none";
-  const stroke = style?.stroke ? ` stroke="${style.stroke}"` : "";
-  const opacity = style?.opacity !== undefined && style.opacity < 1 ? ` opacity="${style.opacity}"` : "";
+  const strokeAttr = style?.stroke ? ` stroke="${style.stroke}" stroke-width="${style?.strokeWidth || 1}"` : "";
+  const opacityAttr = style?.opacity !== undefined && style.opacity < 1 ? ` opacity="${style.opacity}"` : "";
   const rx = style?.borderRadius ? ` rx="${style.borderRadius}"` : "";
 
   switch (el.type) {
     case "text": {
       const fontSize = el.text?.fontSize || 16;
-      const fontFamily = el.text?.fontFamily || "sans-serif";
+      const fontFamily = el.text?.fontFamily || "Inter, sans-serif";
       const fontWeight = el.text?.fontWeight || 400;
-      const textColor = el.text?.color || "#000000";
-      const anchor = el.text?.align === "center" ? "middle" : el.text?.align === "right" ? "end" : "start";
-      const textX = el.text?.align === "center" ? bounds.x + bounds.w / 2 : el.text?.align === "right" ? bounds.x + bounds.w : bounds.x;
-      return `${pad}<text x="${textX}" y="${bounds.y + fontSize}" font-family="${fontFamily}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${textColor}" text-anchor="${anchor}"${opacity}>${escapeSvg(el.text?.content || "")}</text>`;
+      const rawColor = el.text?.color || "#ffffff";
+      const textColor = ensureContrast(rawColor, bgColor);
+      const textAlign = el.text?.align || "left";
+      const textTransform = el.text?.textTransform || "none";
+      const lineHeight = el.text?.lineHeight || 1.15;
+      const letterSpacing = el.text?.letterSpacing ? ` letter-spacing="${el.text.letterSpacing}px"` : "";
+
+      // Determine text-anchor and x position based on alignment
+      let textAnchor = "start";
+      let textX = px.x;
+      if (textAlign === "center") {
+        textAnchor = "middle";
+        textX = px.x + Math.round(px.w / 2);
+      } else if (textAlign === "right") {
+        textAnchor = "end";
+        textX = px.x + px.w;
+      }
+
+      // Use maxWidthPct if available, otherwise use element width
+      const textWidth = el.text?.maxWidthPct
+        ? Math.round((el.text.maxWidthPct / 100) * canvas.width)
+        : px.w;
+
+      // Split content on \n or literal \\n
+      const rawContent = el.text?.content || "";
+      let contentParts = rawContent.split(/\\n|\n/).map(s => s.trim()).filter(Boolean);
+
+      // Only word-wrap if the AI didn't already provide line breaks
+      // Use conservative char width (0.45) — condensed fonts like Bebas Neue are narrower
+      const hasExplicitBreaks = contentParts.length > 1;
+      if (!hasExplicitBreaks && contentParts.length === 1) {
+        const avgCharWidth = fontSize * 0.45;
+        const maxCharsPerLine = Math.floor(textWidth / avgCharWidth);
+        if (maxCharsPerLine > 0 && contentParts[0].length > maxCharsPerLine) {
+          const words = contentParts[0].split(" ");
+          const wrapped: string[] = [];
+          let currentLine = "";
+          for (const word of words) {
+            if (currentLine.length === 0) {
+              currentLine = word;
+            } else if (currentLine.length + 1 + word.length <= maxCharsPerLine) {
+              currentLine += " " + word;
+            } else {
+              wrapped.push(currentLine);
+              currentLine = word;
+            }
+          }
+          if (currentLine) wrapped.push(currentLine);
+          contentParts = wrapped;
+        }
+      }
+
+      // Apply textTransform
+      if (textTransform === "uppercase") {
+        contentParts = contentParts.map(p => p.toUpperCase());
+      } else if (textTransform === "lowercase") {
+        contentParts = contentParts.map(p => p.toLowerCase());
+      } else if (textTransform === "capitalize") {
+        contentParts = contentParts.map(p => p.replace(/\b\w/g, c => c.toUpperCase()));
+      }
+
+      // Escape for SVG
+      contentParts = contentParts.map(p => escapeSvg(p));
+
+      // SVG text y = top of box + fontSize (baseline offset)
+      const textY = px.y + fontSize;
+      const dySpacing = Math.round(fontSize * lineHeight);
+
+      const tspans = contentParts.map((part, i) =>
+        `    <tspan x="${textX}" dy="${i === 0 ? 0 : dySpacing}">${part}</tspan>`
+      ).join("\n");
+
+      const lines: string[] = [
+        `  <text x="${textX}" y="${textY}" font-family="'${fontFamily}', sans-serif" font-size="${fontSize}" font-weight="${fontWeight}" fill="${textColor}" text-anchor="${textAnchor}" dominant-baseline="auto"${letterSpacing}${opacityAttr}>`,
+        tspans,
+        `  </text>`,
+      ];
+      return lines.join("\n");
     }
-    case "image":
-      return `${pad}<rect x="${bounds.x}" y="${bounds.y}" width="${bounds.w}" height="${bounds.h}" fill="#d4d4d4"${rx}${opacity} /><!-- image placeholder -->`;
+    case "image": {
+      // Crosshatch pattern placeholder with dimensions label
+      const cx = px.x + px.w / 2;
+      const cy = px.y + px.h / 2;
+      const lines: string[] = [
+        `  <rect x="${px.x}" y="${px.y}" width="${px.w}" height="${px.h}" fill="url(#img-placeholder)"${rx} stroke="#333" stroke-width="1"${opacityAttr} />`,
+        `  <text x="${cx}" y="${cy}" font-family="Inter, sans-serif" font-size="12" fill="#666" text-anchor="middle" dominant-baseline="middle">${px.w}×${px.h}</text>`,
+      ];
+      return lines.join("\n");
+    }
     case "group":
-    case "container": {
-      const children = getChildren(tree, el);
-      const inner = children.map((c) => buildSvgElement(tree, c, depth + 1)).join("\n");
-      const bgRect = el.type === "container" && style?.fill
-        ? `\n${pad}  <rect x="${bounds.x}" y="${bounds.y}" width="${bounds.w}" height="${bounds.h}" fill="${fill}"${rx}${stroke} />`
-        : "";
-      return `${pad}<g${opacity}>${bgRect}\n${inner}\n${pad}</g>`;
-    }
+      return "";
+    case "container":
+    case "shape":
+    case "icon":
+      return `  <rect x="${px.x}" y="${px.y}" width="${px.w}" height="${px.h}" fill="${fill}"${rx}${strokeAttr}${opacityAttr} />`;
     default:
-      // shape, icon
-      return `${pad}<rect x="${bounds.x}" y="${bounds.y}" width="${bounds.w}" height="${bounds.h}" fill="${fill}"${rx}${stroke}${opacity} />`;
+      return "";
   }
 }
 
