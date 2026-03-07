@@ -1,6 +1,7 @@
 /**
- * PixelForge — Analyze Edge Function
- * Takes a base64 image, sends to Claude Vision API, returns a DesignTree JSON.
+ * DesignGrab — PixelForge Analyze Edge Function
+ * Receives a base64 image, sends it to Claude Vision API with tool_use,
+ * and returns a DesignTree JSON for the image-to-design pipeline.
  *
  * Deploy: supabase functions deploy pixelforge-analyze
  * Requires: ANTHROPIC_API_KEY set in Supabase secrets
@@ -10,6 +11,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
 const CLAUDE_MODEL = "claude-sonnet-4-6";
+const MAX_TOOL_ITERATIONS = 5;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,161 +19,164 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const DESIGN_TREE_TOOL = {
-  name: "create_design_tree",
-  description:
-    "Analyze the UI screenshot and return a structured DesignTree representing every visual element, its styles, layout, and hierarchy.",
-  input_schema: {
-    type: "object" as const,
-    required: ["elements", "canvas"],
-    properties: {
-      canvas: {
-        type: "object" as const,
-        description: "Overall canvas/artboard info",
-        required: ["width", "height", "backgroundColor"],
-        properties: {
-          width: { type: "number" as const },
-          height: { type: "number" as const },
-          backgroundColor: {
-            type: "string" as const,
-            description: "CSS color value",
-          },
+const systemPrompt = `You are a design decomposition expert. Analyze this image and identify every visual element.
+
+Return a valid DesignTree JSON with this structure:
+{
+  "version": "1.0",
+  "canvas": { "width": <number>, "height": <number>, "background": "<color>" },
+  "elements": [
+    {
+      "id": "<unique_id>",
+      "type": "text|image|shape|icon|group|container",
+      "bounds": { "x": <number>, "y": <number>, "w": <number>, "h": <number>, "rotation": 0 },
+      "zIndex": <number>,
+      "style": { "fill": "<color>", "stroke": "<color>", "borderRadius": <number>, "opacity": <number> },
+      "text": { "content": "<text>", "fontFamily": "<font>", "fontSize": <number>, "fontWeight": <number>, "color": "<color>", "align": "left|center|right" },
+      "children": ["<child_id>"]
+    }
+  ],
+  "fonts": [{ "name": "<font>", "googleFont": "<google_font>", "confidence": <0-1>, "alternatives": [] }],
+  "colors": [{ "hex": "<hex>", "rgb": "<rgb>", "usage": "<description>", "name": "<name>" }]
+}
+
+Rules:
+- Classify each element as: text, image, shape, icon, group, or container
+- Group related elements (a button = container with shape + text child)
+- Use font_identify tool for every text element you find
+- Use color_extract tool once for the overall color palette
+- Use ocr_extract if any text is unclear or hard to read
+- Estimate dimensions in pixels based on image proportions
+- After all tool calls, return ONLY the final valid JSON DesignTree`;
+
+
+/** Claude tool definitions for design analysis */
+const toolDefinitions = [
+  {
+    name: "font_identify",
+    description: "Identify the closest Google Font match for detected text",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        text_sample: {
+          type: "string",
+          description: "A sample of the text to identify the font for",
+        },
+        style_hints: {
+          type: "string",
+          description:
+            "Visual hints about the font style (e.g. bold, serif, rounded)",
         },
       },
-      fonts: {
-        type: "array" as const,
-        description: "All fonts detected in the design",
-        items: {
-          type: "object" as const,
-          required: ["family"],
-          properties: {
-            family: { type: "string" as const },
-            weights: {
-              type: "array" as const,
-              items: { type: "string" as const },
-            },
-            category: {
-              type: "string" as const,
-              enum: ["serif", "sans-serif", "monospace", "display", "handwriting"],
-            },
-          },
-        },
-      },
-      colors: {
-        type: "array" as const,
-        description: "Color palette extracted from the design",
-        items: {
-          type: "object" as const,
-          required: ["hex", "role"],
-          properties: {
-            hex: { type: "string" as const, description: "#RRGGBB format" },
-            role: {
-              type: "string" as const,
-              enum: [
-                "primary",
-                "secondary",
-                "accent",
-                "background",
-                "text",
-                "border",
-                "shadow",
-                "other",
-              ],
-            },
-            opacity: { type: "number" as const },
-          },
-        },
-      },
-      elements: {
-        type: "array" as const,
-        description: "Flat list of all UI elements in the design",
-        items: {
-          type: "object" as const,
-          required: ["id", "type", "bounds", "styles"],
-          properties: {
-            id: { type: "string" as const },
-            parentId: {
-              type: "string" as const,
-              description: "ID of parent element, null for root",
-            },
-            type: {
-              type: "string" as const,
-              enum: [
-                "container",
-                "text",
-                "image",
-                "button",
-                "input",
-                "icon",
-                "divider",
-                "card",
-                "nav",
-                "header",
-                "footer",
-                "list",
-                "link",
-                "badge",
-                "avatar",
-                "shape",
-              ],
-            },
-            tag: {
-              type: "string" as const,
-              description: "Suggested HTML tag (div, h1, p, img, button, etc.)",
-            },
-            bounds: {
-              type: "object" as const,
-              required: ["x", "y", "width", "height"],
-              properties: {
-                x: { type: "number" as const },
-                y: { type: "number" as const },
-                width: { type: "number" as const },
-                height: { type: "number" as const },
-              },
-            },
-            styles: {
-              type: "object" as const,
-              properties: {
-                backgroundColor: { type: "string" as const },
-                color: { type: "string" as const },
-                fontSize: { type: "number" as const },
-                fontWeight: { type: "string" as const },
-                fontFamily: { type: "string" as const },
-                lineHeight: { type: "number" as const },
-                letterSpacing: { type: "number" as const },
-                textAlign: { type: "string" as const },
-                borderRadius: { type: "number" as const },
-                border: { type: "string" as const },
-                boxShadow: { type: "string" as const },
-                opacity: { type: "number" as const },
-                padding: { type: "string" as const },
-                margin: { type: "string" as const },
-                display: { type: "string" as const },
-                flexDirection: { type: "string" as const },
-                justifyContent: { type: "string" as const },
-                alignItems: { type: "string" as const },
-                gap: { type: "number" as const },
-                overflow: { type: "string" as const },
-              },
-            },
-            content: {
-              type: "string" as const,
-              description:
-                "Text content for text elements, alt text for images, label for buttons",
-            },
-            src: {
-              type: "string" as const,
-              description:
-                "Placeholder description for images (e.g. 'hero-image', 'logo', 'avatar')",
-            },
-          },
-        },
-      },
+      required: ["text_sample"],
     },
   },
-};
+  {
+    name: "color_extract",
+    description: "Extract color palette from a region",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        region_description: {
+          type: "string",
+          description: "Description of the region to extract colors from",
+        },
+      },
+      required: ["region_description"],
+    },
+  },
+  {
+    name: "ocr_extract",
+    description: "Extract text content from a region",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        region_description: {
+          type: "string",
+          description: "Description of the region containing text",
+        },
+        language: {
+          type: "string",
+          description: "Expected language of the text (e.g. en, he, ar)",
+        },
+      },
+      required: ["region_description"],
+    },
+  },
+  {
+    name: "icon_match",
+    description: "Match a visual element to an icon library",
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        description: {
+          type: "string",
+          description: "Visual description of the icon element",
+        },
+      },
+      required: ["description"],
+    },
+  },
+];
+
+/**
+ * Generate a mock tool result based on the tool name and input.
+ * These stubs guide Claude's analysis — real tool backends can replace them later.
+ */
+function generateToolResult(
+  toolName: string,
+  input: Record<string, string>
+): string {
+  switch (toolName) {
+    case "font_identify":
+      return JSON.stringify({
+        font_name: input.text_sample,
+        google_font: "Inter",
+        confidence: 0.8,
+        alternatives: ["Roboto", "Open Sans"],
+      });
+
+    case "color_extract":
+      return JSON.stringify({
+        palette: ["#000000", "#ffffff", "#6366f1"],
+        dominant: "#ffffff",
+      });
+
+    case "ocr_extract":
+      return JSON.stringify({
+        text: input.region_description,
+        confidence: 0.9,
+      });
+
+    case "icon_match":
+      return JSON.stringify({
+        library: "lucide",
+        icon_name: "circle",
+        svg_suggestion: "<svg></svg>",
+      });
+
+    default:
+      return JSON.stringify({ error: `Unknown tool: ${toolName}` });
+  }
+}
+
+/**
+ * Extract JSON from Claude's text response.
+ * Handles responses wrapped in markdown code blocks.
+ */
+function extractJSON(text: string): unknown {
+  // Try stripping markdown code fences first
+  const fenceMatch = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
+  const jsonStr = fenceMatch ? fenceMatch[1].trim() : text.trim();
+  return JSON.parse(jsonStr);
+}
+
+
+// deno-lint-ignore no-explicit-any
+type ClaudeMessage = { role: string; content: any };
 
 serve(async (req) => {
+  // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -187,11 +192,11 @@ serve(async (req) => {
   }
 
   try {
-    const { image, format, width, height } = await req.json();
+    const { image, media_type } = await req.json();
 
     if (!image) {
       return new Response(
-        JSON.stringify({ error: "Missing image parameter (base64)" }),
+        JSON.stringify({ error: "Missing image parameter" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -199,106 +204,144 @@ serve(async (req) => {
       );
     }
 
-    // Detect media type from base64 header or default to png
-    let mediaType = "image/png";
-    let base64Data = image;
-    if (image.startsWith("data:")) {
-      const match = image.match(/^data:(image\/\w+);base64,(.+)$/);
-      if (match) {
-        mediaType = match[1];
-        base64Data = match[2];
+    if (!media_type) {
+      return new Response(
+        JSON.stringify({ error: "Missing media_type parameter" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Build initial messages with the image + system prompt
+    const messages: ClaudeMessage[] = [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type, data: image },
+          },
+          { type: "text", text: systemPrompt },
+        ],
+      },
+    ];
+
+    // Tool-use loop — Claude may request tools multiple times
+    let iteration = 0;
+
+    while (iteration < MAX_TOOL_ITERATIONS) {
+      iteration++;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: 8192,
+          tools: toolDefinitions,
+          messages,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        return new Response(
+          JSON.stringify({
+            error: `Claude API error: ${response.status}`,
+            details: errText,
+          }),
+          {
+            status: 502,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const data = await response.json();
+
+      // If Claude is done (no more tool calls), extract the final text
+      if (data.stop_reason === "end_turn") {
+        const textBlock = data.content?.find(
+          // deno-lint-ignore no-explicit-any
+          (block: any) => block.type === "text"
+        );
+        const rawText = textBlock?.text || "";
+
+        try {
+          const designTree = extractJSON(rawText);
+          return new Response(
+            JSON.stringify({ design_tree: designTree, model: CLAUDE_MODEL }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        } catch {
+          return new Response(
+            JSON.stringify({
+              error: "Failed to parse DesignTree JSON from Claude response",
+              raw: rawText.slice(0, 500),
+            }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        }
+      }
+
+      // Claude wants to use tools — process each tool_use block
+      if (data.stop_reason === "tool_use") {
+        // Append Claude's assistant message (contains tool_use blocks)
+        messages.push({ role: "assistant", content: data.content });
+
+        // Build tool_result responses for every tool_use in this turn
+        // deno-lint-ignore no-explicit-any
+        const toolResults = data.content
+          // deno-lint-ignore no-explicit-any
+          .filter((block: any) => block.type === "tool_use")
+          // deno-lint-ignore no-explicit-any
+          .map((block: any) => ({
+            type: "tool_result",
+            tool_use_id: block.id,
+            content: generateToolResult(block.name, block.input),
+          }));
+
+        messages.push({ role: "user", content: toolResults });
+        continue;
+      }
+
+      // Unexpected stop_reason — try to extract text anyway
+      const fallbackText =
+        // deno-lint-ignore no-explicit-any
+        data.content?.find((block: any) => block.type === "text")?.text || "";
+      if (fallbackText) {
+        try {
+          const designTree = extractJSON(fallbackText);
+          return new Response(
+            JSON.stringify({ design_tree: designTree, model: CLAUDE_MODEL }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            }
+          );
+        } catch {
+          // Fall through to loop end
+        }
       }
     }
 
-    const systemPrompt = `You are a pixel-perfect UI analysis engine. Analyze the uploaded screenshot and extract every visual element into a structured DesignTree.
-
-Rules:
-- Identify ALL visible elements: text, images, buttons, inputs, icons, containers, cards, navbars, etc.
-- Estimate exact pixel positions and sizes based on the image dimensions (${width || "unknown"}x${height || "unknown"}).
-- Extract all colors as hex values. Identify their roles (primary, secondary, background, text, etc.).
-- Identify all fonts (family, weight, size). Make best guesses for common web fonts.
-- Capture layout relationships: which elements are children of which containers.
-- For flex/grid layouts, specify direction, alignment, gap, etc.
-- Be thorough — miss nothing visible in the design.
-- Use the create_design_tree tool to return the structured result.`;
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 8192,
-        system: systemPrompt,
-        tools: [DESIGN_TREE_TOOL],
-        tool_choice: { type: "tool", name: "create_design_tree" },
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: mediaType,
-                  data: base64Data,
-                },
-              },
-              {
-                type: "text",
-                text: `Analyze this UI screenshot${width && height ? ` (${width}x${height}px)` : ""}. Extract every element, color, font, and layout detail into a DesignTree using the create_design_tree tool.`,
-              },
-            ],
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      return new Response(
-        JSON.stringify({
-          error: `Claude API error: ${response.status}`,
-          details: errText,
-        }),
-        {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const data = await response.json();
-
-    // Extract the tool use result
-    const toolUse = data.content?.find(
-      (block: { type: string }) => block.type === "tool_use"
-    );
-    if (!toolUse) {
-      return new Response(
-        JSON.stringify({
-          error: "Claude did not return a DesignTree",
-          raw: data.content,
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const designTree = toolUse.input;
-
+    // Exhausted tool iterations without a final answer
     return new Response(
       JSON.stringify({
-        designTree,
-        model: CLAUDE_MODEL,
-        usage: data.usage,
+        error: "Max tool iterations reached without final response",
       }),
       {
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
