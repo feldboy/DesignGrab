@@ -9,6 +9,8 @@ import storage from './storage.js';
 import { syncPlanLimits } from './usageTracker.js';
 
 const GOOGLE_CLIENT_ID = '783180663354-1fq4t4fsfhj6r9eatecr98172e5v6sio.apps.googleusercontent.com';
+const PROD_EXTENSION_ID = 'higkjddpoecdlhmecmadknihbnahjmib';
+const IS_LOCAL_DEV = chrome.runtime.id !== PROD_EXTENSION_ID;
 
 /**
  * Get current auth state
@@ -16,6 +18,11 @@ const GOOGLE_CLIENT_ID = '783180663354-1fq4t4fsfhj6r9eatecr98172e5v6sio.apps.goo
  */
 export async function getAuthState() {
     const state = await storage.getState();
+
+    if (IS_LOCAL_DEV) {
+        await storage.set({ userId: 'local-dev-user', plan: 'lifetime' });
+        return { user: { id: 'local-dev-user', email: 'local@dev.com', user_metadata: { full_name: 'Local Developer' } }, plan: 'lifetime', isLoggedIn: true, cloudEnabled: true };
+    }
 
     if (!isSupabaseConfigured()) {
         return { user: null, plan: state.plan, isLoggedIn: false, cloudEnabled: false };
@@ -60,6 +67,11 @@ export async function getAuthState() {
  * which we use to authenticate with Supabase.
  */
 export async function signInWithGoogle() {
+    if (IS_LOCAL_DEV) {
+        await storage.set({ userId: 'local-dev-user', plan: 'lifetime' });
+        return { user: { id: 'local-dev-user', email: 'local@dev.com', user_metadata: { full_name: 'Local Developer' } }, error: null };
+    }
+
     const supabase = await getSupabase();
     if (!supabase) return { error: 'Cloud features not configured' };
 
@@ -136,6 +148,11 @@ export async function signInWithGoogle() {
  * Sign out — clears Supabase session
  */
 export async function signOut() {
+    if (IS_LOCAL_DEV) {
+        await storage.set({ userId: null, plan: 'free', usage: null });
+        return { error: null };
+    }
+
     const supabase = await getSupabase();
     if (supabase) {
         await supabase.auth.signOut();

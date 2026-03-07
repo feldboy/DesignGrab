@@ -316,6 +316,7 @@ export function PixelForgeTab() {
                         class="pf-file-input"
                         accept=".png,.jpg,.jpeg,.pdf,.pptx"
                         onChange={handleFileSelect}
+                        onClick={(e) => e.stopPropagation()}
                     />
                 </div>
             </div>

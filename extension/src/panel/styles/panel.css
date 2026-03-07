@@ -2362,3 +2362,258 @@ body {
         opacity: 1;
     }
 }
+
+/* ============================================================
+   PixelForge Tab Styles
+   ============================================================ */
+
+.pf-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.pf-dropzone {
+    border: 2px dashed var(--border-strong);
+    border-radius: 12px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.pf-dropzone:hover,
+.pf-dropzone-active {
+    border-color: var(--accent);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.pf-dropzone-icon {
+    font-size: 32px;
+    opacity: 0.6;
+}
+
+.pf-dropzone-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.pf-dropzone-formats {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.pf-file-input {
+    display: none;
+}
+
+.pf-step-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    animation: pf-pulse 2s ease-in-out infinite;
+}
+
+.pf-slow-warning {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+.pf-cancel-btn {
+    margin-top: 16px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pf-cancel-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+@keyframes pf-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.pf-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.pf-color-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 16px;
+}
+
+.pf-color-swatch-wrapper {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.pf-color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.pf-color-swatch:hover {
+    transform: scale(1.2);
+}
+
+.pf-font-list {
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pf-font-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+}
+
+.pf-font-item-name {
+    font-weight: 500;
+}
+
+.pf-font-item-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pf-font-item-match {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.pf-save-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-muted);
+    padding: 2px 4px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.pf-save-btn:hover {
+    color: #f472b6;
+    transform: scale(1.15);
+}
+
+.pf-save-btn.saved {
+    color: #f472b6;
+}
+
+.pf-error {
+    padding: 12px 16px;
+    margin: 12px 16px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    font-size: 12px;
+    text-align: center;
+}
+
+.pf-new-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    font-family: inherit;
+}
+
+.pf-new-btn:hover {
+    background: var(--bg-hover);
+}
+
+.pf-generate-btn {
+    margin: 8px 16px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    width: calc(100% - 32px);
+}
+
+.pf-generate-btn:hover {
+    opacity: 0.9;
+}
+
+.pf-generate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pf-save-all-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.pf-save-all-btn:hover {
+    background: rgba(244, 114, 182, 0.1);
+    border-color: rgba(244, 114, 182, 0.3);
+    color: #f472b6;
+}
+
+.pf-save-all-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
