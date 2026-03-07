@@ -137,7 +137,7 @@ export function SettingsTab({ authState: parentAuthState, onSignIn, onSignOut, a
                     DesignGrab v1.0.0 — Inspect, extract, and export design tokens from any website.
                 </p>
                 <div className="settings-about-links">
-                    <a href="https://designgrab.app" target="_blank" rel="noopener noreferrer" className="settings-link">Website</a>
+                    <a href="https://landing-nine-vert.vercel.app/" target="_blank" rel="noopener noreferrer" className="settings-link">Website</a>
                     <a href="https://designgrab.app/privacy" target="_blank" rel="noopener noreferrer" className="settings-link">Privacy Policy</a>
                 </div>
             </div>

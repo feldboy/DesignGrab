@@ -8,7 +8,7 @@ import { getSupabase, isSupabaseConfigured } from './supabase.js';
 import storage from './storage.js';
 import { syncPlanLimits } from './usageTracker.js';
 
-const GOOGLE_CLIENT_ID = '783180663354-idjnv92nubl3e1dbe5ufm7jq8ll6m1pd.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '783180663354-1fq4t4fsfhj6r9eatecr98172e5v6sio.apps.googleusercontent.com';
 
 /**
  * Get current auth state

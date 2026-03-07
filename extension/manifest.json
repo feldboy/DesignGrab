@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "DesignGrab",
     "description": "Extract any website's design in seconds. Colors, fonts, CSS, SVGs, Lottie, and production-ready code.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "icons": {
         "16": "assets/icons/icon-16.png",
         "32": "assets/icons/icon-32.png",
@@ -18,7 +18,7 @@
         "identity"
     ],
     "oauth2": {
-        "client_id": "783180663354-idjnv92nubl3e1dbe5ufm7jq8ll6m1pd.apps.googleusercontent.com",
+        "client_id": "783180663354-1fq4t4fsfhj6r9eatecr98172e5v6sio.apps.googleusercontent.com",
         "scopes": [
             "openid",
             "email",
