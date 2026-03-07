@@ -183,3 +183,43 @@ create policy "Anyone can join waitlist"
 create policy "Service role can read waitlist"
   on public.waitlist for select
   using (auth.role() = 'service_role');
+
+
+-- ============================================================
+-- 8. PixelForge — cached analysis results
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.pixelforge_results (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    source_format TEXT NOT NULL,          -- 'png', 'jpeg', 'pdf', 'pptx'
+    source_width INTEGER,
+    source_height INTEGER,
+    design_tree JSONB NOT NULL,           -- Full DesignTree JSON
+    outputs JSONB DEFAULT '{}',           -- Generated outputs keyed by format
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.pixelforge_results ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users see own pixelforge results"
+    ON public.pixelforge_results FOR ALL
+    USING (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_pixelforge_results_user
+    ON public.pixelforge_results (user_id, created_at DESC);
+
+-- ============================================================
+-- 9. Update usage_logs to accept pixelforge_analysis action
+-- ============================================================
+ALTER TABLE public.usage_logs DROP CONSTRAINT IF EXISTS usage_logs_action_check;
+ALTER TABLE public.usage_logs ADD CONSTRAINT usage_logs_action_check
+    CHECK (action IN ('download', 'code_export', 'design_system', 'ai_export', 'pixelforge_analysis'));
+
+-- ============================================================
+-- 10. Add PixelForge limit column to plans table
+-- ============================================================
+ALTER TABLE public.plans ADD COLUMN IF NOT EXISTS pixelforge_analyses_limit INTEGER NOT NULL DEFAULT 0;
+
+UPDATE public.plans SET pixelforge_analyses_limit = 1 WHERE id = 'free';
+UPDATE public.plans SET pixelforge_analyses_limit = 10 WHERE id = 'pro';
+UPDATE public.plans SET pixelforge_analyses_limit = 10 WHERE id = 'lifetime';

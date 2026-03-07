@@ -1,4 +1,4 @@
-import { a as getAuthState, e as signInWithGoogle } from "./auth-DRu1Lwtc.js";
+import { a as getAuthState, e as signInWithGoogle } from "./auth-C227BZWj.js";
 import "./preload-helper-CyNIpbXk.js";
 import "./env-BLrtva26.js";
 const btnFigma = document.getElementById("btn-figma");

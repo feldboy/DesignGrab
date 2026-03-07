@@ -2130,3 +2130,228 @@ body {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+
+/* ============================================================
+   PixelForge Tab Styles
+   ============================================================ */
+
+.pf-dropzone {
+    border: 2px dashed var(--border-color, #333);
+    border-radius: 12px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.pf-dropzone:hover,
+.pf-dropzone-active {
+    border-color: var(--accent-color, #6366f1);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.pf-dropzone-icon {
+    font-size: 32px;
+    opacity: 0.6;
+}
+
+.pf-dropzone-text {
+    font-size: 13px;
+    color: var(--text-secondary, #888);
+    line-height: 1.5;
+}
+
+.pf-dropzone-formats {
+    font-size: 11px;
+    color: var(--text-tertiary, #666);
+    margin-top: 4px;
+}
+
+.pf-file-input {
+    display: none;
+}
+
+.pf-step-text {
+    font-size: 13px;
+    color: var(--text-secondary, #888);
+    margin-top: 12px;
+    animation: pf-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pf-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.pf-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color, #333);
+}
+
+.pf-color-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 16px;
+}
+
+.pf-color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color, #333);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.pf-color-swatch:hover {
+    transform: scale(1.2);
+}
+
+.pf-font-list {
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pf-font-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-primary, #eee);
+    background: var(--bg-secondary, #1a1a2e);
+}
+
+.pf-font-item-name {
+    font-weight: 500;
+}
+
+.pf-font-item-match {
+    font-size: 11px;
+    color: var(--text-secondary, #888);
+}
+
+.pf-error {
+    padding: 16px;
+    margin: 16px;
+    border-radius: 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    font-size: 13px;
+    text-align: center;
+}
+
+.pf-new-btn {
+    margin: 12px 16px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--bg-secondary, #1a1a2e);
+    border: 1px solid var(--border-color, #333);
+    color: var(--text-primary, #eee);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    text-align: center;
+}
+
+.pf-new-btn:hover {
+    background: var(--bg-tertiary, #252540);
+}
+
+.pf-generate-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--accent-color, #6366f1);
+    border: none;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.pf-generate-btn:hover {
+    opacity: 0.9;
+}
+
+.pf-generate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* PixelForge — Library Save Buttons */
+
+.pf-color-swatch-wrapper {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.pf-save-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-muted);
+    padding: 2px 4px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.pf-save-btn:hover {
+    color: #f472b6;
+    transform: scale(1.15);
+}
+
+.pf-save-btn.saved {
+    color: #f472b6;
+}
+
+.pf-font-item-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pf-save-all-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: var(--bg-secondary, #1a1a2e);
+    border: 1px solid var(--border-color, #333);
+    color: var(--text-primary, #eee);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.pf-save-all-btn:hover {
+    background: rgba(244, 114, 182, 0.1);
+    border-color: rgba(244, 114, 182, 0.3);
+    color: #f472b6;
+}
+
+.pf-save-all-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

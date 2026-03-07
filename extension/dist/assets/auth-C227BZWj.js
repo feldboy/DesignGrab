@@ -136,20 +136,22 @@ const storage = {
   }
 };
 const DEFAULT_LIMITS = {
-  free: { downloads: 15, codeExports: 5, designSystems: 3, aiExports: 0 },
-  pro: { downloads: 2e3, codeExports: -1, designSystems: -1, aiExports: 50 },
-  lifetime: { downloads: 2e3, codeExports: -1, designSystems: -1, aiExports: 50 }
+  free: { downloads: 15, codeExports: 5, designSystems: 3, aiExports: 0, pixelforgeAnalyses: 1 },
+  pro: { downloads: 2e3, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: 10 },
+  lifetime: { downloads: 2e3, codeExports: -1, designSystems: -1, aiExports: 50, pixelforgeAnalyses: 10 }
 };
+const DAILY_LIMIT_ACTIONS = /* @__PURE__ */ new Set(["pixelforge_analysis"]);
 async function getLimitsForPlan(plan) {
+  const defaults = DEFAULT_LIMITS[plan] || DEFAULT_LIMITS.free;
   const cached = await storage.get(["planLimits"]);
   if (cached.planLimits && cached.planLimits[plan]) {
-    return cached.planLimits[plan];
+    return { ...defaults, ...cached.planLimits[plan] };
   }
-  return DEFAULT_LIMITS[plan] || DEFAULT_LIMITS.free;
+  return defaults;
 }
 async function syncPlanLimits(supabase) {
   try {
-    const { data: plans, error } = await supabase.from("plans").select("id, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit").eq("is_active", true);
+    const { data: plans, error } = await supabase.from("plans").select("id, downloads_limit, code_exports_limit, design_systems_limit, ai_exports_limit, pixelforge_analyses_limit").eq("is_active", true);
     if (error || !plans) return;
     const limitsMap = {};
     for (const p of plans) {
@@ -157,7 +159,8 @@ async function syncPlanLimits(supabase) {
         downloads: p.downloads_limit,
         codeExports: p.code_exports_limit,
         designSystems: p.design_systems_limit,
-        aiExports: p.ai_exports_limit
+        aiExports: p.ai_exports_limit,
+        pixelforgeAnalyses: p.pixelforge_analyses_limit
       };
     }
     await storage.set({ planLimits: limitsMap });
@@ -169,7 +172,8 @@ const ACTION_MAP = {
   download: "downloads",
   code_export: "codeExports",
   design_system: "designSystems",
-  ai_export: "aiExports"
+  ai_export: "aiExports",
+  pixelforge_analysis: "pixelforgeAnalyses"
 };
 async function getUsageFromSupabase() {
   const state = await storage.getState();
@@ -190,7 +194,8 @@ async function getUsageFromSupabase() {
       downloads: 0,
       codeExports: 0,
       designSystems: 0,
-      aiExports: 0
+      aiExports: 0,
+      pixelforgeAnalyses: 0
     };
     for (const row of data) {
       const field = ACTION_MAP[row.action];
@@ -202,6 +207,50 @@ async function getUsageFromSupabase() {
     console.warn("[DesignGrab] Failed to fetch usage from Supabase:", e.message);
     return null;
   }
+}
+async function getDailyUsageFromSupabase(action) {
+  const state = await storage.getState();
+  if (!state.userId) return null;
+  const supabase = await getSupabase();
+  if (!supabase) return null;
+  try {
+    const now = /* @__PURE__ */ new Date();
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const { data, error } = await supabase.from("usage_logs").select("id").eq("user_id", state.userId).eq("action", action).gte("created_at", dayStart);
+    if (error) {
+      console.warn("[DesignGrab] Daily usage fetch error:", error.message);
+      return null;
+    }
+    return data ? data.length : 0;
+  } catch (e) {
+    console.warn("[DesignGrab] Failed to fetch daily usage:", e.message);
+    return null;
+  }
+}
+async function getDailyUsageLocal(action) {
+  const field = ACTION_MAP[action];
+  const cached = await storage.get(["dailyUsage"]);
+  const daily = cached.dailyUsage || {};
+  const now = /* @__PURE__ */ new Date();
+  const todayKey = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+  if (daily.day !== todayKey) {
+    return 0;
+  }
+  return daily[field] || 0;
+}
+async function incrementDailyUsageLocal(action) {
+  const field = ACTION_MAP[action];
+  const cached = await storage.get(["dailyUsage"]);
+  const daily = cached.dailyUsage || {};
+  const now = /* @__PURE__ */ new Date();
+  const todayKey = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+  if (daily.day !== todayKey) {
+    const fresh = { day: todayKey, [field]: 1 };
+    await storage.set({ dailyUsage: fresh });
+    return;
+  }
+  daily[field] = (daily[field] || 0) + 1;
+  await storage.set({ dailyUsage: daily });
 }
 async function getUsage() {
   const supabaseUsage = await getUsageFromSupabase();
@@ -220,7 +269,8 @@ async function getUsage() {
       downloads: 0,
       codeExports: 0,
       designSystems: 0,
-      aiExports: 0
+      aiExports: 0,
+      pixelforgeAnalyses: 0
     };
     await storage.set({ usage: fresh });
     return { usage: fresh, plan: state.plan };
@@ -232,13 +282,21 @@ async function checkLimit(action) {
   if (!state.userId) {
     return { allowed: false, current: 0, limit: 0, plan: "free", requiresAuth: true };
   }
-  const { usage, plan } = await getUsage();
+  const { plan } = await getUsage();
   const limits = await getLimitsForPlan(plan);
   const field = ACTION_MAP[action];
   const limit = limits[field] ?? 0;
-  const current = usage[field] || 0;
+  const isDaily = DAILY_LIMIT_ACTIONS.has(action);
+  let current;
+  if (isDaily) {
+    const supabaseCount = await getDailyUsageFromSupabase(action);
+    current = supabaseCount !== null ? supabaseCount : await getDailyUsageLocal(action);
+  } else {
+    const { usage } = await getUsage();
+    current = usage[field] || 0;
+  }
   const allowed = limit === -1 || current < limit;
-  return { allowed, current, limit, plan };
+  return { allowed, current, limit, plan, isDaily };
 }
 async function recordUsage(action) {
   const check = await checkLimit(action);
@@ -260,8 +318,11 @@ async function recordUsage(action) {
   }
   const newCount = check.current + 1;
   const usage = (await storage.get(["usage"])).usage || {};
-  usage[field] = newCount;
+  usage[field] = (usage[field] || 0) + 1;
   await storage.set({ usage });
+  if (DAILY_LIMIT_ACTIONS.has(action)) {
+    await incrementDailyUsageLocal(action);
+  }
   return {
     allowed: true,
     current: newCount,
@@ -272,6 +333,8 @@ async function recordUsage(action) {
 async function getUsageSummary() {
   const { usage, plan } = await getUsage();
   const limits = await getLimitsForPlan(plan);
+  const pfDaily = await getDailyUsageFromSupabase("pixelforge_analysis");
+  const pfCurrent = pfDaily !== null ? pfDaily : await getDailyUsageLocal("pixelforge_analysis");
   return {
     plan,
     month: usage.month,
@@ -304,6 +367,14 @@ async function getUsageSummary() {
         current: usage.aiExports,
         limit: limits.aiExports,
         unlimited: limits.aiExports === -1
+      },
+      {
+        label: "PixelForge Analyses",
+        action: "pixelforge_analysis",
+        current: pfCurrent,
+        limit: limits.pixelforgeAnalyses,
+        unlimited: limits.pixelforgeAnalyses === -1,
+        isDaily: true
       }
     ]
   };
@@ -400,6 +471,7 @@ export {
   checkLimit as c,
   signOut as d,
   signInWithGoogle as e,
+  syncPlanLimits as f,
   getSupabase as g,
   recordUsage as r,
   storage as s

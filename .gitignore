@@ -4,6 +4,7 @@ node_modules/
 *.local
 .DS_Store
 .vite/
+.kiro
 
 # Sensitive config files
 extension/src/config/env.js
@@ -16,7 +17,9 @@ extension/src/config/env.js
 .vscode/
 extension/__MACOSX/
 
+
 # Project docs (keep README.md only)
 designgrab-spec.md
 phase3-plan.md
 progress-compact.md
+AGENTS.md

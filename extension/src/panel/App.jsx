@@ -9,9 +9,11 @@ import { LayoutTab } from './components/LayoutTab.jsx';
 import { LibraryTab } from './components/LibraryTab.jsx';
 import { AnimationsTab } from './components/AnimationsTab.jsx';
 import { SettingsTab } from './components/SettingsTab.jsx';
+import { PixelForgeTab } from './components/PixelForgeTab.jsx';
 import { getAuthState, signInWithGoogle } from '../lib/auth.js';
 const TABS = [
     { id: 'figma', label: 'Figma', icon: '🎯', highlight: true },
+    { id: 'pixelforge', label: 'PixelForge', icon: '🔮', highlight: true },
     { id: 'inspector', label: 'Inspector', icon: '🔍' },
     { id: 'assets', label: 'Assets', icon: '🖼' },
     { id: 'colors', label: 'Colors', icon: '🎨' },
@@ -243,6 +245,9 @@ function App() {
                     <>
                         {activeTab === 'figma' && (
                             <CodeTab pinnedElement={pinnedElement} initialMode="figma" />
+                        )}
+                        {activeTab === 'pixelforge' && (
+                            <PixelForgeTab />
                         )}
                         {activeTab === 'inspector' && (
                             <InspectorTab
