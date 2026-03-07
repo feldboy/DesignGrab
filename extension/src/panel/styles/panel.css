@@ -2371,16 +2371,18 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow-y: auto;
 }
 
 .pf-dropzone {
     border: 2px dashed var(--border-strong);
     border-radius: 12px;
-    padding: 40px 24px;
+    padding: 60px 24px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin: 16px;
+    margin: 24px auto;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2394,13 +2396,14 @@ body {
 }
 
 .pf-dropzone-icon {
-    font-size: 32px;
-    opacity: 0.6;
+    font-size: 48px;
+    opacity: 0.7;
 }
 
 .pf-dropzone-text {
-    font-size: 13px;
-    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
     line-height: 1.5;
 }
 
@@ -2415,33 +2418,35 @@ body {
 }
 
 .pf-step-text {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-top: 16px;
+    font-weight: 500;
     animation: pf-pulse 2s ease-in-out infinite;
 }
 
 .pf-slow-warning {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
-    margin-top: 8px;
+    margin-top: 12px;
 }
 
 .pf-cancel-btn {
-    margin-top: 16px;
-    padding: 6px 16px;
-    border-radius: 6px;
+    margin-top: 20px;
+    padding: 8px 20px;
+    border-radius: 8px;
     border: 1px solid var(--border-strong);
-    background: transparent;
-    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .pf-cancel-btn:hover {
     background: var(--bg-hover);
-    color: var(--text-primary);
+    border-color: var(--border);
 }
 
 @keyframes pf-pulse {
@@ -2453,18 +2458,41 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 16px;
     border-bottom: 1px solid var(--border);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
+    background: var(--bg-secondary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.pf-result-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+.pf-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pf-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
 }
 
 .pf-color-palette {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 12px 16px;
+    gap: 8px;
 }
 
 .pf-color-swatch-wrapper {
@@ -2472,62 +2500,74 @@ body {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
 }
 
 .pf-color-swatch {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
     border: 1px solid var(--border);
     cursor: pointer;
     transition: transform 0.15s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .pf-color-swatch:hover {
-    transform: scale(1.2);
+    transform: scale(1.15);
+}
+
+.pf-color-name {
+    font-size: 10px;
+    color: var(--text-muted);
+    max-width: 50px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .pf-font-list {
-    padding: 8px 16px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 }
 
 .pf-font-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
     color: var(--text-primary);
     background: var(--bg-secondary);
+    border: 1px solid var(--border);
 }
 
 .pf-font-item-name {
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .pf-font-item-right {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .pf-font-item-match {
     font-size: 11px;
     color: var(--text-muted);
+    font-family: monospace;
 }
 
 .pf-save-btn {
     background: transparent;
     border: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--text-muted);
-    padding: 2px 4px;
+    padding: 4px 6px;
     line-height: 1;
     border-radius: 4px;
     transition: color 0.15s ease, transform 0.15s ease;
@@ -2535,7 +2575,7 @@ body {
 
 .pf-save-btn:hover {
     color: #f472b6;
-    transform: scale(1.15);
+    transform: scale(1.2);
 }
 
 .pf-save-btn.saved {
@@ -2544,13 +2584,13 @@ body {
 
 .pf-error {
     padding: 12px 16px;
-    margin: 12px 16px;
+    margin: 16px;
     border-radius: 8px;
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
     color: #ef4444;
-    font-size: 12px;
-    text-align: center;
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 .pf-new-btn {
@@ -2562,12 +2602,13 @@ body {
     font-size: 11px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: all 0.15s ease;
     font-family: inherit;
 }
 
 .pf-new-btn:hover {
     background: var(--bg-hover);
+    border-color: var(--border);
 }
 
 .pf-generate-btn {
@@ -2584,7 +2625,7 @@ body {
     width: calc(100% - 32px);
 }
 
-.pf-generate-btn:hover {
+.pf-generate-btn:hover:not(:disabled) {
     opacity: 0.9;
 }
 
@@ -2594,7 +2635,7 @@ body {
 }
 
 .pf-save-all-btn {
-    padding: 6px 14px;
+    padding: 8px 16px;
     border-radius: 8px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-strong);
@@ -2607,7 +2648,7 @@ body {
     white-space: nowrap;
 }
 
-.pf-save-all-btn:hover {
+.pf-save-all-btn:hover:not(:disabled) {
     background: rgba(244, 114, 182, 0.1);
     border-color: rgba(244, 114, 182, 0.3);
     color: #f472b6;
@@ -2616,4 +2657,75 @@ body {
 .pf-save-all-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.pf-stats {
+    display: flex;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin: 16px;
+    font-size: 12px;
+}
+
+.pf-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pf-stat-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pf-stat-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.pf-toggle-btn {
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.pf-toggle-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+}
+
+.pf-preview-canvas {
+    position: relative;
+    overflow: hidden;
+}
+
+.pf-preview-canvas::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.pf-preview-canvas::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.pf-preview-canvas::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 4px;
+}
+
+.pf-preview-canvas::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
