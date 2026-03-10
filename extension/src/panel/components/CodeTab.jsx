@@ -201,10 +201,15 @@ export function CodeTab({ pinnedElement, initialMode = 'html-css' }) {
             });
         } else if (mode === 'ultra') {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (!tabs[0]) {
+                    setIsLoading(false);
+                    setError('No active tab found. Try again.');
+                    return;
+                }
                 chrome.tabs.sendMessage(tabs[0].id, { type: 'EXPORT_FULL_CONTEXT' }, async (response) => {
                     setIsLoading(false);
                     if (chrome.runtime.lastError || !response?.success) {
-                        setError('Could not connect to page. Try pinning an element first.');
+                        setError(response?.error || 'Could not connect to page. Try pinning an element first.');
                         return;
                     }
                     const prompt = buildUltraPrompt(response.context);

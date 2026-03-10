@@ -1,5 +1,6 @@
 ---
-// This is the Nav component
+// Nav component with mobile menu
+const currentPath = Astro.url.pathname;
 ---
 <nav class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#0f0f1a]/80 backdrop-blur-md">
   <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -13,14 +14,48 @@
       </div>
       <span class="text-xl font-bold tracking-tight text-slate-100">DesignGrab</span>
     </a>
+
+    <!-- Desktop nav -->
     <div class="hidden md:flex items-center gap-8">
-      <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="/#features">Features</a>
-      <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="/pricing">Pricing</a>
+      <a class:list={["text-sm font-medium transition-colors", currentPath === '/' || currentPath.startsWith('/#') ? "text-white" : "text-slate-400 hover:text-white"]} href="/#features">Features</a>
+      <a class:list={["text-sm font-medium transition-colors", currentPath.startsWith('/pricing') ? "text-white" : "text-slate-400 hover:text-white"]} href="/pricing">Pricing</a>
       <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors" href="/pricing#faq">FAQ</a>
       <a href="https://chromewebstore.google.com/detail/designgrab/higkjddpoecdlhmecmadknihbnahjmib?hl=en-US&utm_source=ext_sidebar" target="_blank" rel="noopener" class="hover:opacity-90 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all shadow-lg shadow-indigo-500/20 flex items-center gap-2" style="background-color: #2e0bda;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Install Extension
       </a>
     </div>
+
+    <!-- Mobile hamburger -->
+    <button id="mobile-menu-btn" class="md:hidden text-white p-2 -mr-2" aria-label="Open menu">
+      <svg id="menu-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg id="close-icon" class="hidden" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-white/5 bg-[#0f0f1a]/95 backdrop-blur-md">
+    <div class="px-6 py-4 flex flex-col gap-4">
+      <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors py-2" href="/#features">Features</a>
+      <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors py-2" href="/pricing">Pricing</a>
+      <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors py-2" href="/pricing#faq">FAQ</a>
+      <a href="https://chromewebstore.google.com/detail/designgrab/higkjddpoecdlhmecmadknihbnahjmib?hl=en-US&utm_source=ext_sidebar" target="_blank" rel="noopener" class="hover:opacity-90 text-white px-5 py-3 rounded-lg text-sm font-bold transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2 mt-2" style="background-color: #2e0bda;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Install Extension
+      </a>
+    </div>
   </div>
 </nav>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const menuIcon = document.getElementById('menu-icon');
+  const closeIcon = document.getElementById('close-icon');
+
+  btn?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('hidden') === false;
+    menuIcon?.classList.toggle('hidden', open);
+    closeIcon?.classList.toggle('hidden', !open);
+  });
+</script>

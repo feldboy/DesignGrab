@@ -1,0 +1,1 @@
+const n=document.getElementById("mobile-menu-btn"),t=document.getElementById("mobile-menu"),o=document.getElementById("menu-icon"),c=document.getElementById("close-icon");n?.addEventListener("click",()=>{const e=t?.classList.toggle("hidden")===!1;o?.classList.toggle("hidden",e),c?.classList.toggle("hidden",!e)});

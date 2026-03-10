@@ -7,6 +7,7 @@
  */
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/env.js';
+import { createClient } from '@supabase/supabase-js';
 
 let supabaseClient = null;
 
@@ -19,15 +20,13 @@ export function isSupabaseConfigured() {
 
 /**
  * Get or create the Supabase client.
- * Returns null if @supabase/supabase-js is not installed or not configured.
+ * Returns null if not configured.
  */
 export async function getSupabase() {
     if (!isSupabaseConfigured()) return null;
     if (supabaseClient) return supabaseClient;
 
     try {
-        const { createClient } = await import('@supabase/supabase-js');
-
         supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
                 storage: {

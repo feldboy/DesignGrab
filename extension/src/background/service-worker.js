@@ -5,6 +5,7 @@
 
 // Import config from env (inlined by Vite at build time)
 import { GEMINI_API_KEY as ENV_GEMINI_KEY, GEMINI_MODEL as ENV_GEMINI_MODEL } from '../config/env.js';
+import { signInWithGoogle, signOut, getAuthState } from '../lib/auth.js';
 
 // Open side panel when extension icon is clicked (on supported browsers)
 chrome.sidePanel?.setOptions?.({ enabled: true });
@@ -104,6 +105,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             });
             sendResponse({ success: true });
             break;
+
+        case 'SIGN_IN_WITH_GOOGLE':
+            signInWithGoogle().then(result => {
+                sendResponse(result);
+            }).catch(err => {
+                sendResponse({ error: err.message });
+            });
+            return true; // async response
+
+        case 'SIGN_OUT':
+            signOut().then(result => {
+                sendResponse(result);
+            }).catch(err => {
+                sendResponse({ error: err.message });
+            });
+            return true; // async response
+
+        case 'GET_AUTH_STATE':
+            getAuthState().then(result => {
+                sendResponse(result);
+            }).catch(err => {
+                sendResponse({ error: err.message });
+            });
+            return true; // async response
 
         case 'ELEMENT_PINNED':
         case 'INSPECT_MODE_CHANGED':

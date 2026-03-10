@@ -1,20 +1,18 @@
 /**
  * DesignGrab — Auth Module
  * Handles user authentication via Google Sign-In + Supabase.
- * Uses chrome.identity.launchWebAuthFlow for OAuth.
+ * Uses Supabase OAuth flow via chrome.identity.launchWebAuthFlow.
  */
 
 import { getSupabase, isSupabaseConfigured } from './supabase.js';
 import storage from './storage.js';
 import { syncPlanLimits } from './usageTracker.js';
 
-const GOOGLE_CLIENT_ID = '783180663354-1fq4t4fsfhj6r9eatecr98172e5v6sio.apps.googleusercontent.com';
 const PROD_EXTENSION_ID = 'higkjddpoecdlhmecmadknihbnahjmib';
 const IS_LOCAL_DEV = chrome.runtime.id !== PROD_EXTENSION_ID;
 
 /**
  * Get current auth state
- * @returns {{ user: object|null, plan: string, isLoggedIn: boolean, cloudEnabled: boolean }}
  */
 export async function getAuthState() {
     const state = await storage.getState();
@@ -34,11 +32,6 @@ export async function getAuthState() {
     }
 
     try {
-        // Use getSession() for fast, local-first auth checks.
-        // It reads from storage and auto-refreshes expired tokens.
-        // IMPORTANT: Do NOT call setSession() here — it triggers SIGNED_IN events
-        // that cause storage listeners to fire and re-check auth, creating a
-        // flash of "logged in" then "logged out" on the Settings page.
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError) {
@@ -50,7 +43,6 @@ export async function getAuthState() {
             const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
             const plan = profile?.plan || state.plan;
             await storage.set({ userId: user.id, plan });
-            // Sync plan limits from Supabase (picks up Dashboard changes)
             syncPlanLimits(supabase).catch(() => { });
             return { user, plan, isLoggedIn: true, cloudEnabled: true };
         }
@@ -62,84 +54,149 @@ export async function getAuthState() {
 }
 
 /**
- * Sign in with Google using chrome.identity.launchWebAuthFlow
- * This opens a Google sign-in popup and returns an ID token
- * which we use to authenticate with Supabase.
+ * Sign in with Google via Supabase OAuth flow.
+ *
+ * Flow: Extension → Supabase /authorize → Google → Supabase /callback → Extension redirect URL
+ * Supabase handles all the OAuth complexity. We just open the URL and capture the result.
  */
 export async function signInWithGoogle() {
+    // Persistent debug log — survives popup close
+    const debugLog = [];
+    const log = (msg) => {
+        console.log('[DesignGrab Auth]', msg);
+        debugLog.push(`${new Date().toISOString().slice(11, 23)} ${msg}`);
+        chrome.storage.local.set({ _authDebug: debugLog.join('\n') });
+    };
+
+    log(`START | extId=${chrome.runtime.id} | IS_LOCAL_DEV=${IS_LOCAL_DEV}`);
+
     if (IS_LOCAL_DEV) {
+        log('Local dev → fake user');
         await storage.set({ userId: 'local-dev-user', plan: 'lifetime' });
         return { user: { id: 'local-dev-user', email: 'local@dev.com', user_metadata: { full_name: 'Local Developer' } }, error: null };
     }
 
     const supabase = await getSupabase();
-    if (!supabase) return { error: 'Cloud features not configured' };
+    if (!supabase) {
+        log('ERROR: getSupabase() returned null');
+        return { error: 'Cloud features not configured' };
+    }
+    log('Supabase client OK');
 
     try {
         const redirectURL = chrome.identity.getRedirectURL();
+        log(`redirectURL: ${redirectURL}`);
 
-        // Generate nonce: Supabase gets the raw nonce, Google gets the SHA-256 hash
-        // Supabase hashes the raw nonce and compares it to the one in the id_token
-        const rawNonce = crypto.randomUUID();
-        const encoder = new TextEncoder();
-        const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(rawNonce));
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashedNonce = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // Ask Supabase to generate the full OAuth URL
+        // Supabase uses its own Google Client ID from the Dashboard config
+        const { data: oauthData, error: oauthError } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: redirectURL,
+                skipBrowserRedirect: true,
+                queryParams: {
+                    prompt: 'select_account',
+                },
+            },
+        });
 
-        // Build Google OAuth URL requesting an id_token
-        const authURL = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-        authURL.searchParams.set('client_id', GOOGLE_CLIENT_ID);
-        authURL.searchParams.set('response_type', 'id_token token');
-        authURL.searchParams.set('redirect_uri', redirectURL);
-        authURL.searchParams.set('scope', 'openid email profile');
-        authURL.searchParams.set('nonce', hashedNonce);
-        authURL.searchParams.set('prompt', 'select_account');
+        if (oauthError || !oauthData?.url) {
+            log(`ERROR signInWithOAuth: ${oauthError?.message || 'no URL returned'}`);
+            return { error: oauthError?.message || 'Failed to generate auth URL' };
+        }
 
-        // Launch the auth flow — opens Google sign-in popup
+        log(`Auth URL generated (${oauthData.url.length} chars)`);
+        log('Opening launchWebAuthFlow...');
+
+        // Open Supabase's auth URL in Chrome's managed auth window
         const responseURL = await new Promise((resolve, reject) => {
             chrome.identity.launchWebAuthFlow(
-                { url: authURL.toString(), interactive: true },
+                { url: oauthData.url, interactive: true },
                 (callbackURL) => {
                     if (chrome.runtime.lastError) {
+                        log(`ERROR launchWebAuthFlow: ${chrome.runtime.lastError.message}`);
                         reject(new Error(chrome.runtime.lastError.message));
+                    } else if (!callbackURL) {
+                        log('ERROR: callbackURL is empty/undefined');
+                        reject(new Error('No callback URL received'));
                     } else {
+                        log(`Callback received (${callbackURL.length} chars)`);
                         resolve(callbackURL);
                     }
                 }
             );
         });
 
-        // Extract tokens from the callback URL fragment
-        const urlFragment = new URL(responseURL.replace('#', '?'));
-        const idToken = urlFragment.searchParams.get('id_token');
-        const accessToken = urlFragment.searchParams.get('access_token');
+        // Try extracting tokens from the URL fragment (implicit flow)
+        // Supabase returns: #access_token=...&refresh_token=...&token_type=bearer&...
+        const hashIndex = responseURL.indexOf('#');
+        if (hashIndex !== -1) {
+            const hashStr = responseURL.substring(hashIndex + 1);
+            const hashParams = new URLSearchParams(hashStr);
+            const accessToken = hashParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token');
 
-        if (!idToken) {
-            return { error: 'No ID token received from Google' };
+            log(`Fragment tokens: access=${!!accessToken} refresh=${!!refreshToken}`);
+
+            if (accessToken) {
+                log('Setting Supabase session from tokens...');
+                const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                });
+
+                if (sessionError) {
+                    log(`ERROR setSession: ${sessionError.message}`);
+                    return { error: 'Session error: ' + sessionError.message };
+                }
+
+                const user = sessionData?.user || sessionData?.session?.user;
+                if (user) {
+                    log(`SUCCESS: ${user.email}`);
+                    await storage.set({ userId: user.id });
+                    try {
+                        const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+                        if (profile?.plan) await storage.set({ plan: profile.plan });
+                    } catch (e) {
+                        log(`Profile fetch failed (non-fatal): ${e.message}`);
+                    }
+                    syncPlanLimits(supabase).catch(() => { });
+                    return { user, error: null };
+                }
+                log('ERROR: setSession succeeded but no user object');
+            }
         }
 
-        // Sign in to Supabase with the Google ID token
-        const { data, error } = await supabase.auth.signInWithIdToken({
-            provider: 'google',
-            token: idToken,
-            nonce: rawNonce,
-            access_token: accessToken,
-        });
-
-        if (error) {
-            return { error: error.message };
+        // Try extracting code from query string (PKCE flow)
+        const url = new URL(responseURL.split('#')[0]);
+        const code = url.searchParams.get('code');
+        if (code) {
+            log(`Got auth code, exchanging for session...`);
+            const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+            if (sessionError) {
+                log(`ERROR exchangeCodeForSession: ${sessionError.message}`);
+                return { error: 'Code exchange error: ' + sessionError.message };
+            }
+            const user = sessionData?.user || sessionData?.session?.user;
+            if (user) {
+                log(`SUCCESS (PKCE): ${user.email}`);
+                await storage.set({ userId: user.id });
+                return { user, error: null };
+            }
         }
 
-        if (data?.user) {
-            await storage.set({ userId: data.user.id });
-            const { data: profile } = await supabase.from('profiles').select('plan').eq('id', data.user.id).single();
-            if (profile?.plan) await storage.set({ plan: profile.plan });
-            // Sync plan limits from Supabase on fresh login
-            syncPlanLimits(supabase).catch(() => { });
+        // Check for error in callback
+        const errorParam = new URL(responseURL.replace('#', '?')).searchParams.get('error');
+        const errorDesc = new URL(responseURL.replace('#', '?')).searchParams.get('error_description');
+        if (errorParam) {
+            log(`ERROR from callback: ${errorParam} - ${errorDesc}`);
+            return { error: `Auth error: ${errorParam} - ${errorDesc}` };
         }
 
-        return { user: data?.user, error: null };
+        log(`ERROR: Could not extract tokens or code from callback. URL starts with: ${responseURL.substring(0, 100)}`);
+        return { error: 'No tokens received from auth flow' };
     } catch (err) {
+        log(`EXCEPTION: ${err.message}`);
         return { error: err.message };
     }
 }
